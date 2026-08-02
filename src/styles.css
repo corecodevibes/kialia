@@ -176,5 +176,62 @@
 
 @media print {
   @page { size: A5; margin: 12mm; }
-  body { background: #fff; }
+  body { background: #fff; color: #221c22; }
+
+  .print-page {
+    break-after: page;
+    page-break-after: always;
+    padding: 4mm 0;
+  }
+  .print-page:last-child { break-after: auto; page-break-after: auto; }
+
+  .print-head { padding-bottom: 3mm; margin-bottom: 5mm; border-bottom: 1px solid #d2c8d2; }
+  .print-kicker {
+    display: block;
+    font-size: 8pt;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #a0798c;
+  }
+  .print-day { font-size: 20pt; font-weight: 600; margin: 1mm 0; line-height: 1.1; }
+  .print-meta { font-size: 9pt; color: #6b6270; }
+
+  .print-block { margin-bottom: 6mm; }
+  .print-block h3 {
+    font-size: 8.5pt;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #ce7f5f;
+    margin-bottom: 1.5mm;
+  }
+  .print-block p {
+    font-size: 10.5pt;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    margin: 0;
+  }
+  .print-total { margin-top: 2mm !important; font-weight: 600; }
+
+  /* Journal – Farbleiste links */
+  .print-page--journal { padding-left: 6mm; border-left: 2.5mm solid #f7d67f; }
+  .print-page--journal .print-head { border-bottom-color: #f0a055; }
+
+  /* Postkarte – Rahmen */
+  .print-page--postkarte {
+    border: 0.6mm solid #ce7f5f;
+    border-radius: 4mm;
+    padding: 7mm;
+  }
+  .print-page--postkarte .print-head {
+    border-bottom: 0.4mm dashed #8f9be0;
+    text-align: center;
+  }
+  .print-page--postkarte .print-block h3 { color: #8f9be0; }
+
+  /* Klassisch – Linien unter den Blöcken */
+  .print-page--klassisch .print-block {
+    border-bottom: 0.3mm solid #ece7ec;
+    padding-bottom: 4mm;
+  }
 }
+
