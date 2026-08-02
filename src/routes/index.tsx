@@ -1,112 +1,123 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Plane, Sparkles, Waves, Building2, Car, Mountain, Palmtree } from "lucide-react";
-import { useTrip, styleLabels, type TripStyle } from "@/lib/trip-store";
+import { Check, Copy, Users } from "lucide-react";
+import { AppShell, Card, Field, inputClass } from "@/components/app/AppShell";
+import { eur, tripDays, tripTotals, useTrip } from "@/lib/trip-store";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Reiseplaner – Reisen planen, budgetieren, festhalten" },
+      { title: "TraveliVibes – Reise planen, Budget & Reisetagebuch" },
       {
         name: "description",
         content:
-          "Plane deine nächste Reise gemeinsam: Route, Ideen, Budget und Reisetagebuch in einer App.",
+          "TraveliVibes: Reiseziel, Ideen mit Links, Fortbewegung, Unterkünfte, Budget und Reisetagebuch mit Sprachmemo – alles in einer mobilen App.",
       },
-      { property: "og:title", content: "Reiseplaner – Reisen planen, budgetieren, festhalten" },
+      { property: "og:title", content: "TraveliVibes – Reise planen & festhalten" },
       {
         property: "og:description",
-        content: "Plane deine nächste Reise gemeinsam: Route, Ideen, Budget und Reisetagebuch in einer App.",
+        content: "Ideen sammeln, Kosten planen und jeden Reisetag als Tagebuch festhalten.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: Home,
+  component: HomeTab,
 });
 
-const styles: { key: TripStyle; icon: typeof Plane }[] = [
-  { key: "rundreise", icon: Car },
-  { key: "all-inclusive", icon: Palmtree },
-  { key: "staedtetrip", icon: Building2 },
-  { key: "strand", icon: Waves },
-  { key: "roadtrip", icon: Plane },
-  { key: "natur", icon: Mountain },
-];
+function HomeTab() {
+  const { trip, update, ready } = useTrip();
+  const [copied, setCopied] = useState(false);
+  const days = tripDays(trip);
+  const totals = tripTotals(trip);
 
-function Home() {
-  const navigate = useNavigate();
-  const { trip, update } = useTrip();
-  const [destination, setDestination] = useState("");
-  const [style, setStyle] = useState<TripStyle | null>(null);
-
-  const dest = destination || trip.destination;
-
-  function start(chosen: TripStyle) {
-    setStyle(chosen);
-    update({ destination: dest, style: chosen });
-    navigate({ to: "/planen" });
+  async function share() {
+    try {
+      await navigator.clipboard.writeText(window.location.origin);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
   }
 
+  if (!ready) return <div className="min-h-screen bg-background" />;
+
   return (
-    <main className="relative min-h-screen overflow-hidden">
-      <div className="absolute inset-0 -z-10" style={{ background: "var(--gradient-sky)" }} />
-      <div className="absolute inset-0 -z-10 bg-background/10" />
-
-      <div className="mx-auto flex min-h-screen max-w-3xl flex-col justify-center px-6 py-16">
-        <span className="mb-4 inline-flex w-fit items-center gap-2 rounded-full bg-background/70 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.18em] text-foreground backdrop-blur">
-          <Sparkles className="size-3.5" /> Reiseplaner
-        </span>
-
-        <h1 className="text-4xl font-semibold leading-tight text-background drop-shadow-sm sm:text-6xl">
-          Wohin geht die
-          <br />
-          nächste Reise?
-        </h1>
-
-        <div className="mt-8 rounded-3xl bg-card p-6 sm:p-8" style={{ boxShadow: "var(--shadow-lift)" }}>
-          <label htmlFor="dest" className="text-sm font-medium text-muted-foreground">
-            Land oder Region
-          </label>
-          <input
-            id="dest"
-            value={dest}
-            onChange={(e) => setDestination(e.target.value)}
-            placeholder="z. B. Portugal, Vietnam, Norwegen …"
-            className="mt-2 w-full rounded-2xl border border-border bg-background px-5 py-4 text-lg outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/20"
-          />
-
-          <p className="mt-7 text-sm font-medium text-muted-foreground">
-            Was für eine Reise wird es?
-          </p>
-          <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {styles.map(({ key, icon: Icon }) => {
-              const active = style === key;
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  disabled={!dest.trim()}
-                  onClick={() => start(key)}
-                  className={`group flex flex-col items-start gap-2 rounded-2xl border p-4 text-left transition disabled:cursor-not-allowed disabled:opacity-50 ${
-                    active
-                      ? "border-primary bg-primary/10"
-                      : "border-border bg-secondary/40 hover:border-primary hover:bg-primary/5"
-                  }`}
-                >
-                  <Icon className="size-5 text-primary" />
-                  <span className="text-sm font-medium">{styleLabels[key]}</span>
-                </button>
-              );
-            })}
+    <AppShell title={trip.destination || "Wohin geht's?"} subtitle="Deine nächste Reise beginnt hier.">
+      <div className="space-y-4">
+        <Card>
+          <div className="space-y-3">
+            <Field label="Wohin geht die Reise?">
+              <input
+                value={trip.destination}
+                onChange={(e) => update({ destination: e.target.value })}
+                placeholder="z. B. Portugal, Vietnam, Norwegen …"
+                className={inputClass}
+              />
+            </Field>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Von">
+                <input
+                  type="date"
+                  value={trip.startDate}
+                  onChange={(e) => update({ startDate: e.target.value })}
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="Bis">
+                <input
+                  type="date"
+                  value={trip.endDate}
+                  onChange={(e) => update({ endDate: e.target.value })}
+                  className={inputClass}
+                />
+              </Field>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Mit wem?">
+                <input
+                  value={trip.companions}
+                  onChange={(e) => update({ companions: e.target.value })}
+                  placeholder="Partner, Familie …"
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="Personen">
+                <input
+                  type="number"
+                  min={1}
+                  value={trip.travellers}
+                  onChange={(e) => update({ travellers: Number(e.target.value) })}
+                  className={inputClass}
+                />
+              </Field>
+            </div>
           </div>
+        </Card>
 
-          {!dest.trim() && (
-            <p className="mt-4 text-xs text-muted-foreground">
-              Trage zuerst dein Reiseziel ein, dann wählst du die Art der Reise.
-            </p>
-          )}
-        </div>
+        <Card className="text-center">
+          <p className="text-xs uppercase tracking-wider text-muted-foreground">Reisedauer</p>
+          <p className="mt-1 text-3xl font-semibold">{days > 0 ? `${days} Tage` : "–"}</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            <Users className="mr-1 inline size-4" />
+            {trip.travellers} Personen · bisher geplant {eur(totals.total)}
+          </p>
+        </Card>
+
+        <button
+          type="button"
+          onClick={share}
+          className="flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-sm font-semibold text-background"
+          style={{ background: "var(--gradient-warm)" }}
+        >
+          {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
+          {copied ? "Link kopiert" : "Link zum Teilen kopieren"}
+        </button>
+        <p className="px-2 text-center text-xs text-muted-foreground">
+          Teile den Link mit deinem Partner oder deiner Familie – so plant ihr gemeinsam weiter.
+        </p>
       </div>
-    </main>
+    </AppShell>
   );
 }
