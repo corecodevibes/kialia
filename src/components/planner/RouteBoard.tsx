@@ -18,10 +18,14 @@ export function RouteBoard({ trip, update }: Props) {
   function move(i: number, dir: -1 | 1) {
     const next = [...trip.stops];
     const j = i + dir;
-    if (j < 0 || j >= next.length) return;
-    [next[i], next[j]] = [next[j], next[i]];
+    const a = next[i];
+    const b = next[j];
+    if (!a || !b) return;
+    next[i] = b;
+    next[j] = a;
     setStops(next);
   }
+
 
   const totalNights = trip.stops.reduce((s, x) => s + (x.nights || 0), 0);
 

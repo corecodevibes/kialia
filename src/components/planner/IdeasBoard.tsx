@@ -2,11 +2,12 @@ import { useState } from "react";
 import { Lightbulb, Plus, Trash2 } from "lucide-react";
 import { uid, type Trip } from "@/lib/trip-store";
 
-const categories = ["Sehenswürdigkeit", "Essen", "Aktivität", "Unterkunft", "Geheimtipp"];
+const categories = ["Sehenswürdigkeit", "Essen", "Aktivität", "Unterkunft", "Geheimtipp"] as const;
 
 export function IdeasBoard({ trip, update }: { trip: Trip; update: (p: Partial<Trip>) => void }) {
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState(categories[0]);
+  const [category, setCategory] = useState<string>("Sehenswürdigkeit");
+
 
   function add() {
     if (!title.trim()) return;
