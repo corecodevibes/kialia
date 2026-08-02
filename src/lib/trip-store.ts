@@ -65,9 +65,11 @@ export type DiaryEntry = {
   date: string;
   text: string;
   highlight: string;
+  notes: string;
   expenses: string;
   spent: number;
 };
+
 
 export type Trip = {
   destination: string;
