@@ -81,7 +81,7 @@ function Planner() {
         </div>
       </header>
 
-      <div className="mx-auto -mt-16 max-w-6xl px-6 pb-20">
+      <div className="relative z-10 mx-auto -mt-16 max-w-6xl px-6 pb-20">
         <nav
           className="mb-6 flex flex-wrap gap-2 rounded-3xl bg-card p-2 print:hidden"
           style={{ boxShadow: "var(--shadow-soft)" }}
