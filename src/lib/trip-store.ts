@@ -1,36 +1,62 @@
 import { useCallback, useEffect, useState } from "react";
 
-export type TripStyle =
-  | "rundreise"
-  | "all-inclusive"
-  | "staedtetrip"
-  | "strand"
-  | "roadtrip"
-  | "natur";
+export type PayStatus = "offen" | "reserviert" | "bezahlt";
 
-export type Stop = {
-  id: string;
-  name: string;
-  nights: number;
-  note: string;
-};
+export type LinkItem = { id: string; label: string; url: string };
 
 export type Idea = {
   id: string;
-  title: string;
-  category: string;
-  note: string;
+  text: string;
+  links: LinkItem[];
 };
 
-export type Budget = {
-  transportMode: string;
-  transport: number;
-  accommodation: number;
-  foodPerDay: number;
-  activities: number;
-  extras: number;
+export type Transport = {
+  id: string;
+  mode: string;
+  label: string;
+  cost: number;
+  status: PayStatus;
+  dueDate: string;
+  note: string;
+  url: string;
+};
+
+export type Board = "nichts" | "fruehstueck" | "halbpension" | "vollpension" | "wohnung";
+
+export type Stay = {
+  id: string;
+  name: string;
+  url: string;
+  from: string;
+  to: string;
+  cost: number;
+  status: PayStatus;
+  dueDate: string;
+  board: Board;
+};
+
+export type Activity = {
+  id: string;
+  name: string;
+  url: string;
+  cost: number;
+  status: PayStatus;
+  dueDate: string;
+};
+
+export type Meals = {
+  breakfast: number;
+  lunch: number;
+  dinner: number;
+  snacks: number;
+  maxPerDay: number;
+};
+
+export type Savings = {
+  enabled: boolean;
   saved: number;
   monthsLeft: number;
+  credit: number;
 };
 
 export type DiaryEntry = {
@@ -39,45 +65,41 @@ export type DiaryEntry = {
   date: string;
   text: string;
   highlight: string;
+  expenses: string;
   spent: number;
 };
 
 export type Trip = {
   destination: string;
-  country: string;
-  style: TripStyle | null;
-  travellers: number;
-  days: number;
   startDate: string;
-  stops: Stop[];
+  endDate: string;
+  companions: string;
+  travellers: number;
   ideas: Idea[];
-  budget: Budget;
+  transports: Transport[];
+  stays: Stay[];
+  activities: Activity[];
+  meals: Meals;
+  savings: Savings;
   diary: DiaryEntry[];
 };
 
 export const emptyTrip: Trip = {
   destination: "",
-  country: "",
-  style: null,
-  travellers: 2,
-  days: 10,
   startDate: "",
-  stops: [],
+  endDate: "",
+  companions: "",
+  travellers: 2,
   ideas: [],
-  budget: {
-    transportMode: "Flugzeug",
-    transport: 0,
-    accommodation: 0,
-    foodPerDay: 0,
-    activities: 0,
-    extras: 0,
-    saved: 0,
-    monthsLeft: 6,
-  },
+  transports: [],
+  stays: [],
+  activities: [],
+  meals: { breakfast: 0, lunch: 0, dinner: 0, snacks: 0, maxPerDay: 100 },
+  savings: { enabled: false, saved: 0, monthsLeft: 6, credit: 0 },
   diary: [],
 };
 
-const KEY = "reiseplaner.trip.v1";
+const KEY = "travelivibes.trip.v2";
 
 export function uid() {
   return Math.random().toString(36).slice(2, 10);
@@ -88,7 +110,8 @@ export function loadTrip(): Trip {
   try {
     const raw = window.localStorage.getItem(KEY);
     if (!raw) return emptyTrip;
-    return { ...emptyTrip, ...JSON.parse(raw) } as Trip;
+    const parsed = JSON.parse(raw) as Partial<Trip>;
+    return { ...emptyTrip, ...parsed, meals: { ...emptyTrip.meals, ...parsed.meals }, savings: { ...emptyTrip.savings, ...parsed.savings } };
   } catch {
     return emptyTrip;
   }
@@ -109,7 +132,7 @@ export function useTrip() {
       try {
         window.localStorage.setItem(KEY, JSON.stringify(next));
       } catch {
-        /* storage voll oder blockiert */
+        /* Speicher voll oder blockiert */
       }
       return next;
     });
@@ -118,8 +141,29 @@ export function useTrip() {
   return { trip, update, ready };
 }
 
-export function totalBudget(b: Budget, days: number) {
-  return b.transport + b.accommodation + b.foodPerDay * days + b.activities + b.extras;
+export function tripDays(trip: Trip) {
+  if (!trip.startDate || !trip.endDate) return 0;
+  const a = new Date(trip.startDate).getTime();
+  const b = new Date(trip.endDate).getTime();
+  if (!Number.isFinite(a) || !Number.isFinite(b) || b < a) return 0;
+  return Math.round((b - a) / 86400000) + 1;
+}
+
+export function mealsPerDay(m: Meals) {
+  return m.breakfast + m.lunch + m.dinner + m.snacks;
+}
+
+export function tripTotals(trip: Trip) {
+  const days = tripDays(trip);
+  const transport = trip.transports.reduce((s, t) => s + (t.cost || 0), 0);
+  const stays = trip.stays.reduce((s, t) => s + (t.cost || 0), 0);
+  const activities = trip.activities.reduce((s, t) => s + (t.cost || 0), 0);
+  const food = mealsPerDay(trip.meals) * days;
+  const total = transport + stays + activities + food;
+  const paid = [...trip.transports, ...trip.stays, ...trip.activities]
+    .filter((i) => i.status === "bezahlt")
+    .reduce((s, i) => s + (i.cost || 0), 0);
+  return { days, transport, stays, activities, food, total, paid, open: Math.max(0, total - paid) };
 }
 
 export function eur(n: number) {
@@ -130,30 +174,22 @@ export function eur(n: number) {
   }).format(Number.isFinite(n) ? n : 0);
 }
 
-export const styleLabels: Record<TripStyle, string> = {
-  rundreise: "Rundreise",
-  "all-inclusive": "All Inclusive",
-  staedtetrip: "Städtetrip",
-  strand: "Strand & Erholung",
-  roadtrip: "Roadtrip",
-  natur: "Natur & Wandern",
+export const boardLabels: Record<Board, string> = {
+  nichts: "Ohne Verpflegung",
+  fruehstueck: "Frühstück",
+  halbpension: "Halbpension",
+  vollpension: "Vollpension",
+  wohnung: "Wohnung / Selbstversorgung",
 };
 
-/** Grober Routen-Entwurf ohne Server: verteilt die Tage sinnvoll auf die Stopps. */
-export function draftRoute(destination: string, days: number, style: TripStyle | null): Stop[] {
-  const count = Math.max(2, Math.min(6, Math.round(days / 3)));
-  const labels =
-    style === "strand" || style === "all-inclusive"
-      ? ["Ankunft & Hotel", "Strandtag", "Ausflug ins Umland", "Bootstour", "Markt & Altstadt", "Abreise"]
-      : style === "staedtetrip"
-        ? ["Altstadt", "Museumsviertel", "Aussichtspunkt", "Foodtour", "Tagesausflug", "Abreise"]
-        : ["Ankunft", "Küste", "Berge", "Nationalpark", "Kleinstadt", "Rückreise"];
-  const base = Math.floor(days / count);
-  const rest = days - base * count;
-  return Array.from({ length: count }, (_, i) => ({
-    id: uid(),
-    name: `${destination || "Stopp"} · ${labels[i] ?? `Etappe ${i + 1}`}`,
-    nights: base + (i < rest ? 1 : 0),
-    note: "",
-  }));
+export const statusLabels: Record<PayStatus, string> = {
+  offen: "Offen",
+  reserviert: "Reserviert",
+  bezahlt: "Bezahlt",
+};
+
+export function normalizeUrl(url: string) {
+  const u = url.trim();
+  if (!u) return "";
+  return /^https?:\/\//i.test(u) ? u : `https://${u}`;
 }

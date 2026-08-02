@@ -77,16 +77,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Reiseplaner – Reisen planen, budgetieren, festhalten" },
-      { name: "description", content: "Plane deine nächste Reise gemeinsam: Route, Ideen, Budget und Reisetagebuch in einer App." },
+      { title: "TraveliVibes – Reise planen, Budget & Reisetagebuch" },
+      { name: "description", content: "Ideen sammeln, Kosten planen und jeden Reisetag festhalten – mit TraveliVibes." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Reiseplaner – Reisen planen, budgetieren, festhalten" },
-      { property: "og:description", content: "Plane deine nächste Reise gemeinsam: Route, Ideen, Budget und Reisetagebuch in einer App." },
+      { property: "og:title", content: "TraveliVibes – Reise planen, Budget & Reisetagebuch" },
+      { property: "og:description", content: "Ideen sammeln, Kosten planen und jeden Reisetag festhalten – mit TraveliVibes." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "Reiseplaner – Reisen planen, budgetieren, festhalten" },
-      { name: "twitter:description", content: "Plane deine nächste Reise gemeinsam: Route, Ideen, Budget und Reisetagebuch in einer App." },
+      { name: "twitter:title", content: "TraveliVibes – Reise planen, Budget & Reisetagebuch" },
+      { name: "twitter:description", content: "Ideen sammeln, Kosten planen und jeden Reisetag festhalten – mit TraveliVibes." },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/dcaf5ee1-c401-4342-b7ab-e8c65855ea39/id-preview-853c6446--625fdbb4-c0a1-4fb0-979e-6da54ddbfe35.lovable.app-1785676600803.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/dcaf5ee1-c401-4342-b7ab-e8c65855ea39/id-preview-853c6446--625fdbb4-c0a1-4fb0-979e-6da54ddbfe35.lovable.app-1785676600803.png" },
     ],
@@ -95,7 +95,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon.png", type: "image/png" },
     ],
   }),
   shellComponent: RootShell,
@@ -106,7 +106,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="de">
       <head>
         <HeadContent />
       </head>
