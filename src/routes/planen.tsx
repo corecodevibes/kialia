@@ -54,7 +54,7 @@ function Planner() {
 
   return (
     <main className="min-h-screen bg-background">
-      <header className="relative overflow-hidden px-6 pb-24 pt-8 print:hidden">
+      <header className="relative z-0 overflow-hidden px-6 pb-24 pt-8 print:hidden">
         <div className="absolute inset-0 -z-10" style={{ background: "var(--gradient-sky)" }} />
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4">
           <Link
