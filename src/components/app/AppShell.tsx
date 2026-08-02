@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Home, Lightbulb, Wallet, BookOpen } from "lucide-react";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import logo from "@/assets/travelivibes-logo.png";
 
 const tabs = [
