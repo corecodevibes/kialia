@@ -21,8 +21,10 @@ export function AppShell({
 }) {
   return (
     <div className="min-h-screen bg-background">
-      <header className="relative overflow-hidden px-5 pb-10 pt-7 print:hidden">
-        <div className="absolute inset-0 -z-10" style={{ background: "var(--gradient-sky)" }} />
+      <header
+        className="relative isolate overflow-hidden px-5 pb-10 pt-7 print:hidden"
+        style={{ background: "var(--gradient-sky)" }}
+      >
         <div className="mx-auto flex max-w-lg items-center gap-3">
           <img
             src={logo}
