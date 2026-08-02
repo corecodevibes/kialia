@@ -19,21 +19,10 @@ export function AppShell({
   subtitle?: string;
   children: ReactNode;
 }) {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   return (
     <div className="min-h-screen bg-background">
       <header
-        className={`sticky top-0 z-30 overflow-hidden px-5 transition-[padding,box-shadow] duration-200 print:hidden ${
-          scrolled ? "pb-3 pt-3 shadow-lg" : "pb-10 pt-7"
-        }`}
+        className="sticky top-0 z-30 px-5 pb-5 pt-6 print:hidden"
         style={{ background: "var(--gradient-sky)" }}
       >
         <div className="mx-auto flex max-w-lg items-center gap-3">
@@ -42,31 +31,26 @@ export function AppShell({
             alt="TraveliVibes Logo"
             width={64}
             height={64}
-            className={`shrink-0 rounded-2xl bg-background/85 p-1.5 transition-all duration-200 ${
-              scrolled ? "size-9" : "size-11"
-            }`}
+            className="size-11 shrink-0 rounded-2xl bg-background/85 p-1.5"
           />
           <div className="min-w-0">
-            {!scrolled && (
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-background/90">
-                TraveliVibes
-              </p>
-            )}
-            <h1
-              className={`truncate font-semibold text-background transition-all duration-200 ${
-                scrolled ? "text-lg" : "text-2xl"
-              }`}
-            >
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-background/90">
+              TraveliVibes
+            </p>
+            <h1 className="truncate text-2xl font-semibold leading-tight text-background">
               {title}
             </h1>
           </div>
         </div>
-        {subtitle && !scrolled && (
-          <p className="mx-auto mt-2 max-w-lg text-sm text-background/90">{subtitle}</p>
+        {subtitle && (
+          <p className="mx-auto mt-2 max-w-lg text-sm leading-snug text-background/90">
+            {subtitle}
+          </p>
         )}
       </header>
 
-      <main className="mx-auto -mt-6 max-w-lg px-4 pb-28 print:mt-0 print:pb-0">{children}</main>
+      <main className="mx-auto max-w-lg px-4 pb-28 pt-4 print:pb-0 print:pt-0">{children}</main>
+
 
 
       <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card/95 backdrop-blur print:hidden">
