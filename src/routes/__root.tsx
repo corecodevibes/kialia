@@ -77,14 +77,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "Reiseplaner – Reisen planen, budgetieren, festhalten" },
+      { name: "description", content: "Plane deine nächste Reise gemeinsam: Route, Ideen, Budget und Reisetagebuch in einer App." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "Reiseplaner – Reisen planen, budgetieren, festhalten" },
+      { property: "og:description", content: "Plane deine nächste Reise gemeinsam: Route, Ideen, Budget und Reisetagebuch in einer App." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Reiseplaner – Reisen planen, budgetieren, festhalten" },
+      { name: "twitter:description", content: "Plane deine nächste Reise gemeinsam: Route, Ideen, Budget und Reisetagebuch in einer App." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/dcaf5ee1-c401-4342-b7ab-e8c65855ea39/id-preview-853c6446--625fdbb4-c0a1-4fb0-979e-6da54ddbfe35.lovable.app-1785676600803.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/dcaf5ee1-c401-4342-b7ab-e8c65855ea39/id-preview-853c6446--625fdbb4-c0a1-4fb0-979e-6da54ddbfe35.lovable.app-1785676600803.png" },
     ],
     links: [
       {

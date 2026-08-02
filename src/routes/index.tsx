@@ -12,10 +12,10 @@ export const Route = createFileRoute("/")({
         content:
           "Plane deine nächste Reise gemeinsam: Route, Ideen, Budget und Reisetagebuch in einer App.",
       },
-      { property: "og:title", content: "Reiseplaner – Reisen gemeinsam planen" },
+      { property: "og:title", content: "Reiseplaner – Reisen planen, budgetieren, festhalten" },
       {
         property: "og:description",
-        content: "Route, Ideensammlung, Ausgabenplan und Reisetagebuch in einer App.",
+        content: "Plane deine nächste Reise gemeinsam: Route, Ideen, Budget und Reisetagebuch in einer App.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
