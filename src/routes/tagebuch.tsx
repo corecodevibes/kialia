@@ -27,11 +27,36 @@ export const Route = createFileRoute("/tagebuch")({
   component: DiaryTab,
 });
 
+type Layout = "klassisch" | "journal" | "postkarte";
+
+const layoutLabels: Record<Layout, string> = {
+  klassisch: "Klassisch – ruhige Linien",
+  journal: "Journal – mit Farbleiste",
+  postkarte: "Postkarte – Sunset-Rahmen",
+};
+
+type FieldKey = "text" | "highlight" | "notes" | "expenses";
+
+const fieldLabels: Record<FieldKey, string> = {
+  text: "Was ist heute alles passiert?",
+  highlight: "Mein Highlight",
+  notes: "Merke dir (Restaurants, Tipps, meiden …)",
+  expenses: "Ausgaben heute",
+};
+
+const fieldPlaceholders: Record<FieldKey, string> = {
+  text: "Sprich einfach los – der Text landet hier.",
+  highlight: "Der schönste Moment des Tages …",
+  notes: "Restaurant Da Vinci top, Hafenstraße abends meiden …",
+  expenses: "Mittagessen 24 €, Museum 12 € …",
+};
+
 function DiaryTab() {
   const { trip, update, ready } = useTrip();
   const [withBudget, setWithBudget] = useState(true);
-  const [busyId, setBusyId] = useState<string | null>(null);
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const [layout, setLayout] = useState<Layout>("journal");
+  const [busyKey, setBusyKey] = useState<string | null>(null);
+  const [activeKey, setActiveKey] = useState<string | null>(null);
   const voice = useVoiceMemo();
 
   const set = (id: string, patch: Partial<DiaryEntry>) =>
@@ -47,6 +72,7 @@ function DiaryTab() {
           date: new Date().toISOString().slice(0, 10),
           text: "",
           highlight: "",
+          notes: "",
           expenses: "",
           spent: 0,
         },
@@ -54,27 +80,62 @@ function DiaryTab() {
     });
   }
 
-  async function toggleRecording(entry: DiaryEntry) {
-    if (voice.recording && activeId === entry.id) {
-      setActiveId(null);
+  async function toggleRecording(entry: DiaryEntry, field: FieldKey) {
+    const key = `${entry.id}:${field}`;
+    if (voice.recording && activeKey === key) {
+      setActiveKey(null);
       const audio = await voice.stop();
       if (!audio) return;
-      setBusyId(entry.id);
+      setBusyKey(key);
       try {
         const res = await transcribeMemo({ data: { audio, mimeType: "audio/wav" } });
         const text = res.text.trim();
-        if (text) set(entry.id, { text: entry.text ? `${entry.text}\n${text}` : text });
-        else voice.setError("Es wurde nichts erkannt – bitte nochmal sprechen.");
+        if (text) {
+          const prev = entry[field];
+          set(entry.id, { [field]: prev ? `${prev}\n${text}` : text } as Partial<DiaryEntry>);
+        } else {
+          voice.setError("Es wurde nichts erkannt – bitte nochmal sprechen.");
+        }
       } catch (err) {
         voice.setError(err instanceof Error ? err.message : "Transkription fehlgeschlagen.");
       } finally {
-        setBusyId(null);
+        setBusyKey(null);
       }
       return;
     }
-    setActiveId(entry.id);
+    if (voice.recording) voice.cancel();
+    setActiveKey(key);
     voice.setError(null);
     await voice.start();
+  }
+
+  function MemoButton({ entry, field }: { entry: DiaryEntry; field: FieldKey }) {
+    const key = `${entry.id}:${field}`;
+    const isRec = voice.recording && activeKey === key;
+    return (
+      <button
+        type="button"
+        disabled={busyKey === key}
+        onClick={() => toggleRecording(entry, field)}
+        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-semibold transition ${
+          isRec ? "bg-destructive text-background" : "bg-secondary text-foreground"
+        }`}
+      >
+        {busyKey === key ? (
+          <>
+            <Loader2 className="size-3.5 animate-spin" /> schreibt …
+          </>
+        ) : isRec ? (
+          <>
+            <Square className="size-3.5" /> stoppen
+          </>
+        ) : (
+          <>
+            <Mic className="size-3.5" /> Memo
+          </>
+        )}
+      </button>
+    );
   }
 
   const totalSpent = trip.diary.reduce((s, e) => s + (e.spent || 0), 0);
@@ -83,8 +144,8 @@ function DiaryTab() {
 
   return (
     <AppShell title="Reisetagebuch" subtitle="Sprich deinen Tag ein – wir schreiben ihn auf.">
-      <div className="space-y-4">
-        <Card className="print:hidden">
+      <div className="space-y-4 print:hidden">
+        <Card>
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-xs text-muted-foreground">Bisher ausgegeben</p>
@@ -101,27 +162,26 @@ function DiaryTab() {
         </Card>
 
         {voice.error && (
-          <p className="rounded-2xl bg-destructive/10 px-4 py-3 text-sm text-destructive print:hidden">
+          <p className="rounded-2xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
             {voice.error}
           </p>
         )}
 
-        <div className="space-y-4 print:space-y-2">
+        <div className="space-y-4">
           {trip.diary.map((e) => (
-            <Card key={e.id} className="print:rounded-none print:shadow-none">
+            <Card key={e.id}>
               <div className="flex items-center justify-between gap-2">
-                <h2 className="text-lg font-semibold">{e.day}. Tag</h2>
+                <h2 className="text-lg font-semibold">{e.day}. Reisetag</h2>
                 <div className="flex items-center gap-2">
                   <input
                     type="date"
                     value={e.date}
                     onChange={(ev) => set(e.id, { date: ev.target.value })}
-                    className="rounded-xl border border-border bg-background px-2 py-1 text-xs print:border-0"
+                    className="rounded-xl border border-border bg-background px-2 py-1 text-xs"
                   />
                   <button
                     type="button"
                     aria-label="Tag löschen"
-                    className="print:hidden"
                     onClick={() => update({ diary: trip.diary.filter((x) => x.id !== e.id) })}
                   >
                     <Trash2 className="size-4 text-muted-foreground hover:text-destructive" />
@@ -129,72 +189,50 @@ function DiaryTab() {
                 </div>
               </div>
 
-              <div className="mt-3 print:hidden">
-                <button
-                  type="button"
-                  disabled={busyId === e.id}
-                  onClick={() => toggleRecording(e)}
-                  className={`flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
-                    voice.recording && activeId === e.id
-                      ? "bg-destructive text-background"
-                      : "bg-secondary text-foreground"
-                  }`}
-                >
-                  {busyId === e.id ? (
-                    <>
-                      <Loader2 className="size-4 animate-spin" /> Wird geschrieben …
-                    </>
-                  ) : voice.recording && activeId === e.id ? (
-                    <>
-                      <Square className="size-4" /> Aufnahme beenden
-                    </>
-                  ) : (
-                    <>
-                      <Mic className="size-4" /> Sprachmemo aufnehmen
-                    </>
-                  )}
-                </button>
-                <p className="mt-1 text-center text-[11px] text-muted-foreground">
-                  Der Text erscheint unten und lässt sich korrigieren. Die Aufnahme wird danach gelöscht.
-                </p>
-              </div>
-
-              <div className="mt-3 space-y-3">
-                <Field label="Wie war dein Tag heute?">
-                  <textarea
-                    value={e.text}
-                    onChange={(ev) => set(e.id, { text: ev.target.value })}
-                    rows={5}
-                    className={`${inputClass} resize-y print:border-0`}
-                  />
-                </Field>
-                <Field label="Highlight">
-                  <input
-                    value={e.highlight}
-                    onChange={(ev) => set(e.id, { highlight: ev.target.value })}
-                    className={`${inputClass} print:border-0`}
-                  />
-                </Field>
-                <div className={withBudget ? "space-y-3" : "space-y-3 print:hidden"}>
-                  <Field label="Ausgaben heute (frei aufschreiben)">
+              <div className="mt-3 space-y-4">
+                {(["text", "highlight", "notes"] as FieldKey[]).map((f) => (
+                  <div key={f}>
+                    <div className="mb-1 flex items-center justify-between gap-2">
+                      <span className="text-xs font-medium text-muted-foreground">
+                        {fieldLabels[f]}
+                      </span>
+                      <MemoButton entry={e} field={f} />
+                    </div>
                     <textarea
-                      value={e.expenses}
-                      onChange={(ev) => set(e.id, { expenses: ev.target.value })}
-                      rows={2}
-                      placeholder="Mittagessen 24 €, Museum 12 € …"
-                      className={`${inputClass} resize-y print:border-0`}
+                      value={e[f] ?? ""}
+                      onChange={(ev) => set(e.id, { [f]: ev.target.value } as Partial<DiaryEntry>)}
+                      rows={f === "text" ? 5 : 3}
+                      placeholder={fieldPlaceholders[f]}
+                      className={`${inputClass} resize-y`}
                     />
-                  </Field>
-                  <Field label="Summe heute (€)">
-                    <input
-                      type="number"
-                      min={0}
-                      value={e.spent}
-                      onChange={(ev) => set(e.id, { spent: Number(ev.target.value) })}
-                      className={`${inputClass} print:border-0`}
-                    />
-                  </Field>
+                  </div>
+                ))}
+
+                <div>
+                  <div className="mb-1 flex items-center justify-between gap-2">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      {fieldLabels.expenses}
+                    </span>
+                    <MemoButton entry={e} field="expenses" />
+                  </div>
+                  <textarea
+                    value={e.expenses}
+                    onChange={(ev) => set(e.id, { expenses: ev.target.value })}
+                    rows={3}
+                    placeholder={fieldPlaceholders.expenses}
+                    className={`${inputClass} resize-y`}
+                  />
                 </div>
+
+                <Field label="Summe heute (€)">
+                  <input
+                    type="number"
+                    min={0}
+                    value={e.spent}
+                    onChange={(ev) => set(e.id, { spent: Number(ev.target.value) })}
+                    className={inputClass}
+                  />
+                </Field>
               </div>
             </Card>
           ))}
@@ -206,11 +244,32 @@ function DiaryTab() {
           </p>
         )}
 
-        <Card className="print:hidden">
+        <Card>
           <p className="text-sm font-semibold">Als PDF speichern</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Kleines A5-Tagebuch zum Ausdrucken – wahlweise mit oder ohne Budget.
+            Fertiges A5-Layout – zum Ausdrucken oder als PDF in Canva & Co. weiterverwenden.
           </p>
+
+          <div className="mt-3 space-y-2">
+            {(Object.keys(layoutLabels) as Layout[]).map((l) => (
+              <label
+                key={l}
+                className={`flex cursor-pointer items-center gap-2 rounded-2xl border px-3 py-2.5 text-sm ${
+                  layout === l ? "border-primary bg-primary/10" : "border-border"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="pdf-layout"
+                  checked={layout === l}
+                  onChange={() => setLayout(l)}
+                  className="size-4 accent-[var(--primary)]"
+                />
+                {layoutLabels[l]}
+              </label>
+            ))}
+          </div>
+
           <label className="mt-3 flex items-center gap-2 text-sm">
             <input
               type="checkbox"
@@ -220,6 +279,7 @@ function DiaryTab() {
             />
             Mit Budget & Ausgaben drucken
           </label>
+
           <button
             type="button"
             onClick={() => window.print()}
@@ -229,6 +289,44 @@ function DiaryTab() {
             <Printer className="size-4" /> Als A5-PDF speichern
           </button>
         </Card>
+      </div>
+
+      {/* Druck-Layout */}
+      <div className="hidden print:block">
+        {trip.diary.map((e) => (
+          <article key={e.id} className={`print-page print-page--${layout}`}>
+            <header className="print-head">
+              <span className="print-kicker">TraveliVibes · Reisetagebuch</span>
+              <h2 className="print-day">{e.day}. Reisetag</h2>
+              <span className="print-meta">
+                {[trip.destination, e.date].filter(Boolean).join(" · ")}
+              </span>
+            </header>
+
+            <section className="print-block">
+              <h3>Was heute passiert ist</h3>
+              <p>{e.text || "—"}</p>
+            </section>
+
+            <section className="print-block">
+              <h3>Highlight</h3>
+              <p>{e.highlight || "—"}</p>
+            </section>
+
+            <section className="print-block">
+              <h3>Merke dir</h3>
+              <p>{e.notes || "—"}</p>
+            </section>
+
+            {withBudget && (
+              <section className="print-block">
+                <h3>Ausgaben</h3>
+                <p>{e.expenses || "—"}</p>
+                <p className="print-total">Summe: {eur(e.spent || 0)}</p>
+              </section>
+            )}
+          </article>
+        ))}
       </div>
     </AppShell>
   );
