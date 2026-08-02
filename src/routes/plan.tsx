@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Bike, Bus, Car, Plane, Plus, Ship, Train, Trash2 } from "lucide-react";
 import { AppShell, Card, Field, inputClass } from "@/components/app/AppShell";
-import { LinkList, StatusPicker } from "@/components/app/bits";
+import { StatusPicker } from "@/components/app/bits";
 import {
   boardLabels,
   eur,
@@ -480,17 +480,6 @@ function PlanTab() {
           )}
         </Card>
 
-        <SectionTitle>Gespeicherte Links</SectionTitle>
-        <Card>
-          <p className="mb-2 text-xs text-muted-foreground">
-            Alles, was du schnell wieder öffnen willst.
-          </p>
-          <LinkList
-            links={trip.ideas.flatMap((i) => i.links)}
-            onChange={() => undefined}
-            placeholder="Links legst du bei den Ideen an"
-          />
-        </Card>
       </div>
     </AppShell>
   );
