@@ -1,20 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Lightbulb, Plus } from "lucide-react";
-import { AppShell, Card, DeleteButton, PrimaryButton, inputClass } from "@/components/app/AppShell";
+import { AppShell, Card, CardTitle, DeleteButton, PrimaryButton, inputClass } from "@/components/app/AppShell";
 import { LinkList } from "@/components/app/bits";
 import { uid, useTrip, type LinkItem } from "@/lib/trip-store";
 
 export const Route = createFileRoute("/ideen")({
   head: () => ({
     meta: [
-      { title: "Ideensammlung – TraveliVibes" },
+      { title: "Ideensammlung – kialia" },
       {
         name: "description",
         content:
           "Sammle frei alle Reiseideen und speichere Links zu Touren, Restaurants und Unterkünften direkt unter jeder Idee.",
       },
-      { property: "og:title", content: "Ideensammlung – TraveliVibes" },
+      { property: "og:title", content: "Ideensammlung – kialia" },
       {
         property: "og:description",
         content: "Ideen notieren und Links zu Touren, Restaurants und Unterkünften speichern.",
@@ -45,12 +45,13 @@ function IdeasTab() {
     <AppShell title="Ideensammlung" subtitle="Alles, was ihr sehen, essen und erleben wollt.">
       <div className="space-y-4">
         <Card>
+          <CardTitle>Neue Idee</CardTitle>
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
             rows={3}
             placeholder="Was wäre eine Idee? Ganz frei reinschreiben …"
-            className={`${inputClass} resize-y`}
+            className={`${inputClass} mt-3 resize-y`}
           />
           <PrimaryButton onClick={add} className="mt-2">
             <Plus className="size-4" /> Idee sammeln

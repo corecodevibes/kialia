@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Check, Plus, Trash2, ChevronDown, ChevronRight } from "lucide-react";
-import { AppShell, Card, Field, chipClass, inputClass } from "@/components/app/AppShell";
+import { AppShell, Card, CardTitle, Field, chipClass, inputClass } from "@/components/app/AppShell";
 import {
   kidsPacking,
   petsPacking,
@@ -13,13 +13,13 @@ import {
 export const Route = createFileRoute("/packliste")({
   head: () => ({
     meta: [
-      { title: "Packliste – TraveliVibes" },
+      { title: "Packliste – kialia" },
       {
         name: "description",
         content:
           "Gemeinsame Packliste für eure Reise: Hygiene, Medikamente, Kleidung, Schuhe, Sport, Kinder und Haustiere – individuell erweiterbar.",
       },
-      { property: "og:title", content: "Packliste – TraveliVibes" },
+      { property: "og:title", content: "Packliste – kialia" },
       {
         property: "og:description",
         content: "Packliste gemeinsam mit Partner oder Familie füllen und abhaken.",
@@ -71,7 +71,7 @@ function PackingTab() {
         <Card>
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold">Fortschritt</p>
+              <CardTitle>Fortschritt</CardTitle>
               <p className="text-xs text-muted-foreground">{done} / {total} erledigt</p>
             </div>
             <div className="h-2 w-32 overflow-hidden rounded-full bg-muted">

@@ -59,7 +59,10 @@ export function AppShell({
             className="size-11 shrink-0 rounded-2xl shadow-sm"
           />
           <div className="min-w-0 flex-1">
-            <h1 className="truncate text-2xl font-semibold leading-tight text-background drop-shadow-sm">
+            <p className="truncate text-lg font-extrabold leading-tight tracking-tight text-background drop-shadow-sm">
+              kialia · κιάλια
+            </p>
+            <h1 className="truncate text-sm font-medium leading-snug text-background/90">
               {title}
             </h1>
           </div>
@@ -149,9 +152,37 @@ export const selectClass = `${inputClass} appearance-none bg-background pr-8`;
 
 export function SectionTitle({ children }: { children: ReactNode }) {
   return (
-    <h2 className="mb-2 mt-6 px-1 text-xs font-semibold uppercase tracking-wider text-background/95 drop-shadow-sm">
+    <h2 className="mb-2 mt-6 px-1 text-[11px] font-bold uppercase tracking-[0.16em] text-background/95 drop-shadow-sm">
       {children}
     </h2>
+  );
+}
+
+/** Einheitliche Überschrift innerhalb einer Karte – überall gleich. */
+export function CardTitle({ children }: { children: ReactNode }) {
+  return (
+    <h2 className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+      {children}
+    </h2>
+  );
+}
+
+/** Einheitlicher Kennzahl-Block (z. B. Reisedauer, Gesamtkosten). */
+export function Stat({
+  label,
+  value,
+  hint,
+}: {
+  label: string;
+  value: ReactNode;
+  hint?: ReactNode;
+}) {
+  return (
+    <div className="text-center">
+      <CardTitle>{label}</CardTitle>
+      <p className="mt-1 text-3xl font-extrabold tracking-tight">{value}</p>
+      {hint && <p className="mt-1 text-sm text-muted-foreground">{hint}</p>}
+    </div>
   );
 }
 

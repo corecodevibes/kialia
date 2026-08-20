@@ -7,6 +7,8 @@ import {
   DeleteButton,
   Field,
   PrimaryButton,
+  CardTitle,
+  Stat,
   dateInputClass,
   inputClass,
 } from "@/components/app/AppShell";
@@ -17,13 +19,13 @@ import { transcribeMemo } from "@/lib/transcribe.functions";
 export const Route = createFileRoute("/tagebuch")({
   head: () => ({
     meta: [
-      { title: "Reisetagebuch mit Sprachmemo – TraveliVibes" },
+      { title: "Reisetagebuch mit Sprachmemo – kialia" },
       {
         name: "description",
         content:
           "Sprich deinen Reisetag als Sprachmemo ein, korrigiere den Text, halte Ausgaben fest und drucke das Tagebuch als A5-PDF.",
       },
-      { property: "og:title", content: "Reisetagebuch – TraveliVibes" },
+      { property: "og:title", content: "Reisetagebuch – kialia" },
       {
         property: "og:description",
         content: "Sprachmemo zu Text, Ausgaben festhalten und als A5-PDF drucken.",
@@ -154,10 +156,7 @@ function DiaryTab() {
     <AppShell title="Reisetagebuch" subtitle="Sprich deinen Tag ein – wir schreiben ihn auf.">
       <div className="space-y-4 print:hidden">
         <Card>
-          <div>
-            <p className="text-xs text-muted-foreground">Bisher ausgegeben</p>
-            <p className="text-2xl font-semibold">{eur(totalSpent)}</p>
-          </div>
+          <Stat label="Bisher ausgegeben" value={eur(totalSpent)} />
           <PrimaryButton onClick={addDay} className="mt-3">
             <Plus className="size-4" /> Neuer Tag
           </PrimaryButton>
@@ -242,7 +241,7 @@ function DiaryTab() {
         )}
 
         <Card>
-          <p className="text-sm font-semibold">Als PDF speichern</p>
+          <CardTitle>Als PDF speichern</CardTitle>
           <p className="mt-1 text-xs text-muted-foreground">
             Fertiges A5-Layout – zum Ausdrucken oder als PDF in Canva & Co. weiterverwenden.
           </p>
@@ -288,7 +287,7 @@ function DiaryTab() {
         {trip.diary.map((e) => (
           <article key={e.id} className={`print-page print-page--${layout}`}>
             <header className="print-head">
-              <span className="print-kicker">TraveliVibes · Reisetagebuch</span>
+              <span className="print-kicker">kialia · Reisetagebuch</span>
               <h2 className="print-day">{e.day}. Reisetag</h2>
               <span className="print-meta">
                 {[trip.destination, e.date].filter(Boolean).join(" · ")}

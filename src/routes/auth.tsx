@@ -87,12 +87,18 @@ function AuthPage() {
     <div className="acrylic-page flex min-h-screen items-center justify-center px-5 py-10">
       <div className="relative z-10 w-full max-w-sm">
         <div className="mb-6 flex flex-col items-center text-center">
-          <img src={logo} alt="App Logo" width={72} height={72} className="size-16 rounded-2xl shadow-sm" />
-          <h1 className="mt-3 text-2xl font-semibold text-background drop-shadow-sm">
-            Plane deine Reise
+          <img
+            src={logo}
+            alt="kialia Logo"
+            width={160}
+            height={160}
+            className="size-32 rounded-3xl shadow-sm"
+          />
+          <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-background drop-shadow-sm">
+            kialia · κιάλια
           </h1>
-          <p className="mt-1 text-sm text-background/90">
-            Organisation, Budget und Erinnerungen an einem Ort.
+          <p className="mt-1 text-sm font-medium text-background/90">
+            See more. travel further.
           </p>
         </div>
 
