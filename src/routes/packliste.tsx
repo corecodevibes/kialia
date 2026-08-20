@@ -180,7 +180,7 @@ function PackingTab() {
                             ),
                           )
                         }
-                        className={`${inputClass} flex-1 ${item.done ? "text-muted-foreground line-through" : ""}`}
+                        className={`${inputClass} min-w-0 flex-1 ${item.done ? "text-muted-foreground line-through" : ""}`}
                       />
                       <input
                         value={item.who}
@@ -199,7 +199,7 @@ function PackingTab() {
                           )
                         }
                         placeholder="Wer?"
-                        className={`${inputClass} w-20 shrink-0 px-2`}
+                        className={`${inputClass} w-16 shrink-0 px-2`}
                       />
                       <button
                         type="button"
