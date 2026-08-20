@@ -1,7 +1,8 @@
-import { Link } from "@tanstack/react-router";
-import { Home, Lightbulb, Wallet, BookOpen, Backpack } from "lucide-react";
-import type { ReactNode } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { Home, Lightbulb, Wallet, BookOpen, Backpack, LogOut } from "lucide-react";
+import { useEffect, type ReactNode } from "react";
 import logo from "@/assets/travelivibes-logo.png";
+import { signOut, useProfile, useSession } from "@/lib/auth";
 
 const tabs = [
   { to: "/", label: "Home", icon: Home },
@@ -20,6 +21,29 @@ export function AppShell({
   subtitle?: string;
   children: ReactNode;
 }) {
+  const navigate = useNavigate();
+  const { session, ready } = useSession();
+  const { profile, ready: profileReady } = useProfile(session?.user.id);
+
+  useEffect(() => {
+    if (ready && !session) navigate({ to: "/auth", replace: true });
+  }, [ready, session, navigate]);
+
+  useEffect(() => {
+    if (session && profileReady && !profile?.onboarding_done) {
+      navigate({ to: "/onboarding", replace: true });
+    }
+  }, [session, profileReady, profile, navigate]);
+
+  if (!ready || !session || !profileReady || !profile?.onboarding_done) {
+    return <div className="acrylic-page min-h-screen" />;
+  }
+
+  async function handleSignOut() {
+    await signOut();
+    navigate({ to: "/auth", replace: true });
+  }
+
   return (
     <div className="acrylic-page min-h-screen">
       <header className="relative z-30 px-5 pb-6 pt-6 print:hidden">
@@ -31,11 +55,19 @@ export function AppShell({
             height={64}
             className="size-11 shrink-0 rounded-2xl shadow-sm"
           />
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <h1 className="truncate text-2xl font-semibold leading-tight text-background drop-shadow-sm">
               {title}
             </h1>
           </div>
+          <button
+            type="button"
+            onClick={handleSignOut}
+            aria-label="Abmelden"
+            className="shrink-0 rounded-xl p-2 text-background/90 transition hover:bg-background/15"
+          >
+            <LogOut className="size-5" />
+          </button>
         </div>
         {subtitle && (
           <p className="mx-auto mt-2 max-w-lg text-sm leading-snug text-background/90">
@@ -43,6 +75,7 @@ export function AppShell({
           </p>
         )}
       </header>
+
 
       <main className="relative z-10 mx-auto max-w-lg px-4 pb-28 pt-1 print:pb-0 print:pt-0">
         {children}
