@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Check, Plus, Trash2, ChevronDown, ChevronRight } from "lucide-react";
-import { AppShell, Card, Field, inputClass } from "@/components/app/AppShell";
+import { AppShell, Card, Field, chipClass, inputClass } from "@/components/app/AppShell";
 import {
   kidsPacking,
   petsPacking,
@@ -85,18 +85,14 @@ function PackingTab() {
             <button
               type="button"
               onClick={() => toggleExtra("kids")}
-              className={`rounded-xl border px-3 py-2.5 text-sm font-medium transition ${
-                trip.kids ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground"
-              }`}
+              className={`${chipClass(trip.kids)} py-2.5`}
             >
               Kinder dabei
             </button>
             <button
               type="button"
               onClick={() => toggleExtra("pets")}
-              className={`rounded-xl border px-3 py-2.5 text-sm font-medium transition ${
-                trip.pets ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground"
-              }`}
+              className={`${chipClass(trip.pets)} py-2.5`}
             >
               Haustiere dabei
             </button>
@@ -202,7 +198,7 @@ function PackingTab() {
                           )
                         }
                         placeholder="Wer?"
-                        className={`${rowInput} w-16 shrink-0 px-2`}
+                        className={`${rowInput} w-14 shrink-0 px-2 text-xs`}
                       />
                       <button
                         type="button"
@@ -252,7 +248,7 @@ function PackingTab() {
 
         <Card>
           <Field label="Eigene Kategorie">
-            <div className="flex gap-2">
+            <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
               <input
                 value={newCat}
                 onChange={(e) => setNewCat(e.target.value)}
@@ -267,7 +263,8 @@ function PackingTab() {
                   setCats((cats) => [...cats, { id: uid(), name, items: [] }]);
                   setNewCat("");
                 }}
-                className="acrylic-warm shrink-0 rounded-xl px-4 text-sm font-semibold text-background"
+                aria-label="Kategorie hinzufügen"
+                className="acrylic-warm grid size-11 shrink-0 place-items-center rounded-xl text-background"
               >
                 <Plus className="size-4" />
               </button>
