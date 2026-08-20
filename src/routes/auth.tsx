@@ -42,7 +42,7 @@ function AuthPage() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (ready && session) navigate({ to: "/onboarding", replace: true });
+    if (ready && session && window.location.pathname !== "/onboarding") navigate({ to: "/onboarding", replace: true });
   }, [ready, session, navigate]);
 
   async function submit(e: React.FormEvent) {
