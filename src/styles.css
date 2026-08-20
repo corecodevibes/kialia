@@ -219,8 +219,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .acrylic, .acrylic-warm { animation: none; }
+  .acrylic, .acrylic-warm, .acrylic-page { animation: none; }
 }
+
 
 
 
