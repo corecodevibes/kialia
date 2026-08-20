@@ -46,28 +46,28 @@ export function LinkList({
           </button>
         </div>
       ))}
-      <div className="flex gap-2">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
         <input
           value={label}
           onChange={(e) => setLabel(e.target.value)}
           placeholder="Name"
-          className={`${inputClass} w-28 shrink-0`}
-        />
-        <input
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && add()}
-          placeholder={placeholder}
           className={inputClass}
         />
         <button
           type="button"
           onClick={add}
           aria-label="Link hinzufügen"
-          className="shrink-0 rounded-xl bg-primary px-3 text-primary-foreground"
+          className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground"
         >
           <Plus className="size-4" />
         </button>
+        <input
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && add()}
+          placeholder={placeholder}
+          className={`${inputClass} col-span-2`}
+        />
       </div>
     </div>
   );
@@ -81,14 +81,14 @@ export function StatusPicker({
   onChange: (v: PayStatus) => void;
 }) {
   return (
-    <div className="flex gap-1.5">
+    <div className="grid grid-cols-3 gap-1.5">
       {(Object.keys(statusLabels) as PayStatus[]).map((s) => (
         <button
           key={s}
           type="button"
           onClick={() => onChange(s)}
-          className={`flex-1 rounded-full border px-2 py-1.5 text-xs font-medium transition ${
-            value === s ? "border-primary bg-primary/10" : "border-border text-muted-foreground"
+          className={`min-w-0 truncate rounded-full border px-2 py-2 text-xs font-medium transition ${
+            value === s ? "border-primary bg-primary/10 text-primary" : "border-border bg-background text-muted-foreground"
           }`}
         >
           {statusLabels[s]}
@@ -97,3 +97,4 @@ export function StatusPicker({
     </div>
   );
 }
+
