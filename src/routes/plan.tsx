@@ -60,29 +60,8 @@ const modes = [
   { key: "Schiff", icon: Ship },
 ];
 
-function SectionTitle({ children }: { children: string }) {
-  return <h2 className="mb-2 mt-6 px-1 text-sm font-semibold uppercase tracking-wide">{children}</h2>;
-}
 
-function DeleteButton({ onClick }: { onClick: () => void }) {
-  return (
-    <button type="button" aria-label="Eintrag löschen" onClick={onClick}>
-      <Trash2 className="size-4 text-muted-foreground hover:text-destructive" />
-    </button>
-  );
-}
 
-function AddButton({ onClick, label }: { onClick: () => void; label: string }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-border py-3 text-sm font-medium text-muted-foreground hover:border-primary hover:text-foreground"
-    >
-      <Plus className="size-4" /> {label}
-    </button>
-  );
-}
 
 function PlanTab() {
   const { trip, update, ready } = useTrip();
