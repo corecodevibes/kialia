@@ -1,7 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Bike, Bus, Car, Plane, Plus, Ship, Train, Trash2 } from "lucide-react";
-import { AppShell, Card, Field, inputClass } from "@/components/app/AppShell";
+import { Bike, Bus, Car, Plane, Ship, Train } from "lucide-react";
+import {
+  AddButton,
+  AppShell,
+  Card,
+  DeleteButton,
+  Field,
+  FieldRow,
+  SectionTitle,
+  chipClass,
+  dateInputClass,
+  inputClass,
+  selectClass,
+} from "@/components/app/AppShell";
 import { StatusPicker } from "@/components/app/bits";
+
 import {
   boardLabels,
   eur,
