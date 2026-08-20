@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Lightbulb, Plus, Trash2 } from "lucide-react";
-import { AppShell, Card, inputClass } from "@/components/app/AppShell";
+import { Lightbulb, Plus } from "lucide-react";
+import { AppShell, Card, DeleteButton, PrimaryButton, inputClass } from "@/components/app/AppShell";
 import { LinkList } from "@/components/app/bits";
 import { uid, useTrip, type LinkItem } from "@/lib/trip-store";
 
@@ -52,26 +52,21 @@ function IdeasTab() {
             placeholder="Was wäre eine Idee? Ganz frei reinschreiben …"
             className={`${inputClass} resize-y`}
           />
-          <button
-            type="button"
-            onClick={add}
-            className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground"
-          >
+          <PrimaryButton onClick={add} className="mt-2">
             <Plus className="size-4" /> Idee sammeln
-          </button>
+          </PrimaryButton>
         </Card>
 
         {trip.ideas.map((idea) => (
           <Card key={idea.id}>
-            <div className="flex items-start justify-between gap-3">
-              <p className="whitespace-pre-wrap text-sm font-medium leading-snug">{idea.text}</p>
-              <button
-                type="button"
-                aria-label="Idee löschen"
+            <div className="flex items-start gap-2">
+              <p className="min-w-0 flex-1 whitespace-pre-wrap break-words text-sm font-medium leading-snug">
+                {idea.text}
+              </p>
+              <DeleteButton
+                ariaLabel="Idee löschen"
                 onClick={() => update({ ideas: trip.ideas.filter((i) => i.id !== idea.id) })}
-              >
-                <Trash2 className="size-4 text-muted-foreground hover:text-destructive" />
-              </button>
+              />
             </div>
             <div className="mt-3">
               <LinkList links={idea.links} onChange={(l) => setLinks(idea.id, l)} />
