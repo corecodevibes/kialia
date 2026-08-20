@@ -59,7 +59,10 @@ export function AppShell({
             className="size-11 shrink-0 rounded-2xl shadow-sm"
           />
           <div className="min-w-0 flex-1">
-            <h1 className="truncate text-2xl font-semibold leading-tight text-background drop-shadow-sm">
+            <p className="truncate text-lg font-extrabold leading-tight tracking-tight text-background drop-shadow-sm">
+              kialia · κιάλια
+            </p>
+            <h1 className="truncate text-sm font-medium leading-snug text-background/90">
               {title}
             </h1>
           </div>
