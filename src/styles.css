@@ -184,11 +184,33 @@
   animation: acrylic-drift 22s ease-in-out infinite alternate;
 }
 
+/* Durchgehender Acryl-Hintergrund für die ganze Seite */
+@utility acrylic-page {
+  position: relative;
+  background: var(--gradient-sky) fixed;
+  background-size: 180% 180%;
+  animation: acrylic-drift 26s ease-in-out infinite alternate;
+
+  &::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      oklch(1 0 0 / 0.18) 18%,
+      oklch(1 0 0 / 0.3) 100%
+    );
+    pointer-events: none;
+  }
+}
+
 @utility acrylic-warm {
   background: var(--gradient-warm);
   background-size: 180% 180%;
   animation: acrylic-drift 18s ease-in-out infinite alternate;
 }
+
 
 @keyframes acrylic-drift {
   0% { background-position: 0% 40%; }
