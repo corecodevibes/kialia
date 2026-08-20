@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IdeenRouteImport } from './routes/ideen'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as PacklisteRouteImport } from './routes/packliste'
 import { Route as PlanRouteImport } from './routes/plan'
 import { Route as TagebuchRouteImport } from './routes/tagebuch'
@@ -20,9 +22,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IdeenRoute = IdeenRouteImport.update({
   id: '/ideen',
   path: '/ideen',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PacklisteRoute = PacklisteRouteImport.update({
@@ -43,14 +55,18 @@ const TagebuchRoute = TagebuchRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/ideen': typeof IdeenRoute
+  '/onboarding': typeof OnboardingRoute
   '/packliste': typeof PacklisteRoute
   '/plan': typeof PlanRoute
   '/tagebuch': typeof TagebuchRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/ideen': typeof IdeenRoute
+  '/onboarding': typeof OnboardingRoute
   '/packliste': typeof PacklisteRoute
   '/plan': typeof PlanRoute
   '/tagebuch': typeof TagebuchRoute
@@ -58,22 +74,48 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/ideen': typeof IdeenRoute
+  '/onboarding': typeof OnboardingRoute
   '/packliste': typeof PacklisteRoute
   '/plan': typeof PlanRoute
   '/tagebuch': typeof TagebuchRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/ideen' | '/packliste' | '/plan' | '/tagebuch'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/ideen'
+    | '/onboarding'
+    | '/packliste'
+    | '/plan'
+    | '/tagebuch'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/ideen' | '/packliste' | '/plan' | '/tagebuch'
-  id: '__root__' | '/' | '/ideen' | '/packliste' | '/plan' | '/tagebuch'
+  to:
+    | '/'
+    | '/auth'
+    | '/ideen'
+    | '/onboarding'
+    | '/packliste'
+    | '/plan'
+    | '/tagebuch'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/ideen'
+    | '/onboarding'
+    | '/packliste'
+    | '/plan'
+    | '/tagebuch'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
   IdeenRoute: typeof IdeenRoute
+  OnboardingRoute: typeof OnboardingRoute
   PacklisteRoute: typeof PacklisteRoute
   PlanRoute: typeof PlanRoute
   TagebuchRoute: typeof TagebuchRoute
@@ -88,11 +130,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ideen': {
       id: '/ideen'
       path: '/ideen'
       fullPath: '/ideen'
       preLoaderRoute: typeof IdeenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/packliste': {
@@ -121,7 +177,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
   IdeenRoute: IdeenRoute,
+  OnboardingRoute: OnboardingRoute,
   PacklisteRoute: PacklisteRoute,
   PlanRoute: PlanRoute,
   TagebuchRoute: TagebuchRoute,
