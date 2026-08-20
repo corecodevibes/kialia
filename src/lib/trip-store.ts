@@ -191,7 +191,7 @@ export function loadStore(): Store {
       const parsed = JSON.parse(raw) as Partial<Store>;
       const trips = (parsed.trips ?? []).map(normalize);
       if (trips.length) {
-        const activeId = trips.some((t) => t.id === parsed.activeId) ? parsed.activeId! : trips[0].id;
+        const activeId = trips.some((t) => t.id === parsed.activeId) ? parsed.activeId! : trips[0]!.id;
         return { trips, activeId };
       }
     }
@@ -263,7 +263,7 @@ export function useTrip() {
           const t = newTrip();
           return { trips: [t], activeId: t.id };
         }
-        return { trips, activeId: s.activeId === id ? trips[0].id : s.activeId };
+        return { trips, activeId: s.activeId === id ? trips[0]!.id : s.activeId };
       });
     },
     [mutate],
