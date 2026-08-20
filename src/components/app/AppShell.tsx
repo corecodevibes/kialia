@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Home, Lightbulb, Wallet, BookOpen } from "lucide-react";
+import { Home, Lightbulb, Wallet, BookOpen, Backpack } from "lucide-react";
 import type { ReactNode } from "react";
 import logo from "@/assets/travelivibes-logo.png";
 
@@ -7,6 +7,7 @@ const tabs = [
   { to: "/", label: "Home", icon: Home },
   { to: "/ideen", label: "Ideen", icon: Lightbulb },
   { to: "/plan", label: "Plan", icon: Wallet },
+  { to: "/packliste", label: "Packen", icon: Backpack },
   { to: "/tagebuch", label: "Tagebuch", icon: BookOpen },
 ] as const;
 
@@ -21,20 +22,17 @@ export function AppShell({
 }) {
   return (
     <div className="min-h-screen bg-background">
-      <header
-        className="sticky top-0 z-30 px-5 pb-5 pt-6 print:hidden"
-        style={{ background: "var(--gradient-sky)" }}
-      >
+      <header className="acrylic sticky top-0 z-30 overflow-hidden rounded-b-[2rem] px-5 pb-6 pt-6 print:hidden">
         <div className="mx-auto flex max-w-lg items-center gap-3">
           <img
             src={logo}
             alt="TraveliVibes Logo"
             width={64}
             height={64}
-            className="size-11 shrink-0 rounded-2xl bg-background/85 p-1.5"
+            className="size-11 shrink-0 rounded-2xl shadow-sm"
           />
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-background/90">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-background/90">
               TraveliVibes
             </p>
             <h1 className="truncate text-2xl font-semibold leading-tight text-background">
@@ -51,10 +49,8 @@ export function AppShell({
 
       <main className="mx-auto max-w-lg px-4 pb-28 pt-4 print:pb-0 print:pt-0">{children}</main>
 
-
-
       <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card/95 backdrop-blur print:hidden">
-        <div className="mx-auto flex max-w-lg items-stretch justify-between px-2 pb-[env(safe-area-inset-bottom)]">
+        <div className="mx-auto flex max-w-lg items-stretch justify-between px-1 pb-[env(safe-area-inset-bottom)]">
           {tabs.map(({ to, label, icon: Icon }) => (
             <Link
               key={to}
@@ -62,7 +58,7 @@ export function AppShell({
               activeOptions={{ exact: to === "/" }}
               activeProps={{ className: "text-primary" }}
               inactiveProps={{ className: "text-muted-foreground" }}
-              className="flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-medium transition"
+              className="flex flex-1 flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition"
             >
               <Icon className="size-5" />
               {label}
@@ -77,7 +73,7 @@ export function AppShell({
 export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
     <section
-      className={`rounded-3xl bg-card p-4 ${className}`}
+      className={`rounded-3xl border border-border/60 bg-card p-4 ${className}`}
       style={{ boxShadow: "var(--shadow-soft)" }}
     >
       {children}
