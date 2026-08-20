@@ -34,13 +34,13 @@ import {
 export const Route = createFileRoute("/plan")({
   head: () => ({
     meta: [
-      { title: "Reiseplan & Kosten – TraveliVibes" },
+      { title: "Reiseplan & Kosten – kialia" },
       {
         name: "description",
         content:
           "Plane Fortbewegung, Unterkünfte, Verpflegung und Aktivitäten mit Kosten, Zahlungsstatus und Fristen – inklusive Sparplan bis zur Reise.",
       },
-      { property: "og:title", content: "Reiseplan & Kosten – TraveliVibes" },
+      { property: "og:title", content: "Reiseplan & Kosten – kialia" },
       {
         property: "og:description",
         content: "Fortbewegung, Unterkünfte, Essen und Aktivitäten mit Kosten und Zahlungsstatus.",

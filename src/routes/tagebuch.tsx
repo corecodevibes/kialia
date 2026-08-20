@@ -19,13 +19,13 @@ import { transcribeMemo } from "@/lib/transcribe.functions";
 export const Route = createFileRoute("/tagebuch")({
   head: () => ({
     meta: [
-      { title: "Reisetagebuch mit Sprachmemo – TraveliVibes" },
+      { title: "Reisetagebuch mit Sprachmemo – kialia" },
       {
         name: "description",
         content:
           "Sprich deinen Reisetag als Sprachmemo ein, korrigiere den Text, halte Ausgaben fest und drucke das Tagebuch als A5-PDF.",
       },
-      { property: "og:title", content: "Reisetagebuch – TraveliVibes" },
+      { property: "og:title", content: "Reisetagebuch – kialia" },
       {
         property: "og:description",
         content: "Sprachmemo zu Text, Ausgaben festhalten und als A5-PDF drucken.",
@@ -287,7 +287,7 @@ function DiaryTab() {
         {trip.diary.map((e) => (
           <article key={e.id} className={`print-page print-page--${layout}`}>
             <header className="print-head">
-              <span className="print-kicker">TraveliVibes · Reisetagebuch</span>
+              <span className="print-kicker">kialia · Reisetagebuch</span>
               <h2 className="print-day">{e.day}. Reisetag</h2>
               <span className="print-meta">
                 {[trip.destination, e.date].filter(Boolean).join(" · ")}

@@ -8,13 +8,13 @@ import { uid, useTrip, type LinkItem } from "@/lib/trip-store";
 export const Route = createFileRoute("/ideen")({
   head: () => ({
     meta: [
-      { title: "Ideensammlung – TraveliVibes" },
+      { title: "Ideensammlung – kialia" },
       {
         name: "description",
         content:
           "Sammle frei alle Reiseideen und speichere Links zu Touren, Restaurants und Unterkünften direkt unter jeder Idee.",
       },
-      { property: "og:title", content: "Ideensammlung – TraveliVibes" },
+      { property: "og:title", content: "Ideensammlung – kialia" },
       {
         property: "og:description",
         content: "Ideen notieren und Links zu Touren, Restaurants und Unterkünften speichern.",

@@ -13,13 +13,13 @@ import {
 export const Route = createFileRoute("/packliste")({
   head: () => ({
     meta: [
-      { title: "Packliste – TraveliVibes" },
+      { title: "Packliste – kialia" },
       {
         name: "description",
         content:
           "Gemeinsame Packliste für eure Reise: Hygiene, Medikamente, Kleidung, Schuhe, Sport, Kinder und Haustiere – individuell erweiterbar.",
       },
-      { property: "og:title", content: "Packliste – TraveliVibes" },
+      { property: "og:title", content: "Packliste – kialia" },
       {
         property: "og:description",
         content: "Packliste gemeinsam mit Partner oder Familie füllen und abhaken.",

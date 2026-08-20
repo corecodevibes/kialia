@@ -17,13 +17,13 @@ import { eur, tripDays, tripTotals, useTrip } from "@/lib/trip-store";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "TraveliVibes – Reisen planen, Budget & Reisetagebuch" },
+      { title: "kialia – Reisen planen, Budget & Reisetagebuch" },
       {
         name: "description",
         content:
-          "TraveliVibes: mehrere Reisen planen, Ideen mit Links sammeln, Budget kalkulieren, Packliste teilen und ein Reisetagebuch mit Sprachmemo führen.",
+          "kialia: mehrere Reisen planen, Ideen mit Links sammeln, Budget kalkulieren, Packliste teilen und ein Reisetagebuch mit Sprachmemo führen.",
       },
-      { property: "og:title", content: "TraveliVibes – Reisen planen & festhalten" },
+      { property: "og:title", content: "kialia – Reisen planen & festhalten" },
       {
         property: "og:description",
         content: "Mehrere Reiseziele planen, Kosten im Blick behalten und jeden Tag festhalten.",
