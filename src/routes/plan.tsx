@@ -90,36 +90,37 @@ function PlanTab() {
         <SectionTitle>Fortbewegungsmittel</SectionTitle>
         {trip.transports.map((t, i) => (
           <Card key={t.id}>
-            <div className="flex items-center justify-between gap-2">
-              <p className="text-sm font-semibold">Nr. {i + 1}</p>
-              <DeleteButton
-                onClick={() => update({ transports: trip.transports.filter((x) => x.id !== t.id) })}
-              />
-            </div>
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {modes.map(({ key, icon: Icon }) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => setTransport(t.id, { mode: key })}
-                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition ${
-                    t.mode === key ? "border-primary bg-primary/10 font-medium" : "border-border"
-                  }`}
-                >
-                  <Icon className="size-3.5" /> {key}
-                </button>
-              ))}
+            <div className="flex items-start gap-2">
+              <div className="min-w-0 flex-1">
+                <Field label={`Nr. ${i + 1} – Strecke / Anbieter`}>
+                  <input
+                    value={t.label}
+                    onChange={(e) => setTransport(t.id, { label: e.target.value })}
+                    placeholder="z. B. Hinflug Zürich – Lissabon"
+                    className={inputClass}
+                  />
+                </Field>
+              </div>
+              <div className="pt-5">
+                <DeleteButton
+                  onClick={() => update({ transports: trip.transports.filter((x) => x.id !== t.id) })}
+                />
+              </div>
             </div>
             <div className="mt-3 space-y-3">
-              <Field label="Strecke / Anbieter">
-                <input
-                  value={t.label}
-                  onChange={(e) => setTransport(t.id, { label: e.target.value })}
-                  placeholder="z. B. Hinflug Zürich – Lissabon"
-                  className={inputClass}
-                />
-              </Field>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-wrap gap-1.5">
+                {modes.map(({ key, icon: Icon }) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setTransport(t.id, { mode: key })}
+                    className={chipClass(t.mode === key)}
+                  >
+                    <Icon className="size-3.5" /> {key}
+                  </button>
+                ))}
+              </div>
+              <FieldRow>
                 <Field label="Kosten (€)">
                   <input
                     type="number"
@@ -134,10 +135,10 @@ function PlanTab() {
                     type="date"
                     value={t.dueDate}
                     onChange={(e) => setTransport(t.id, { dueDate: e.target.value })}
-                    className={inputClass}
+                    className={dateInputClass}
                   />
                 </Field>
-              </div>
+              </FieldRow>
               <StatusPicker value={t.status} onChange={(status) => setTransport(t.id, { status })} />
               <Field label="Notiz (z. B. Ratenzahlung)">
                 <input
@@ -160,7 +161,7 @@ function PlanTab() {
                   href={t.url}
                   target="_blank"
                   rel="noreferrer noopener"
-                  className="text-xs font-medium text-primary underline"
+                  className="block truncate text-xs font-medium text-primary underline"
                 >
                   Buchung öffnen
                 </a>
@@ -183,23 +184,29 @@ function PlanTab() {
         <SectionTitle>Unterkünfte</SectionTitle>
         {trip.stays.map((s) => (
           <Card key={s.id}>
-            <div className="flex items-center justify-between gap-2">
-              <input
-                value={s.name}
-                onChange={(e) => setStay(s.id, { name: e.target.value })}
-                placeholder="Name der Unterkunft"
-                className={`${inputClass} font-semibold`}
-              />
-              <DeleteButton onClick={() => update({ stays: trip.stays.filter((x) => x.id !== s.id) })} />
+            <div className="flex items-start gap-2">
+              <div className="min-w-0 flex-1">
+                <Field label="Name der Unterkunft">
+                  <input
+                    value={s.name}
+                    onChange={(e) => setStay(s.id, { name: e.target.value })}
+                    placeholder="z. B. Casa Azul"
+                    className={inputClass}
+                  />
+                </Field>
+              </div>
+              <div className="pt-5">
+                <DeleteButton onClick={() => update({ stays: trip.stays.filter((x) => x.id !== s.id) })} />
+              </div>
             </div>
             <div className="mt-3 space-y-3">
-              <div className="grid grid-cols-2 gap-3">
+              <FieldRow>
                 <Field label="Von">
                   <input
                     type="date"
                     value={s.from}
                     onChange={(e) => setStay(s.id, { from: e.target.value })}
-                    className={inputClass}
+                    className={dateInputClass}
                   />
                 </Field>
                 <Field label="Bis">
@@ -207,10 +214,10 @@ function PlanTab() {
                     type="date"
                     value={s.to}
                     onChange={(e) => setStay(s.id, { to: e.target.value })}
-                    className={inputClass}
+                    className={dateInputClass}
                   />
                 </Field>
-              </div>
+              </FieldRow>
               <Field label="Link zur Unterkunft (Booking, Airbnb …)">
                 <input
                   value={s.url}
@@ -224,7 +231,7 @@ function PlanTab() {
                   href={s.url}
                   target="_blank"
                   rel="noreferrer noopener"
-                  className="text-xs font-medium text-primary underline"
+                  className="block truncate text-xs font-medium text-primary underline"
                 >
                   Website öffnen
                 </a>
@@ -233,7 +240,7 @@ function PlanTab() {
                 <select
                   value={s.board}
                   onChange={(e) => setStay(s.id, { board: e.target.value as Board })}
-                  className={inputClass}
+                  className={selectClass}
                 >
                   {(Object.keys(boardLabels) as Board[]).map((b) => (
                     <option key={b} value={b}>
@@ -242,7 +249,7 @@ function PlanTab() {
                   ))}
                 </select>
               </Field>
-              <div className="grid grid-cols-2 gap-3">
+              <FieldRow>
                 <Field label="Kosten (€)">
                   <input
                     type="number"
@@ -257,10 +264,10 @@ function PlanTab() {
                     type="date"
                     value={s.dueDate}
                     onChange={(e) => setStay(s.id, { dueDate: e.target.value })}
-                    className={inputClass}
+                    className={dateInputClass}
                   />
                 </Field>
-              </div>
+              </FieldRow>
               <StatusPicker value={s.status} onChange={(status) => setStay(s.id, { status })} />
             </div>
           </Card>
@@ -279,45 +286,47 @@ function PlanTab() {
 
         <SectionTitle>Essen pro Tag</SectionTitle>
         <Card>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Morgens (€)">
-              <input
-                type="number"
-                min={0}
-                value={trip.meals.breakfast}
-                onChange={(e) => setMeals({ breakfast: Number(e.target.value) })}
-                className={inputClass}
-              />
-            </Field>
-            <Field label="Mittags (€)">
-              <input
-                type="number"
-                min={0}
-                value={trip.meals.lunch}
-                onChange={(e) => setMeals({ lunch: Number(e.target.value) })}
-                className={inputClass}
-              />
-            </Field>
-            <Field label="Abends (€)">
-              <input
-                type="number"
-                min={0}
-                value={trip.meals.dinner}
-                onChange={(e) => setMeals({ dinner: Number(e.target.value) })}
-                className={inputClass}
-              />
-            </Field>
-            <Field label="Snacks (€)">
-              <input
-                type="number"
-                min={0}
-                value={trip.meals.snacks}
-                onChange={(e) => setMeals({ snacks: Number(e.target.value) })}
-                className={inputClass}
-              />
-            </Field>
-          </div>
-          <div className="mt-3">
+          <div className="space-y-3">
+            <FieldRow>
+              <Field label="Morgens (€)">
+                <input
+                  type="number"
+                  min={0}
+                  value={trip.meals.breakfast}
+                  onChange={(e) => setMeals({ breakfast: Number(e.target.value) })}
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="Mittags (€)">
+                <input
+                  type="number"
+                  min={0}
+                  value={trip.meals.lunch}
+                  onChange={(e) => setMeals({ lunch: Number(e.target.value) })}
+                  className={inputClass}
+                />
+              </Field>
+            </FieldRow>
+            <FieldRow>
+              <Field label="Abends (€)">
+                <input
+                  type="number"
+                  min={0}
+                  value={trip.meals.dinner}
+                  onChange={(e) => setMeals({ dinner: Number(e.target.value) })}
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="Snacks (€)">
+                <input
+                  type="number"
+                  min={0}
+                  value={trip.meals.snacks}
+                  onChange={(e) => setMeals({ snacks: Number(e.target.value) })}
+                  className={inputClass}
+                />
+              </Field>
+            </FieldRow>
             <Field label="Maximal pro Tag (€)">
               <input
                 type="number"
@@ -337,16 +346,22 @@ function PlanTab() {
         <SectionTitle>Aktivitäten</SectionTitle>
         {trip.activities.map((a) => (
           <Card key={a.id}>
-            <div className="flex items-center justify-between gap-2">
-              <input
-                value={a.name}
-                onChange={(e) => setActivity(a.id, { name: e.target.value })}
-                placeholder="Name der Aktivität"
-                className={`${inputClass} font-semibold`}
-              />
-              <DeleteButton
-                onClick={() => update({ activities: trip.activities.filter((x) => x.id !== a.id) })}
-              />
+            <div className="flex items-start gap-2">
+              <div className="min-w-0 flex-1">
+                <Field label="Name der Aktivität">
+                  <input
+                    value={a.name}
+                    onChange={(e) => setActivity(a.id, { name: e.target.value })}
+                    placeholder="z. B. Bootstour bei Sonnenuntergang"
+                    className={inputClass}
+                  />
+                </Field>
+              </div>
+              <div className="pt-5">
+                <DeleteButton
+                  onClick={() => update({ activities: trip.activities.filter((x) => x.id !== a.id) })}
+                />
+              </div>
             </div>
             <div className="mt-3 space-y-3">
               <Field label="Link (z. B. GetYourGuide)">
@@ -362,12 +377,12 @@ function PlanTab() {
                   href={a.url}
                   target="_blank"
                   rel="noreferrer noopener"
-                  className="text-xs font-medium text-primary underline"
+                  className="block truncate text-xs font-medium text-primary underline"
                 >
                   Website öffnen
                 </a>
               )}
-              <div className="grid grid-cols-2 gap-3">
+              <FieldRow>
                 <Field label="Kosten (€)">
                   <input
                     type="number"
@@ -382,10 +397,10 @@ function PlanTab() {
                     type="date"
                     value={a.dueDate}
                     onChange={(e) => setActivity(a.id, { dueDate: e.target.value })}
-                    className={inputClass}
+                    className={dateInputClass}
                   />
                 </Field>
-              </div>
+              </FieldRow>
               <StatusPicker value={a.status} onChange={(status) => setActivity(a.id, { status })} />
             </div>
           </Card>
@@ -401,6 +416,7 @@ function PlanTab() {
             })
           }
         />
+
 
         <SectionTitle>Gesamtkosten</SectionTitle>
         <Card>
