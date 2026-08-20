@@ -70,13 +70,30 @@ export type DiaryEntry = {
   spent: number;
 };
 
+export type PackItem = {
+  id: string;
+  text: string;
+  qty: string;
+  done: boolean;
+  who: string;
+};
+
+export type PackCategory = {
+  id: string;
+  name: string;
+  items: PackItem[];
+};
 
 export type Trip = {
+  id: string;
   destination: string;
   startDate: string;
   endDate: string;
   companions: string;
   travellers: number;
+  kids: boolean;
+  pets: boolean;
+  sports: string;
   ideas: Idea[];
   transports: Transport[];
   stays: Stay[];
@@ -84,63 +101,182 @@ export type Trip = {
   meals: Meals;
   savings: Savings;
   diary: DiaryEntry[];
+  packing: PackCategory[];
 };
-
-export const emptyTrip: Trip = {
-  destination: "",
-  startDate: "",
-  endDate: "",
-  companions: "",
-  travellers: 2,
-  ideas: [],
-  transports: [],
-  stays: [],
-  activities: [],
-  meals: { breakfast: 0, lunch: 0, dinner: 0, snacks: 0, maxPerDay: 100 },
-  savings: { enabled: false, saved: 0, monthsLeft: 6, credit: 0 },
-  diary: [],
-};
-
-const KEY = "travelivibes.trip.v2";
 
 export function uid() {
   return Math.random().toString(36).slice(2, 10);
 }
 
-export function loadTrip(): Trip {
-  if (typeof window === "undefined") return emptyTrip;
+function cat(name: string, items: string[]): PackCategory {
+  return {
+    id: uid(),
+    name,
+    items: items.map((text) => ({ id: uid(), text, qty: "", done: false, who: "" })),
+  };
+}
+
+export function defaultPacking(): PackCategory[] {
+  return [
+    cat("Hygieneartikel", ["Zahnbürste & Zahnpasta", "Duschgel & Shampoo", "Deo", "Sonnencreme", "Rasierer"]),
+    cat("Medikamente / Notfall", ["Persönliche Medikamente", "Schmerztabletten", "Pflaster & Verband", "Reiseübelkeit", "Elektrolyte"]),
+    cat("Kleidung – Jacken & Mäntel", ["Regenjacke", "Übergangsjacke"]),
+    cat("Kleidung – Oberteile", ["T-Shirts", "Pullover", "Hemd / Bluse"]),
+    cat("Kleidung – Unterteile", ["Hosen", "Shorts", "Rock / Kleid"]),
+    cat("Unterwäsche & Socken", ["Unterwäsche", "Socken", "Badesachen"]),
+    cat("Schuhe", ["Sneaker", "Sandalen", "Wanderschuhe"]),
+    cat("Sportkleidung", ["Sport-Shirt", "Sporthose", "Sportschuhe"]),
+    cat("Dokumente & Technik", ["Ausweis / Reisepass", "Ladekabel", "Powerbank", "Adapter", "Versicherungskarte"]),
+    cat("Spielutensilien", ["Kartenspiel", "Buch", "Kopfhörer"]),
+  ];
+}
+
+export function kidsPacking(): PackCategory {
+  return cat("Kinder", ["Windeln / Feuchttücher", "Lieblingskuscheltier", "Snacks", "Kindermedikamente", "Wechselkleidung"]);
+}
+
+export function petsPacking(): PackCategory {
+  return cat("Haustiere", ["Futter & Napf", "Leine & Geschirr", "Impfpass", "Transportbox", "Spielzeug"]);
+}
+
+export function newTrip(destination = ""): Trip {
+  return {
+    id: uid(),
+    destination,
+    startDate: "",
+    endDate: "",
+    companions: "",
+    travellers: 2,
+    kids: false,
+    pets: false,
+    sports: "",
+    ideas: [],
+    transports: [],
+    stays: [],
+    activities: [],
+    meals: { breakfast: 0, lunch: 0, dinner: 0, snacks: 0, maxPerDay: 100 },
+    savings: { enabled: false, saved: 0, monthsLeft: 6, credit: 0 },
+    diary: [],
+    packing: defaultPacking(),
+  };
+}
+
+export const emptyTrip: Trip = newTrip();
+
+type Store = { trips: Trip[]; activeId: string };
+
+const KEY = "travelivibes.trips.v3";
+const LEGACY_KEY = "travelivibes.trip.v2";
+
+function normalize(t: Partial<Trip>): Trip {
+  const base = newTrip();
+  return {
+    ...base,
+    ...t,
+    id: t.id || base.id,
+    meals: { ...base.meals, ...t.meals },
+    savings: { ...base.savings, ...t.savings },
+    packing: t.packing && t.packing.length ? t.packing : base.packing,
+  };
+}
+
+export function loadStore(): Store {
+  if (typeof window === "undefined") {
+    const t = newTrip();
+    return { trips: [t], activeId: t.id };
+  }
   try {
     const raw = window.localStorage.getItem(KEY);
-    if (!raw) return emptyTrip;
-    const parsed = JSON.parse(raw) as Partial<Trip>;
-    return { ...emptyTrip, ...parsed, meals: { ...emptyTrip.meals, ...parsed.meals }, savings: { ...emptyTrip.savings, ...parsed.savings } };
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<Store>;
+      const trips = (parsed.trips ?? []).map(normalize);
+      if (trips.length) {
+        const activeId = trips.some((t) => t.id === parsed.activeId) ? parsed.activeId! : trips[0].id;
+        return { trips, activeId };
+      }
+    }
+    const legacy = window.localStorage.getItem(LEGACY_KEY);
+    if (legacy) {
+      const t = normalize(JSON.parse(legacy) as Partial<Trip>);
+      return { trips: [t], activeId: t.id };
+    }
   } catch {
-    return emptyTrip;
+    /* ignore */
+  }
+  const t = newTrip();
+  return { trips: [t], activeId: t.id };
+}
+
+function save(store: Store) {
+  try {
+    window.localStorage.setItem(KEY, JSON.stringify(store));
+  } catch {
+    /* Speicher voll oder blockiert */
   }
 }
 
+const fallback: Store = { trips: [emptyTrip], activeId: emptyTrip.id };
+
 export function useTrip() {
-  const [trip, setTrip] = useState<Trip>(emptyTrip);
+  const [store, setStore] = useState<Store>(fallback);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    setTrip(loadTrip());
+    setStore(loadStore());
     setReady(true);
   }, []);
 
-  const update = useCallback((patch: Partial<Trip> | ((t: Trip) => Partial<Trip>)) => {
-    setTrip((prev) => {
-      const next = { ...prev, ...(typeof patch === "function" ? patch(prev) : patch) };
-      try {
-        window.localStorage.setItem(KEY, JSON.stringify(next));
-      } catch {
-        /* Speicher voll oder blockiert */
-      }
+  const mutate = useCallback((fn: (s: Store) => Store) => {
+    setStore((prev) => {
+      const next = fn(prev);
+      save(next);
       return next;
     });
   }, []);
 
-  return { trip, update, ready };
+  const update = useCallback(
+    (patch: Partial<Trip> | ((t: Trip) => Partial<Trip>)) => {
+      mutate((s) => ({
+        ...s,
+        trips: s.trips.map((t) =>
+          t.id === s.activeId ? { ...t, ...(typeof patch === "function" ? patch(t) : patch) } : t,
+        ),
+      }));
+    },
+    [mutate],
+  );
+
+  const addTrip = useCallback(
+    (destination = "") => {
+      const t = newTrip(destination);
+      mutate((s) => ({ trips: [...s.trips, t], activeId: t.id }));
+      return t.id;
+    },
+    [mutate],
+  );
+
+  const removeTrip = useCallback(
+    (id: string) => {
+      mutate((s) => {
+        const trips = s.trips.filter((t) => t.id !== id);
+        if (!trips.length) {
+          const t = newTrip();
+          return { trips: [t], activeId: t.id };
+        }
+        return { trips, activeId: s.activeId === id ? trips[0].id : s.activeId };
+      });
+    },
+    [mutate],
+  );
+
+  const selectTrip = useCallback(
+    (id: string) => mutate((s) => ({ ...s, activeId: id })),
+    [mutate],
+  );
+
+  const trip = store.trips.find((t) => t.id === store.activeId) ?? store.trips[0] ?? emptyTrip;
+
+  return { trip, trips: store.trips, activeId: store.activeId, update, addTrip, removeTrip, selectTrip, ready };
 }
 
 export function tripDays(trip: Trip) {
