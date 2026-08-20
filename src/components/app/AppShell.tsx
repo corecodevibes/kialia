@@ -22,18 +22,21 @@ export function AppShell({
   children: ReactNode;
 }) {
   const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { session, ready } = useSession();
   const { profile, ready: profileReady } = useProfile(session?.user.id);
+  const onboardingDone = !!profile?.onboarding_done;
 
   useEffect(() => {
-    if (ready && !session) navigate({ to: "/auth", replace: true });
-  }, [ready, session, navigate]);
+    if (ready && !session && pathname !== "/auth") navigate({ to: "/auth", replace: true });
+  }, [ready, session, pathname, navigate]);
 
   useEffect(() => {
-    if (session && profileReady && !profile?.onboarding_done) {
+    if (session && profileReady && !onboardingDone && pathname !== "/onboarding") {
       navigate({ to: "/onboarding", replace: true });
     }
-  }, [session, profileReady, profile, navigate]);
+  }, [session, profileReady, onboardingDone, pathname, navigate]);
+
 
   if (!ready || !session || !profileReady || !profile?.onboarding_done) {
     return <div className="acrylic-page min-h-screen" />;
