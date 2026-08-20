@@ -51,7 +51,7 @@ function IdeasTab() {
             onChange={(e) => setText(e.target.value)}
             rows={3}
             placeholder="Was wäre eine Idee? Ganz frei reinschreiben …"
-            className={`${inputClass} resize-y`}
+            className={`${inputClass} mt-3 resize-y`}
           />
           <PrimaryButton onClick={add} className="mt-2">
             <Plus className="size-4" /> Idee sammeln
