@@ -154,10 +154,7 @@ function DiaryTab() {
     <AppShell title="Reisetagebuch" subtitle="Sprich deinen Tag ein – wir schreiben ihn auf.">
       <div className="space-y-4 print:hidden">
         <Card>
-          <div>
-            <p className="text-xs text-muted-foreground">Bisher ausgegeben</p>
-            <p className="text-2xl font-semibold">{eur(totalSpent)}</p>
-          </div>
+          <Stat label="Bisher ausgegeben" value={eur(totalSpent)} />
           <PrimaryButton onClick={addDay} className="mt-3">
             <Plus className="size-4" /> Neuer Tag
           </PrimaryButton>
