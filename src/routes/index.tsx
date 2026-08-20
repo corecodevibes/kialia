@@ -148,7 +148,7 @@ function HomeTab() {
                   className={dateInputClass}
                 />
               </Field>
-            </div>
+            </FieldRow>
             <FieldRow>
               <Field label="Mit wem?">
                 <input
