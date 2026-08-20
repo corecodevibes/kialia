@@ -49,7 +49,7 @@ export function AppShell({
       </main>
 
 
-      <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card/95 backdrop-blur print:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card print:hidden">
         <div className="mx-auto flex max-w-lg items-stretch justify-between px-1 pb-[env(safe-area-inset-bottom)]">
           {tabs.map(({ to, label, icon: Icon }) => (
             <Link
