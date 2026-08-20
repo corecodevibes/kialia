@@ -31,6 +31,9 @@ export const Route = createFileRoute("/packliste")({
   component: PackingTab,
 });
 
+const rowInput =
+  "rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none transition focus:border-primary";
+
 function PackingTab() {
   const { trip, update, ready } = useTrip();
   const [newCat, setNewCat] = useState("");
@@ -180,7 +183,7 @@ function PackingTab() {
                             ),
                           )
                         }
-                        className={`${inputClass} min-w-0 flex-1 ${item.done ? "text-muted-foreground line-through" : ""}`}
+                        className={`${rowInput} min-w-0 flex-1 ${item.done ? "text-muted-foreground line-through" : ""}`}
                       />
                       <input
                         value={item.who}
@@ -199,7 +202,7 @@ function PackingTab() {
                           )
                         }
                         placeholder="Wer?"
-                        className={`${inputClass} w-16 shrink-0 px-2`}
+                        className={`${rowInput} w-16 shrink-0 px-2`}
                       />
                       <button
                         type="button"
