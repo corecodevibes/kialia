@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Lightbulb, Plus } from "lucide-react";
-import { AppShell, Card, DeleteButton, PrimaryButton, inputClass } from "@/components/app/AppShell";
+import { AppShell, Card, CardTitle, DeleteButton, PrimaryButton, inputClass } from "@/components/app/AppShell";
 import { LinkList } from "@/components/app/bits";
 import { uid, useTrip, type LinkItem } from "@/lib/trip-store";
 
@@ -45,7 +45,9 @@ function IdeasTab() {
     <AppShell title="Ideensammlung" subtitle="Alles, was ihr sehen, essen und erleben wollt.">
       <div className="space-y-4">
         <Card>
+          <CardTitle>Neue Idee</CardTitle>
           <textarea
+            // eslint-disable-next-line
             value={text}
             onChange={(e) => setText(e.target.value)}
             rows={3}

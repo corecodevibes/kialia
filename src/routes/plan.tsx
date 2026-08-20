@@ -8,6 +8,7 @@ import {
   Field,
   FieldRow,
   SectionTitle,
+  CardTitle,
   chipClass,
   dateInputClass,
   inputClass,
@@ -420,10 +421,8 @@ function PlanTab() {
 
         <SectionTitle>Gesamtkosten</SectionTitle>
         <Card>
-          <p className="text-xs uppercase tracking-wider text-muted-foreground">
-            Die Reise kostet bis jetzt
-          </p>
-          <p className="mt-1 text-4xl font-semibold">{eur(totals.total)}</p>
+          <CardTitle>Die Reise kostet bis jetzt</CardTitle>
+          <p className="mt-1 text-3xl font-extrabold tracking-tight">{eur(totals.total)}</p>
           <div className="mt-3 space-y-1 text-sm text-muted-foreground">
             <p>Fortbewegung: {eur(totals.transport)}</p>
             <p>Unterkünfte: {eur(totals.stays)}</p>
@@ -478,8 +477,8 @@ function PlanTab() {
                 />
               </Field>
               <div className="rounded-2xl bg-accent/25 p-3">
-                <p className="text-sm font-medium">Spar-Empfehlung</p>
-                <p className="mt-1 text-2xl font-semibold">{eur(perMonth)} / Monat</p>
+                <CardTitle>Spar-Empfehlung</CardTitle>
+                <p className="mt-1 text-2xl font-extrabold tracking-tight">{eur(perMonth)} / Monat</p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   Noch offen: {eur(openAmount)} in {trip.savings.monthsLeft} Monaten.
                 </p>

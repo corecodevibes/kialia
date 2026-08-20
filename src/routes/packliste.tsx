@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Check, Plus, Trash2, ChevronDown, ChevronRight } from "lucide-react";
-import { AppShell, Card, Field, chipClass, inputClass } from "@/components/app/AppShell";
+import { AppShell, Card, CardTitle, Field, chipClass, inputClass } from "@/components/app/AppShell";
 import {
   kidsPacking,
   petsPacking,
@@ -71,7 +71,7 @@ function PackingTab() {
         <Card>
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold">Fortschritt</p>
+              <CardTitle>Fortschritt</CardTitle>
               <p className="text-xs text-muted-foreground">{done} / {total} erledigt</p>
             </div>
             <div className="h-2 w-32 overflow-hidden rounded-full bg-muted">

@@ -7,6 +7,8 @@ import {
   DeleteButton,
   Field,
   PrimaryButton,
+  CardTitle,
+  Stat,
   dateInputClass,
   inputClass,
 } from "@/components/app/AppShell";
@@ -239,7 +241,7 @@ function DiaryTab() {
         )}
 
         <Card>
-          <p className="text-sm font-semibold">Als PDF speichern</p>
+          <CardTitle>Als PDF speichern</CardTitle>
           <p className="mt-1 text-xs text-muted-foreground">
             Fertiges A5-Layout – zum Ausdrucken oder als PDF in Canva & Co. weiterverwenden.
           </p>
