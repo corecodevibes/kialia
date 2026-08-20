@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IdeenRouteImport } from './routes/ideen'
 import { Route as PacklisteRouteImport } from './routes/packliste'
 import { Route as PlanRouteImport } from './routes/plan'
@@ -18,6 +19,11 @@ import { Route as TagebuchRouteImport } from './routes/tagebuch'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IdeenRoute = IdeenRouteImport.update({
@@ -43,6 +49,7 @@ const TagebuchRoute = TagebuchRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/ideen': typeof IdeenRoute
   '/packliste': typeof PacklisteRoute
   '/plan': typeof PlanRoute
@@ -50,6 +57,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/ideen': typeof IdeenRoute
   '/packliste': typeof PacklisteRoute
   '/plan': typeof PlanRoute
@@ -58,6 +66,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/ideen': typeof IdeenRoute
   '/packliste': typeof PacklisteRoute
   '/plan': typeof PlanRoute
@@ -65,14 +74,16 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/ideen' | '/packliste' | '/plan' | '/tagebuch'
+  fullPaths: '/' | '/auth' | '/ideen' | '/packliste' | '/plan' | '/tagebuch'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/ideen' | '/packliste' | '/plan' | '/tagebuch'
-  id: '__root__' | '/' | '/ideen' | '/packliste' | '/plan' | '/tagebuch'
+  to: '/' | '/auth' | '/ideen' | '/packliste' | '/plan' | '/tagebuch'
+  id:
+    '__root__' | '/' | '/auth' | '/ideen' | '/packliste' | '/plan' | '/tagebuch'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
   IdeenRoute: typeof IdeenRoute
   PacklisteRoute: typeof PacklisteRoute
   PlanRoute: typeof PlanRoute
@@ -86,6 +97,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ideen': {
@@ -121,6 +139,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
   IdeenRoute: IdeenRoute,
   PacklisteRoute: PacklisteRoute,
   PlanRoute: PlanRoute,
