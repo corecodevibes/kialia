@@ -63,7 +63,7 @@ export function useProfile(userId: string | undefined) {
   // Erst "ready", wenn die Daten wirklich zum aktuellen Nutzer gehören.
   const inSync = loadedFor === userId;
 
-  return { profile, ready };
+  return { profile, ready: ready && inSync };
 }
 
 export async function signOut() {
