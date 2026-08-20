@@ -1,7 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Loader2, Mic, Plus, Printer, Square, Trash2 } from "lucide-react";
-import { AppShell, Card, Field, inputClass } from "@/components/app/AppShell";
+import { Loader2, Mic, Plus, Printer, Square } from "lucide-react";
+import {
+  AppShell,
+  Card,
+  DeleteButton,
+  Field,
+  PrimaryButton,
+  dateInputClass,
+  inputClass,
+} from "@/components/app/AppShell";
 import { eur, uid, useTrip, type DiaryEntry } from "@/lib/trip-store";
 import { useVoiceMemo } from "@/lib/use-voice-memo";
 import { transcribeMemo } from "@/lib/transcribe.functions";
@@ -146,19 +154,13 @@ function DiaryTab() {
     <AppShell title="Reisetagebuch" subtitle="Sprich deinen Tag ein – wir schreiben ihn auf.">
       <div className="space-y-4 print:hidden">
         <Card>
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-xs text-muted-foreground">Bisher ausgegeben</p>
-              <p className="text-2xl font-semibold">{eur(totalSpent)}</p>
-            </div>
-            <button
-              type="button"
-              onClick={addDay}
-              className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground"
-            >
-              <Plus className="size-4" /> Neuer Tag
-            </button>
+          <div>
+            <p className="text-xs text-muted-foreground">Bisher ausgegeben</p>
+            <p className="text-2xl font-semibold">{eur(totalSpent)}</p>
           </div>
+          <PrimaryButton onClick={addDay} className="mt-3">
+            <Plus className="size-4" /> Neuer Tag
+          </PrimaryButton>
         </Card>
 
         {voice.error && (
@@ -170,23 +172,18 @@ function DiaryTab() {
         <div className="space-y-4">
           {trip.diary.map((e) => (
             <Card key={e.id}>
-              <div className="flex items-center justify-between gap-2">
-                <h2 className="text-lg font-semibold">{e.day}. Reisetag</h2>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="date"
-                    value={e.date}
-                    onChange={(ev) => set(e.id, { date: ev.target.value })}
-                    className="rounded-xl border border-border bg-background px-2 py-1 text-xs"
-                  />
-                  <button
-                    type="button"
-                    aria-label="Tag löschen"
-                    onClick={() => update({ diary: trip.diary.filter((x) => x.id !== e.id) })}
-                  >
-                    <Trash2 className="size-4 text-muted-foreground hover:text-destructive" />
-                  </button>
-                </div>
+              <div className="flex items-center gap-2">
+                <h2 className="min-w-0 flex-1 truncate text-lg font-semibold">{e.day}. Reisetag</h2>
+                <input
+                  type="date"
+                  value={e.date}
+                  onChange={(ev) => set(e.id, { date: ev.target.value })}
+                  className={`${dateInputClass} w-[9.5rem] shrink-0 py-1.5`}
+                />
+                <DeleteButton
+                  ariaLabel="Tag löschen"
+                  onClick={() => update({ diary: trip.diary.filter((x) => x.id !== e.id) })}
+                />
               </div>
 
               <div className="mt-3 space-y-4">
@@ -280,14 +277,9 @@ function DiaryTab() {
             Mit Budget & Ausgaben drucken
           </label>
 
-          <button
-            type="button"
-            onClick={() => window.print()}
-            className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold text-background"
-            style={{ background: "var(--gradient-warm)" }}
-          >
+          <PrimaryButton onClick={() => window.print()} className="mt-3">
             <Printer className="size-4" /> Als A5-PDF speichern
-          </button>
+          </PrimaryButton>
         </Card>
       </div>
 

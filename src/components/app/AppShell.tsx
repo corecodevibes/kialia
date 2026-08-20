@@ -122,12 +122,123 @@ export function Field({
   children: ReactNode;
 }) {
   return (
-    <label className="block">
-      <span className="text-xs font-medium text-muted-foreground">{label}</span>
-      <div className="mt-1">{children}</div>
+    <label className="block min-w-0">
+      <span className="block truncate text-xs font-medium text-muted-foreground">{label}</span>
+      <div className="mt-1 min-w-0">{children}</div>
     </label>
   );
 }
 
+/** Zwei Felder nebeneinander – auf sehr schmalen Displays untereinander. */
+export function FieldRow({ children }: { children: ReactNode }) {
+  return (
+    <div className="grid grid-cols-1 gap-3 min-[340px]:grid-cols-2 [&>*]:min-w-0">{children}</div>
+  );
+}
+
 export const inputClass =
-  "w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-primary";
+  "block w-full min-w-0 max-w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none transition focus:border-primary";
+
+/** Datums-Felder: gleiches Aussehen, aber kompakter, damit nichts abgeschnitten wird. */
+export const dateInputClass = `${inputClass} px-2.5 text-[13px] [&::-webkit-calendar-picker-indicator]:ml-0`;
+
+export const selectClass = `${inputClass} appearance-none bg-background pr-8`;
+
+export function SectionTitle({ children }: { children: ReactNode }) {
+  return (
+    <h2 className="mb-2 mt-6 px-1 text-xs font-semibold uppercase tracking-wider text-background/95 drop-shadow-sm">
+      {children}
+    </h2>
+  );
+}
+
+export function PrimaryButton({
+  children,
+  onClick,
+  className = "",
+  type = "button",
+  disabled,
+  ariaLabel,
+}: {
+  children: ReactNode;
+  onClick?: () => void;
+  className?: string;
+  type?: "button" | "submit";
+  disabled?: boolean;
+  ariaLabel?: string;
+}) {
+  return (
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={ariaLabel}
+      className={`acrylic-warm flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold text-background transition active:scale-[0.99] disabled:opacity-60 ${className}`}
+    >
+      {children}
+    </button>
+  );
+}
+
+export function IconButton({
+  children,
+  onClick,
+  ariaLabel,
+}: {
+  children: ReactNode;
+  onClick?: () => void;
+  ariaLabel: string;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={ariaLabel}
+      onClick={onClick}
+      className="acrylic-warm grid size-11 shrink-0 place-items-center rounded-xl text-background transition active:scale-95"
+    >
+      {children}
+    </button>
+  );
+}
+
+export function DeleteButton({ onClick, ariaLabel = "Eintrag löschen" }: { onClick: () => void; ariaLabel?: string }) {
+  return (
+    <button
+      type="button"
+      aria-label={ariaLabel}
+      onClick={onClick}
+      className="grid size-9 shrink-0 place-items-center rounded-xl text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"
+    >
+      <span className="sr-only">{ariaLabel}</span>
+      {/* Icon wird von der aufrufenden Seite gestellt */}
+      <TrashIcon />
+    </button>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="size-4">
+      <path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export function AddButton({ onClick, label }: { onClick: () => void; label: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-background/60 bg-background/25 py-3 text-sm font-semibold text-background backdrop-blur-sm transition hover:bg-background/40"
+    >
+      <span className="text-base leading-none">+</span> {label}
+    </button>
+  );
+}
+
+export function chipClass(active: boolean) {
+  return `inline-flex items-center justify-center gap-1.5 rounded-full border px-3 py-2 text-xs font-medium transition ${
+    active ? "border-primary bg-primary/10 text-primary" : "border-border bg-background text-muted-foreground"
+  }`;
+}
+

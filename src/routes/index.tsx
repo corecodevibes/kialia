@@ -1,7 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Check, Copy, Plus, Trash2, Users, MapPin } from "lucide-react";
-import { AppShell, Card, Field, inputClass } from "@/components/app/AppShell";
+import {
+  AppShell,
+  Card,
+  Field,
+  FieldRow,
+  PrimaryButton,
+  dateInputClass,
+  inputClass,
+} from "@/components/app/AppShell";
 import { eur, tripDays, tripTotals, useTrip } from "@/lib/trip-store";
 
 export const Route = createFileRoute("/")({
@@ -89,7 +97,7 @@ function HomeTab() {
               );
             })}
           </div>
-          <div className="mt-3 flex gap-2">
+          <div className="mt-3 grid grid-cols-[minmax(0,1fr)_auto] gap-2">
             <input
               value={newDest}
               onChange={(e) => setNewDest(e.target.value)}
@@ -102,7 +110,7 @@ function HomeTab() {
                 addTrip(newDest.trim());
                 setNewDest("");
               }}
-              className="acrylic-warm shrink-0 rounded-xl px-4 text-sm font-semibold text-background"
+              className="acrylic-warm grid size-11 shrink-0 place-items-center rounded-xl text-background"
               aria-label="Reise hinzufügen"
             >
               <Plus className="size-4" />
@@ -123,13 +131,13 @@ function HomeTab() {
                 className={inputClass}
               />
             </Field>
-            <div className="grid grid-cols-2 gap-3">
+            <FieldRow>
               <Field label="Von">
                 <input
                   type="date"
                   value={trip.startDate}
                   onChange={(e) => update({ startDate: e.target.value })}
-                  className={inputClass}
+                  className={dateInputClass}
                 />
               </Field>
               <Field label="Bis">
@@ -137,11 +145,11 @@ function HomeTab() {
                   type="date"
                   value={trip.endDate}
                   onChange={(e) => update({ endDate: e.target.value })}
-                  className={inputClass}
+                  className={dateInputClass}
                 />
               </Field>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
+            </FieldRow>
+            <FieldRow>
               <Field label="Mit wem?">
                 <input
                   value={trip.companions}
@@ -159,7 +167,7 @@ function HomeTab() {
                   className={inputClass}
                 />
               </Field>
-            </div>
+            </FieldRow>
           </div>
         </Card>
 
@@ -172,14 +180,10 @@ function HomeTab() {
           </p>
         </Card>
 
-        <button
-          type="button"
-          onClick={share}
-          className="acrylic-warm flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-sm font-semibold text-background"
-        >
+        <PrimaryButton onClick={share}>
           {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
           {copied ? "Link kopiert" : "Link zum Teilen kopieren"}
-        </button>
+        </PrimaryButton>
         <p className="px-2 text-center text-xs text-muted-foreground">
           Teile den Link mit deinem Partner oder deiner Familie – so plant ihr gemeinsam weiter.
         </p>
