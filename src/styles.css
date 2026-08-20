@@ -97,18 +97,22 @@
   --terracotta: oklch(0.673 0.108 42.6);
   --sunset: oklch(0.771 0.132 61.9);
 
-  --gradient-sky: linear-gradient(
-    160deg,
-    oklch(0.707 0.102 275.9) 0%,
-    oklch(0.62 0.055 348) 42%,
-    oklch(0.771 0.132 61.9) 78%,
-    oklch(0.886 0.113 89.3) 100%
-  );
-  --gradient-warm: linear-gradient(
-    135deg,
-    oklch(0.886 0.113 89.3),
-    oklch(0.673 0.108 42.6)
-  );
+  /* Acryl / Spachtel-Look: übereinandergelegte Farbflecken statt linearem Verlauf */
+  --gradient-sky:
+    radial-gradient(75% 120% at 6% 4%, oklch(0.707 0.102 275.9) 0%, transparent 58%),
+    radial-gradient(65% 110% at 96% 0%, oklch(0.886 0.113 89.3) 0%, transparent 62%),
+    radial-gradient(85% 130% at 78% 100%, oklch(0.673 0.108 42.6) 0%, transparent 60%),
+    radial-gradient(70% 120% at 22% 104%, oklch(0.62 0.055 348) 0%, transparent 62%),
+    radial-gradient(120% 90% at 50% 40%, oklch(0.771 0.132 61.9) 0%, transparent 70%),
+    linear-gradient(140deg, oklch(0.707 0.102 275.9), oklch(0.771 0.132 61.9));
+  --gradient-warm:
+    radial-gradient(80% 140% at 0% 0%, oklch(0.886 0.113 89.3) 0%, transparent 60%),
+    radial-gradient(90% 140% at 100% 100%, oklch(0.62 0.055 348) 0%, transparent 62%),
+    linear-gradient(120deg, oklch(0.771 0.132 61.9), oklch(0.673 0.108 42.6));
+  --gradient-soft:
+    radial-gradient(90% 140% at 0% 0%, oklch(0.938 0.011 330.2) 0%, transparent 65%),
+    radial-gradient(80% 130% at 100% 20%, oklch(0.886 0.113 89.3 / 0.35) 0%, transparent 60%),
+    linear-gradient(160deg, oklch(1 0 0), oklch(0.978 0.004 56.4));
   --shadow-soft: 0 18px 40px -24px oklch(0.279 0.038 302.4 / 0.45);
   --shadow-lift: 0 28px 60px -30px oklch(0.62 0.055 348 / 0.55);
 
@@ -173,6 +177,30 @@
     color: var(--color-foreground);
   }
 }
+
+@utility acrylic {
+  background: var(--gradient-sky);
+  background-size: 180% 180%;
+  animation: acrylic-drift 22s ease-in-out infinite alternate;
+}
+
+@utility acrylic-warm {
+  background: var(--gradient-warm);
+  background-size: 180% 180%;
+  animation: acrylic-drift 18s ease-in-out infinite alternate;
+}
+
+@keyframes acrylic-drift {
+  0% { background-position: 0% 40%; }
+  50% { background-position: 100% 60%; }
+  100% { background-position: 20% 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .acrylic, .acrylic-warm { animation: none; }
+}
+
+
 
 @media print {
   @page { size: A5; margin: 12mm; }

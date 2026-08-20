@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as IdeenRouteImport } from './routes/ideen'
+import { Route as PacklisteRouteImport } from './routes/packliste'
 import { Route as PlanRouteImport } from './routes/plan'
 import { Route as TagebuchRouteImport } from './routes/tagebuch'
 
@@ -22,6 +23,11 @@ const IndexRoute = IndexRouteImport.update({
 const IdeenRoute = IdeenRouteImport.update({
   id: '/ideen',
   path: '/ideen',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PacklisteRoute = PacklisteRouteImport.update({
+  id: '/packliste',
+  path: '/packliste',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlanRoute = PlanRouteImport.update({
@@ -38,12 +44,14 @@ const TagebuchRoute = TagebuchRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/ideen': typeof IdeenRoute
+  '/packliste': typeof PacklisteRoute
   '/plan': typeof PlanRoute
   '/tagebuch': typeof TagebuchRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/ideen': typeof IdeenRoute
+  '/packliste': typeof PacklisteRoute
   '/plan': typeof PlanRoute
   '/tagebuch': typeof TagebuchRoute
 }
@@ -51,20 +59,22 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/ideen': typeof IdeenRoute
+  '/packliste': typeof PacklisteRoute
   '/plan': typeof PlanRoute
   '/tagebuch': typeof TagebuchRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/ideen' | '/plan' | '/tagebuch'
+  fullPaths: '/' | '/ideen' | '/packliste' | '/plan' | '/tagebuch'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/ideen' | '/plan' | '/tagebuch'
-  id: '__root__' | '/' | '/ideen' | '/plan' | '/tagebuch'
+  to: '/' | '/ideen' | '/packliste' | '/plan' | '/tagebuch'
+  id: '__root__' | '/' | '/ideen' | '/packliste' | '/plan' | '/tagebuch'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   IdeenRoute: typeof IdeenRoute
+  PacklisteRoute: typeof PacklisteRoute
   PlanRoute: typeof PlanRoute
   TagebuchRoute: typeof TagebuchRoute
 }
@@ -83,6 +93,13 @@ declare module '@tanstack/react-router' {
       path: '/ideen'
       fullPath: '/ideen'
       preLoaderRoute: typeof IdeenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/packliste': {
+      id: '/packliste'
+      path: '/packliste'
+      fullPath: '/packliste'
+      preLoaderRoute: typeof PacklisteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/plan': {
@@ -105,9 +122,20 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   IdeenRoute: IdeenRoute,
+  PacklisteRoute: PacklisteRoute,
   PlanRoute: PlanRoute,
   TagebuchRoute: TagebuchRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
