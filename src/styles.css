@@ -178,6 +178,30 @@
   }
 }
 
+@utility acrylic {
+  background: var(--gradient-sky);
+  background-size: 180% 180%;
+  animation: acrylic-drift 22s ease-in-out infinite alternate;
+}
+
+@utility acrylic-warm {
+  background: var(--gradient-warm);
+  background-size: 180% 180%;
+  animation: acrylic-drift 18s ease-in-out infinite alternate;
+}
+
+@keyframes acrylic-drift {
+  0% { background-position: 0% 40%; }
+  50% { background-position: 100% 60%; }
+  100% { background-position: 20% 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .acrylic, .acrylic-warm { animation: none; }
+}
+
+
+
 @media print {
   @page { size: A5; margin: 12mm; }
   body { background: #fff; color: #221c22; }
