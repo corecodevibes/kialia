@@ -74,7 +74,11 @@ function OnboardingPage() {
     <div className="acrylic-page flex min-h-screen items-center justify-center px-5 py-10">
       <div className="relative z-10 w-full max-w-sm">
         <div className="mb-5 flex flex-col items-center text-center">
-          <img src={logo} alt="App Logo" width={64} height={64} className="size-14 rounded-2xl shadow-sm" />
+          <img src={logo} alt="kialia Logo" width={96} height={96} className="size-20 rounded-3xl shadow-sm" />
+          <p className="mt-3 text-xl font-extrabold tracking-tight text-background drop-shadow-sm">
+            kialia · κιάλια
+          </p>
+          <p className="text-xs font-medium text-background/90">See more. travel further.</p>
           <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-background/90">
             Schritt {step + 1} von 2
           </p>
