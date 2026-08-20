@@ -47,7 +47,6 @@ function IdeasTab() {
         <Card>
           <CardTitle>Neue Idee</CardTitle>
           <textarea
-            // eslint-disable-next-line
             value={text}
             onChange={(e) => setText(e.target.value)}
             rows={3}
