@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Home, Lightbulb, Wallet, BookOpen, Backpack, LogOut } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
 import logo from "@/assets/travelivibes-logo.png";

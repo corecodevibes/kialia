@@ -40,7 +40,7 @@ function OnboardingPage() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (ready && !session) navigate({ to: "/auth", replace: true });
+    if (ready && !session && window.location.pathname !== "/auth") navigate({ to: "/auth", replace: true });
   }, [ready, session, navigate]);
 
   useEffect(() => {
