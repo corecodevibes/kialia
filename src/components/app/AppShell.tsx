@@ -21,21 +21,18 @@ export function AppShell({
   children: ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-background">
-      <header className="acrylic sticky top-0 z-30 overflow-hidden rounded-b-[2rem] px-5 pb-6 pt-6 print:hidden">
+    <div className="acrylic-page min-h-screen">
+      <header className="relative z-30 px-5 pb-6 pt-6 print:hidden">
         <div className="mx-auto flex max-w-lg items-center gap-3">
           <img
             src={logo}
-            alt="TraveliVibes Logo"
+            alt="App Logo"
             width={64}
             height={64}
             className="size-11 shrink-0 rounded-2xl shadow-sm"
           />
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-background/90">
-              TraveliVibes
-            </p>
-            <h1 className="truncate text-2xl font-semibold leading-tight text-background">
+            <h1 className="truncate text-2xl font-semibold leading-tight text-background drop-shadow-sm">
               {title}
             </h1>
           </div>
@@ -47,9 +44,12 @@ export function AppShell({
         )}
       </header>
 
-      <main className="mx-auto max-w-lg px-4 pb-28 pt-4 print:pb-0 print:pt-0">{children}</main>
+      <main className="relative z-10 mx-auto max-w-lg px-4 pb-28 pt-1 print:pb-0 print:pt-0">
+        {children}
+      </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card/95 backdrop-blur print:hidden">
+
+      <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card print:hidden">
         <div className="mx-auto flex max-w-lg items-stretch justify-between px-1 pb-[env(safe-area-inset-bottom)]">
           {tabs.map(({ to, label, icon: Icon }) => (
             <Link
