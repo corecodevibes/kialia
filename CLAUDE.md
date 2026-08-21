@@ -36,6 +36,17 @@ findet wrangler zwei konkurrierende Configs und bricht ab.
 - **`supabase db push` scheitert mit 403 bei "Initialising login role".** Der
   Management-API-Endpunkt ist fuer den Account gesperrt. Workaround mit
   `--db-url` steht in `docs/MIGRATION.md`, inklusive Prozentkodierung.
+- **`.env` ist gitignored und existiert nur lokal.** Ein `git checkout` auf
+  einen aelteren Commit, in dem sie noch getrackt war, ueberschreibt sie —
+  der anschliessende Merge loescht sie dann ganz. Passiert am 22.08.2026:
+  der Folgebuild lief ohne Credentials durch und wurde deployed. Seitdem
+  bricht `vite.config.ts` den Produktionsbuild ab, wenn `VITE_SUPABASE_URL`
+  oder `VITE_SUPABASE_PUBLISHABLE_KEY` fehlen. **Diesen Guard nicht entfernen.**
+  Notfall-Wiederherstellung: `supabase projects api-keys --project-ref
+  izxkcxqmzsaavkbprlfa` liefert den publishable Key.
+- **Nach jedem Deploy Bundle-Hash live gegen lokal pruefen.** Und bei
+  `grep` auf die Live-Seite `-a` verwenden: das HTML enthaelt Umlaute, sonst
+  stuft grep es als Binaerdatei ein und liefert stillschweigend nichts.
 - **`viewport-fit=cover` muss bleiben**, sonst liefert `env(safe-area-inset-*)`
   konstant 0 und die Tab-Leiste landet unter dem iPhone-Home-Indicator.
 

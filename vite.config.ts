@@ -5,7 +5,7 @@ import tailwindcss from "@tailwindcss/vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import { nitro } from "nitro/vite";
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, command }) => {
   // Load-bearing: VITE_* Variablen werden explizit als `define` eingebacken.
   // Ohne das greift die Injektion im nitro-Server-Bundle nicht zuverlaessig und
   // die App startet in Produktion mit leeren Supabase-Credentials.
@@ -13,6 +13,18 @@ export default defineConfig(({ mode }) => {
   const envDefine = Object.fromEntries(
     Object.entries(env).map(([key, value]) => [`import.meta.env.${key}`, JSON.stringify(value)]),
   );
+
+  // Ein Produktionsbuild ohne Supabase-Credentials erzeugt ein Bundle, das
+  // aussieht wie ein gutes, aber sich nicht verbinden kann — der Fehler faellt
+  // erst im Browser auf. Deshalb hier hart abbrechen statt still durchlaufen.
+  const REQUIRED_ENV = ["VITE_SUPABASE_URL", "VITE_SUPABASE_PUBLISHABLE_KEY"] as const;
+  const missingEnv = REQUIRED_ENV.filter((key) => !env[key]);
+  if (command === "build" && missingEnv.length > 0) {
+    throw new Error(
+      `Build abgebrochen: ${missingEnv.join(", ")} fehlt/fehlen. ` +
+        `Liegt eine .env im Projektwurzelverzeichnis? Vorlage: .env.example`,
+    );
+  }
 
   return {
     define: envDefine,
