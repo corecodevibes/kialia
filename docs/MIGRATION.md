@@ -52,6 +52,28 @@ Erst nach Schritt 4. `/ios` und `/android` sind bereits gitignored.
 Als eigener Commit zu bereinigen, damit der Diff nicht andere Aenderungen
 ueberdeckt.
 
+## Handy-Nutzung (PWA)
+
+Manifest, Icons und Apple-Meta liegen vor, `display: standalone` ist gesetzt.
+Im gleichen WLAN erreichbar unter `http://<LAN-IP>:8080` (Vite bindet dank
+`host: true` auf alle Interfaces), dann "Zum Home-Bildschirm".
+
+Bekannte Grenzen dieses Setups:
+- **Nur im Heimnetz**, und nur solange `bun run dev` laeuft.
+- **Kein Offline-Betrieb**: ein Service Worker braucht HTTPS, ueber LAN-HTTP
+  gibt es keinen. Erst nach einem Deploy sinnvoll nachruestbar.
+- **Getrennter Speicher**: eine Homescreen-Web-App hat unter iOS einen eigenen
+  Storage-Container. In Safari eingegebene Reisen tauchen dort *nicht* auf.
+  Uebertragung ueber Export/Import.
+- **Schrift kommt vom CDN** (`fonts.googleapis.com`, siehe `__root.tsx`). Ohne
+  Verbindung faellt die Typografie zurueck. Vor dem Capacitor-Build muss
+  Manrope lokal eingebunden werden.
+
+Naechster sinnvoller Schritt: Deploy auf Cloudflare Workers — der nitro-Preset
+ist bereits `cloudflare-module`, der Build erzeugt `wrangler.json` von selbst.
+Das gibt eine HTTPS-URL, macht das Handy unabhaengig vom Laptop und schaltet
+Service Worker und Web Push frei.
+
 ## Produkt-Baustellen (unabhaengig von der Migration)
 
 - **Alle Reisedaten liegen im `localStorage`** (`src/lib/trip-store.ts`).

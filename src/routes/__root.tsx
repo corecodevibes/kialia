@@ -73,13 +73,22 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      {
+        name: "viewport",
+        content: "width=device-width, initial-scale=1, viewport-fit=cover",
+      },
       { title: "kialia – Reise planen, Budget & Reisetagebuch" },
       {
         name: "description",
         content: "Ideen sammeln, Kosten planen und jeden Reisetag festhalten – mit kialia.",
       },
       { name: "author", content: "CoreCodeVibes" },
+      { name: "theme-color", content: "#a3a8dd" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      // Legacy-Pendant, das iOS bis heute auswertet.
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "default" },
+      { name: "apple-mobile-web-app-title", content: "kialia" },
       { property: "og:title", content: "kialia – Reise planen, Budget & Reisetagebuch" },
       {
         property: "og:description",
@@ -99,6 +108,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: appCss,
       },
       { rel: "icon", href: "/favicon.png", type: "image/png" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      // iOS liest fuer den Homescreen dieses Icon, nicht die Manifest-Eintraege.
+      { rel: "apple-touch-icon", href: "/icons/icon-180.png", sizes: "180x180" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
