@@ -22,7 +22,19 @@ export default defineConfig(({ mode }) => {
       // server.entry -> src/server.ts: unser SSR-Error-Wrapper, der von h3
       // verschluckte 500er in eine echte Fehlerseite uebersetzt.
       tanstackStart({ server: { entry: "server" } }),
-      nitro({ preset: "cloudflare-module" }),
+      nitro({
+        preset: "cloudflare-module",
+        cloudflare: {
+          wrangler: {
+            // Explizit gesetzt: ohne name leitet nitro ihn aus der Git-Remote ab
+            // und wir haetten "corecodevibes-kialia".
+            name: "kialia",
+            // Eigene Domain wird hier eingetragen, sobald die Zone bei
+            // Cloudflare liegt — dann legt `wrangler deploy` sie selbst an:
+            // routes: [{ pattern: "kialia.app", custom_domain: true }],
+          },
+        },
+      }),
       viteReact(),
     ],
     resolve: {
