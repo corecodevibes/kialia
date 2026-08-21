@@ -172,7 +172,7 @@ export function FieldRow({ children }: { children: ReactNode }) {
 }
 
 export const inputClass =
-  "block w-full min-w-0 max-w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none transition focus:border-primary";
+  "block w-full min-w-0 max-w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground transition focus:border-primary";
 
 /** Datums-Felder: gleiches Aussehen, aber kompakter, damit nichts abgeschnitten wird. */
 export const dateInputClass = `${inputClass} px-2.5 text-[13px] [&::-webkit-calendar-picker-indicator]:ml-0`;

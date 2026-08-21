@@ -67,7 +67,6 @@
   --color-sunset: var(--sunset);
 }
 
-
 :root {
   --radius: 1rem;
   --background: oklch(0.978 0.004 56.4);
@@ -130,7 +129,6 @@
   --sidebar-border: oklch(0.884 0.018 325.7);
   --sidebar-ring: oklch(0.707 0.102 275.9);
 }
-
 
 .dark {
   --background: oklch(0.129 0.042 264.695);
@@ -229,32 +227,93 @@
   animation: acrylic-drift 18s ease-in-out infinite alternate;
 }
 
-
 @keyframes acrylic-drift {
-  0% { background-position: 0% 40%; }
-  50% { background-position: 100% 60%; }
-  100% { background-position: 20% 100%; }
+  0% {
+    background-position: 0% 40%;
+  }
+  50% {
+    background-position: 100% 60%;
+  }
+  100% {
+    background-position: 20% 100%;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .acrylic, .acrylic-warm, .acrylic-page { animation: none; }
+  .acrylic,
+  .acrylic-warm,
+  .acrylic-page {
+    animation: none;
+  }
+
+  /* Vorher wurde nur der Verlauf angehalten, waehrend 23 transition-Klassen
+     weiterliefen. Fuer Menschen mit vestibulaeren Stoerungen ist eine halb
+     respektierte Einstellung unangenehmer als keine — sie erwarten Ruhe und
+     bekommen Bewegung. */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
+/* Tastaturfokus. Das Design-System verlangt einen sichtbaren Ring in
+   Sonnenkupfer statt des Browser-Standards — ohne den ist die App per
+   Tastatur praktisch unbedienbar, weil die eigenen Knoepfe keinen eigenen
+   Fokuszustand haben. Erster uebernommener Marken-Token. */
+:root {
+  --k-copper: #ce7b5c;
+}
 
+/* Bewusst OHNE :where() — das haette null Spezifitaet, und jede
+   Utility-Klasse (etwa `outline-none` an den Eingabefeldern) wuerde
+   gewinnen. Hier soll die Barrierefreiheit gewinnen. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--k-copper);
+  outline-offset: 2px;
+}
 
+a:focus:not(:focus-visible),
+button:focus:not(:focus-visible),
+input:focus:not(:focus-visible),
+textarea:focus:not(:focus-visible) {
+  outline: none;
+}
 
 @media print {
-  @page { size: A5; margin: 12mm; }
-  body { background: #fff; color: #221c22; }
+  @page {
+    size: A5;
+    margin: 12mm;
+  }
+  body {
+    background: #fff;
+    color: #221c22;
+  }
 
   .print-page {
     break-after: page;
     page-break-after: always;
     padding: 4mm 0;
   }
-  .print-page:last-child { break-after: auto; page-break-after: auto; }
+  .print-page:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
 
-  .print-head { padding-bottom: 3mm; margin-bottom: 5mm; border-bottom: 1px solid #d2c8d2; }
+  .print-head {
+    padding-bottom: 3mm;
+    margin-bottom: 5mm;
+    border-bottom: 1px solid #d2c8d2;
+  }
   .print-kicker {
     display: block;
     font-size: 8pt;
@@ -262,10 +321,20 @@
     text-transform: uppercase;
     color: #a0798c;
   }
-  .print-day { font-size: 20pt; font-weight: 600; margin: 1mm 0; line-height: 1.1; }
-  .print-meta { font-size: 9pt; color: #6b6270; }
+  .print-day {
+    font-size: 20pt;
+    font-weight: 600;
+    margin: 1mm 0;
+    line-height: 1.1;
+  }
+  .print-meta {
+    font-size: 9pt;
+    color: #6b6270;
+  }
 
-  .print-block { margin-bottom: 6mm; }
+  .print-block {
+    margin-bottom: 6mm;
+  }
   .print-block h3 {
     font-size: 8.5pt;
     letter-spacing: 0.14em;
@@ -279,11 +348,19 @@
     white-space: pre-wrap;
     margin: 0;
   }
-  .print-total { margin-top: 2mm !important; font-weight: 600; }
+  .print-total {
+    margin-top: 2mm !important;
+    font-weight: 600;
+  }
 
   /* Journal – Farbleiste links */
-  .print-page--journal { padding-left: 6mm; border-left: 2.5mm solid #f7d67f; }
-  .print-page--journal .print-head { border-bottom-color: #f0a055; }
+  .print-page--journal {
+    padding-left: 6mm;
+    border-left: 2.5mm solid #f7d67f;
+  }
+  .print-page--journal .print-head {
+    border-bottom-color: #f0a055;
+  }
 
   /* Postkarte – Rahmen */
   .print-page--postkarte {
@@ -295,7 +372,9 @@
     border-bottom: 0.4mm dashed #8f9be0;
     text-align: center;
   }
-  .print-page--postkarte .print-block h3 { color: #8f9be0; }
+  .print-page--postkarte .print-block h3 {
+    color: #8f9be0;
+  }
 
   /* Klassisch – Linien unter den Blöcken */
   .print-page--klassisch .print-block {
@@ -303,4 +382,3 @@
     padding-bottom: 4mm;
   }
 }
-
