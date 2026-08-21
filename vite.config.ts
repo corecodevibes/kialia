@@ -29,9 +29,17 @@ export default defineConfig(({ mode }) => {
             // Explizit gesetzt: ohne name leitet nitro ihn aus der Git-Remote ab
             // und wir haetten "corecodevibes-kialia".
             name: "kialia",
-            // Eigene Domain wird hier eingetragen, sobald die Zone bei
-            // Cloudflare liegt — dann legt `wrangler deploy` sie selbst an:
-            // routes: [{ pattern: "kialia.app", custom_domain: true }],
+            // Fest gepinnt statt aus dem Buildtag abgeleitet: nitro nimmt sonst
+            // das lokale Datum, und bei Cloudflare (UTC) liegt das abends in
+            // der Zukunft — die API lehnt den Deploy dann ab.
+            compatibility_date: "2026-08-21",
+            // Custom Domains: wrangler legt DNS-Eintrag und Zertifikat selbst
+            // an. www bewusst mit — sonst laeuft jeder, der es eintippt, in
+            // einen Fehler statt auf die App.
+            routes: [
+              { pattern: "kialia.app", custom_domain: true },
+              { pattern: "www.kialia.app", custom_domain: true },
+            ],
           },
         },
       }),
