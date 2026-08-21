@@ -10,7 +10,6 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
   return (
@@ -37,9 +36,7 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
-  useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
+  useEffect(() => {}, [error]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -78,17 +75,23 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "kialia – Reise planen, Budget & Reisetagebuch" },
-      { name: "description", content: "Ideen sammeln, Kosten planen und jeden Reisetag festhalten – mit kialia." },
-      { name: "author", content: "Lovable" },
+      {
+        name: "description",
+        content: "Ideen sammeln, Kosten planen und jeden Reisetag festhalten – mit kialia.",
+      },
+      { name: "author", content: "CoreCodeVibes" },
       { property: "og:title", content: "kialia – Reise planen, Budget & Reisetagebuch" },
-      { property: "og:description", content: "Ideen sammeln, Kosten planen und jeden Reisetag festhalten – mit kialia." },
+      {
+        property: "og:description",
+        content: "Ideen sammeln, Kosten planen und jeden Reisetag festhalten – mit kialia.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "kialia – Reise planen, Budget & Reisetagebuch" },
-      { name: "twitter:description", content: "Ideen sammeln, Kosten planen und jeden Reisetag festhalten – mit kialia." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/dcaf5ee1-c401-4342-b7ab-e8c65855ea39/id-preview-853c6446--625fdbb4-c0a1-4fb0-979e-6da54ddbfe35.lovable.app-1785676600803.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/dcaf5ee1-c401-4342-b7ab-e8c65855ea39/id-preview-853c6446--625fdbb4-c0a1-4fb0-979e-6da54ddbfe35.lovable.app-1785676600803.png" },
+      {
+        name: "twitter:description",
+        content: "Ideen sammeln, Kosten planen und jeden Reisetag festhalten – mit kialia.",
+      },
     ],
     links: [
       {

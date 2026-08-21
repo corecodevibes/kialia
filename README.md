@@ -1,26 +1,31 @@
-# Wanderlust Planner
+# kialia
 
-ich möchte gerne eine app erstellen um reisen zu planen, zb mit dem Partner, familie. Eine app wo erstmal gefragt wird. Wohin geht die nächste Reise? das ist der Home Raster, dann schreibst du das Land rein, dann wird es eine Rundreise? All Incluisv ? Städtertip? Strand ? etc. Dann öffnet sich die karte mit dem Ort. Rundreise ausgesucht. Wie stellst du dir deine Rundreise vor ? dann kommt die KI ins Spiel und macht aufgrund deiner Tage und Zeit eine groben Plan?. Oder normale Version. Du siehst die Karte und markierst die punkte wie du reisen willst. Es gibt ein link an den Partner das man zusammen planen kann. Dann ein nächster Raster: Ausgabenplan: Fortwegeungsmittel - Flugzeug, Bus, Bahn, Zug, Auto, Velo etc. Unterkunft:... Essen pro Tag was planst du ein, Aktivitäten/Ausflüge was planst du ein. Dann wie viel im Monat bis zur reise weglegen KI Version das du dir die reise ohne Probleme leisten kannst ? oder hast du bereits was gespart ? Dann ein dritter Raster.  Wo  Ideen sammeln kannst ? oder das als zweiter Raster vor Budget. Dann vierter Raster: Tagebuch - wo dann steht 1. Tag: wie war dein tag heute ? - Highlights ? - spreche kurz deinen tag als Sprachnachricht und ich schreibe ihn dir aus. wie viel hast du ausgegeben - sind wir im Budget oder solltest du am nächsten Tag evlt etwas sparsamer sein?... so sollte die app funktionieren. und am ende kannst du das Tagebuch als PDF ausdrucken lassen und zb zu deinem Fotoalbum dazulegen oder integrieren. Farben: siehe Screenshot. Identifiziere die RGBs für die app.
+Reisen gemeinsam planen — Route, Budget, Ideen und Reisetagebuch in einer App.
+Web, iOS und Android aus einer Codebasis.
 
-This project was built with [Lovable](https://lovable.dev).
+## Produktidee
 
-**Live app**: https://wander-wisp-51.lovable.app
+Der Nutzer startet mit *„Wohin geht die naechste Reise?"* und waehlt die Art der
+Reise (Rundreise, All Inclusive, Staedtetrip, Strand). Daraus entstehen vier
+Bereiche:
 
-## Build with Lovable
+1. **Plan** — Karte mit Stationen; wahlweise KI-Vorschlag anhand von Reisedauer
+   und Zeitbudget oder manuelles Setzen der Punkte. Teilbar mit Partner/Familie,
+   damit gemeinsam geplant werden kann.
+2. **Ideen** — Sammelstelle fuer alles, was noch nicht terminiert ist.
+3. **Budget** — Fortbewegung, Unterkunft, Essen pro Tag, Aktivitaeten. Dazu die
+   monatliche Sparrate bis zur Abreise bzw. Abgleich mit bereits Gespartem.
+4. **Tagebuch** — pro Reisetag Highlights, optional als Sprachnachricht
+   diktiert und automatisch verschriftlicht. Ausgaben fliessen gegen das Budget.
+   Export als PDF fuers Fotoalbum.
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/625fdbb4-c0a1-4fb0-979e-6da54ddbfe35).
+## Entwicklung
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+    bun install
+    cp .env.example .env    # eigene Supabase-Credentials eintragen
+    bun run dev             # http://localhost:8080
 
-## Development
+## Dokumentation
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
-```
+- `AGENTS.md` — Arbeitsregeln fuer die Codebasis
+- `docs/MIGRATION.md` — Stand der Ablösung von Lovable, offene Schritte
