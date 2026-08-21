@@ -22,6 +22,7 @@ import {
   mealsPerDay,
   normalizeUrl,
   tripTotals,
+  savingsPlan,
   uid,
   useTrip,
   type Activity,
@@ -61,9 +62,6 @@ const modes = [
   { key: "Schiff", icon: Ship },
 ];
 
-
-
-
 function PlanTab() {
   const { trip, update, ready } = useTrip();
   const totals = tripTotals(trip);
@@ -74,14 +72,16 @@ function PlanTab() {
     update({ stays: trip.stays.map((s) => (s.id === id ? { ...s, ...patch } : s)) });
   const setActivity = (id: string, patch: Partial<Activity>) =>
     update({ activities: trip.activities.map((a) => (a.id === id ? { ...a, ...patch } : a)) });
-  const setMeals = (patch: Partial<Trip["meals"]>) => update({ meals: { ...trip.meals, ...patch } });
+  const setMeals = (patch: Partial<Trip["meals"]>) =>
+    update({ meals: { ...trip.meals, ...patch } });
   const setSavings = (patch: Partial<Trip["savings"]>) =>
     update({ savings: { ...trip.savings, ...patch } });
 
   const perDay = mealsPerDay(trip.meals);
   const overMax = perDay > trip.meals.maxPerDay && trip.meals.maxPerDay > 0;
-  const openAmount = Math.max(0, totals.total - trip.savings.saved - trip.savings.credit);
-  const perMonth = trip.savings.monthsLeft > 0 ? openAmount / trip.savings.monthsLeft : openAmount;
+  // Bewusst bei jedem Rendern neu berechnet statt gespeichert: die Rate muss
+  // mitziehen, wenn sich Datum, Kosten oder Erspartes aendern.
+  const plan = savingsPlan(trip, totals);
 
   if (!ready) return <div className="min-h-screen bg-background" />;
 
@@ -104,7 +104,9 @@ function PlanTab() {
               </div>
               <div className="pt-5">
                 <DeleteButton
-                  onClick={() => update({ transports: trip.transports.filter((x) => x.id !== t.id) })}
+                  onClick={() =>
+                    update({ transports: trip.transports.filter((x) => x.id !== t.id) })
+                  }
                 />
               </div>
             </div>
@@ -140,7 +142,10 @@ function PlanTab() {
                   />
                 </Field>
               </FieldRow>
-              <StatusPicker value={t.status} onChange={(status) => setTransport(t.id, { status })} />
+              <StatusPicker
+                value={t.status}
+                onChange={(status) => setTransport(t.id, { status })}
+              />
               <Field label="Notiz (z. B. Ratenzahlung)">
                 <input
                   value={t.note}
@@ -176,7 +181,16 @@ function PlanTab() {
             update({
               transports: [
                 ...trip.transports,
-                { id: uid(), mode: "Flugzeug", label: "", cost: 0, status: "offen", dueDate: "", note: "", url: "" },
+                {
+                  id: uid(),
+                  mode: "Flugzeug",
+                  label: "",
+                  cost: 0,
+                  status: "offen",
+                  dueDate: "",
+                  note: "",
+                  url: "",
+                },
               ],
             })
           }
@@ -197,7 +211,9 @@ function PlanTab() {
                 </Field>
               </div>
               <div className="pt-5">
-                <DeleteButton onClick={() => update({ stays: trip.stays.filter((x) => x.id !== s.id) })} />
+                <DeleteButton
+                  onClick={() => update({ stays: trip.stays.filter((x) => x.id !== s.id) })}
+                />
               </div>
             </div>
             <div className="mt-3 space-y-3">
@@ -279,7 +295,17 @@ function PlanTab() {
             update({
               stays: [
                 ...trip.stays,
-                { id: uid(), name: "", url: "", from: "", to: "", cost: 0, status: "offen", dueDate: "", board: "nichts" },
+                {
+                  id: uid(),
+                  name: "",
+                  url: "",
+                  from: "",
+                  to: "",
+                  cost: 0,
+                  status: "offen",
+                  dueDate: "",
+                  board: "nichts",
+                },
               ],
             })
           }
@@ -360,7 +386,9 @@ function PlanTab() {
               </div>
               <div className="pt-5">
                 <DeleteButton
-                  onClick={() => update({ activities: trip.activities.filter((x) => x.id !== a.id) })}
+                  onClick={() =>
+                    update({ activities: trip.activities.filter((x) => x.id !== a.id) })
+                  }
                 />
               </div>
             </div>
@@ -418,11 +446,12 @@ function PlanTab() {
           }
         />
 
-
         <SectionTitle>Gesamtkosten</SectionTitle>
         <Card>
-          <CardTitle>Die Reise kostet bis jetzt</CardTitle>
-          <p className="mt-1 text-3xl font-extrabold tracking-tight">{eur(totals.total)}</p>
+          <CardTitle>Geplant</CardTitle>
+          <p className="mt-1 text-3xl font-extrabold tracking-tight tabular-nums">
+            {eur(totals.total)}
+          </p>
           <div className="mt-3 space-y-1 text-sm text-muted-foreground">
             <p>Fortbewegung: {eur(totals.transport)}</p>
             <p>Unterkünfte: {eur(totals.stays)}</p>
@@ -434,6 +463,33 @@ function PlanTab() {
               Bereits bezahlt: {eur(totals.paid)} · offen: {eur(totals.open)}
             </p>
           </div>
+
+          {/* Geplant und tatsaechlich bleiben getrennt: `total` ist die
+              Schaetzung aus diesem Bildschirm, `actual` kommt ausschliesslich
+              aus dem Tagebuch. Zusammengezaehlt wuerde beides wertlos. */}
+          {totals.actualDays > 0 && (
+            <div className="mt-4 rounded-2xl bg-secondary/40 p-3">
+              <div className="flex items-baseline justify-between gap-3">
+                <CardTitle>Tatsächlich ausgegeben</CardTitle>
+                <span className="text-lg font-bold tabular-nums">{eur(totals.actual)}</span>
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Aus dem Tagebuch, {totals.actualDays}{" "}
+                {totals.actualDays === 1 ? "erfasster Tag" : "erfasste Tage"}. Nicht in den
+                geplanten Kosten enthalten.
+              </p>
+              {totals.days > 0 && totals.actualDays > 0 && (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Im Schnitt {eur(totals.actual / totals.actualDays)} pro erfasstem Tag — bei{" "}
+                  {totals.days} Reisetagen wären das hochgerechnet{" "}
+                  <span className="tabular-nums">
+                    {eur((totals.actual / totals.actualDays) * totals.days)}
+                  </span>
+                  . Eine Hochrechnung, keine Abrechnung.
+                </p>
+              )}
+            </div>
+          )}
 
           <label className="mt-4 flex items-center gap-2 text-sm font-medium">
             <input
@@ -467,26 +523,70 @@ function PlanTab() {
                   />
                 </Field>
               </div>
-              <Field label="Monate bis zur Reise">
-                <input
-                  type="number"
-                  min={1}
-                  value={trip.savings.monthsLeft}
-                  onChange={(e) => setSavings({ monthsLeft: Number(e.target.value) })}
-                  className={inputClass}
-                />
-              </Field>
+              {plan.source === "manual" && (
+                <Field label="Monate bis zur Reise">
+                  <input
+                    type="number"
+                    min={1}
+                    value={trip.savings.monthsLeft}
+                    onChange={(e) => setSavings({ monthsLeft: Number(e.target.value) })}
+                    className={inputClass}
+                  />
+                </Field>
+              )}
+
               <div className="rounded-2xl bg-accent/25 p-3">
                 <CardTitle>Spar-Empfehlung</CardTitle>
-                <p className="mt-1 text-2xl font-extrabold tracking-tight">{eur(perMonth)} / Monat</p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Noch offen: {eur(openAmount)} in {trip.savings.monthsLeft} Monaten.
-                </p>
+
+                {plan.perMonth === null ? (
+                  <>
+                    <p className="mt-1 text-lg font-semibold">Keine Monatsrate mehr</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {plan.months !== null && plan.months < 0
+                        ? "Das Reisedatum liegt in der Vergangenheit."
+                        : "Die Reise beginnt noch diesen Monat."}{" "}
+                      Offen sind {eur(plan.open)}.
+                    </p>
+                  </>
+                ) : plan.reason === "nothing-open" ? (
+                  <>
+                    <p className="mt-1 text-lg font-semibold">Alles beisammen</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Gespartes und Kredit decken die geplanten {eur(plan.total)} bereits ab.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="mt-1 text-2xl font-extrabold tracking-tight tabular-nums">
+                      {eur(plan.perMonth)} / Monat
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {plan.months} {plan.months === 1 ? "Monat" : "Monate"}{" "}
+                      {plan.source === "date" ? "bis zur Abreise" : "nach deiner Angabe"}.
+                    </p>
+                  </>
+                )}
+
+                {/* Herkunft der Zahl — eine Zahl ohne erkennbare Herkunft
+                    glaubt niemand zweimal. */}
+                <dl className="mt-3 space-y-1 border-t border-foreground/10 pt-2 text-xs">
+                  <div className="flex justify-between gap-3">
+                    <dt className="text-muted-foreground">Geplante Kosten</dt>
+                    <dd className="tabular-nums">{eur(plan.total)}</dd>
+                  </div>
+                  <div className="flex justify-between gap-3">
+                    <dt className="text-muted-foreground">Gespart und Kredit</dt>
+                    <dd className="tabular-nums">− {eur(plan.covered)}</dd>
+                  </div>
+                  <div className="flex justify-between gap-3 font-semibold">
+                    <dt>Noch offen</dt>
+                    <dd className="tabular-nums">{eur(plan.open)}</dd>
+                  </div>
+                </dl>
               </div>
             </div>
           )}
         </Card>
-
       </div>
     </AppShell>
   );

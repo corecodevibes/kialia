@@ -26,5 +26,6 @@
     "paths": {
       "@/*": ["./src/*"]
     }
-  }
+  },
+  "exclude": ["**/*.test.ts", "**/*.test.tsx"]
 }

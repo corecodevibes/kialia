@@ -351,7 +351,26 @@ export function tripTotals(trip: Trip) {
   const paid = [...trip.transports, ...trip.stays, ...trip.activities]
     .filter((i) => i.status === "bezahlt")
     .reduce((s, i) => s + (i.cost || 0), 0);
-  return { days, transport, stays, activities, food, total, paid, open: Math.max(0, total - paid) };
+
+  // Tatsaechlich ausgegeben kommt AUSSCHLIESSLICH aus dem Tagebuch — eine
+  // Quelle, eine Richtung. Es wird bewusst nicht in `total` gemischt: `total`
+  // ist der Plan, `actual` ist die Wirklichkeit, und der Vergleich der beiden
+  // ist der Grund, warum es diese App gibt.
+  const actual = trip.diary.reduce((s, e) => s + (e.spent || 0), 0);
+  const actualDays = trip.diary.filter((e) => (e.spent || 0) > 0).length;
+
+  return {
+    days,
+    transport,
+    stays,
+    activities,
+    food,
+    total,
+    paid,
+    open: Math.max(0, total - paid),
+    actual,
+    actualDays,
+  };
 }
 
 export function eur(n: number) {
@@ -468,4 +487,73 @@ export async function readTripFile(file: File): Promise<Partial<Trip>[]> {
   if (obj?.kind === "kialia.trip" && obj.trip) return [obj.trip];
   if (obj?.kind === "kialia.backup" && Array.isArray(obj.trips)) return obj.trips;
   throw new Error("Die Datei stammt nicht aus kialia.");
+}
+
+/* ---------------------------------------------------------------------------
+ * Datum und Sparrate
+ * ------------------------------------------------------------------------ */
+
+/**
+ * Liest ein `YYYY-MM-DD` aus einem Datumsfeld als LOKALEN Tag.
+ *
+ * `new Date("2026-06-14")` waere UTC-Mitternacht — westlich von Greenwich also
+ * der 13. Fuer eine Reise-App ist ein um einen Tag verschobenes Abreisedatum
+ * kein Schoenheitsfehler.
+ */
+export function parseLocalDate(iso: string): Date | null {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec((iso ?? "").trim());
+  if (!m) return null;
+  const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  return Number.isFinite(d.getTime()) ? d : null;
+}
+
+/**
+ * Volle Kalendermonate bis zum Reisebeginn. Negativ, wenn die Reise vorbei ist,
+ * `null` ohne verwertbares Datum. Ein angefangener Monat zaehlt nur, wenn der
+ * Starttag im Zielmonat noch bevorsteht.
+ */
+export function monthsUntil(iso: string, now: Date = new Date()): number | null {
+  const start = parseLocalDate(iso);
+  if (!start) return null;
+  const months =
+    (start.getFullYear() - now.getFullYear()) * 12 + (start.getMonth() - now.getMonth());
+  return start.getDate() >= now.getDate() ? months : months - 1;
+}
+
+export type SavingsPlan = {
+  total: number;
+  covered: number;
+  open: number;
+  months: number | null;
+  perMonth: number | null;
+  /** Woher die Monatszahl stammt — im UI sichtbar zu machen. */
+  source: "date" | "manual";
+  reason?: "no-months" | "nothing-open";
+};
+
+/**
+ * Die Sparrate wird bei jedem Aufruf BERECHNET, nie gespeichert.
+ *
+ * Vorher stand die Monatszahl als handgetippter Wert im Store: wer das
+ * Reisedatum verschob, bekam weiter die alte Rate angezeigt. Eine Zahl, nach
+ * der jemand sein Geld einteilt, darf nicht veralten koennen.
+ */
+export function savingsPlan(
+  trip: Trip,
+  totals: ReturnType<typeof tripTotals>,
+  now: Date = new Date(),
+): SavingsPlan {
+  const total = totals.total;
+  const covered = (trip.savings.saved || 0) + (trip.savings.credit || 0);
+  const open = Math.max(0, total - covered);
+
+  const fromDate = monthsUntil(trip.startDate, now);
+  const months = fromDate ?? (trip.savings.monthsLeft || 0);
+  const source: SavingsPlan["source"] = fromDate === null ? "manual" : "date";
+
+  if (open <= 0)
+    return { total, covered, open, months, perMonth: 0, source, reason: "nothing-open" };
+  if (months <= 0)
+    return { total, covered, open, months, perMonth: null, source, reason: "no-months" };
+  return { total, covered, open, months, perMonth: open / months, source };
 }
