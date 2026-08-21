@@ -17,14 +17,29 @@
 
 ## Offen — braucht Steffen
 
-### 1. Eigenes Supabase-Projekt
-Aktuell zeigt die App auf ein von Lovable Cloud provisioniertes Projekt.
-Jetzt ist der guenstigste Moment fuer den Umzug: es existiert nur die Tabelle
-`profiles`, alle Reisedaten liegen im `localStorage`. Es gibt also praktisch
-nichts zu migrieren — nur Auth-Nutzer.
+### 1. Eigenes Supabase-Projekt — ERLEDIGT 22.08.2026
+Projekt `izxkcxqmzsaavkbprlfa` (EU Frankfurt, Free). Schema per
+`supabase db push` eingespielt, Migrationsverlauf sauber. `.env` umgestellt,
+`config.toml` zeigt auf den neuen Ref. `types.ts` blieb unveraendert gueltig,
+weil das Schema identisch ist.
 
-Schritte: neues Projekt anlegen, `supabase/migrations/*.sql` einspielen,
-`.env` mit URL + publishable Key fuellen, `types.ts` neu generieren.
+**Stolperstein fuer die Zukunft:** `supabase db push` und `migration list`
+scheitern mit 403 bei "Initialising login role" — dieser Management-API-
+Endpunkt ist fuer den Account gesperrt (andere Endpunkte wie `projects
+api-keys` funktionieren). Workaround, der zuverlaessig laeuft:
+
+    export PGPW="$(python3 -c 'import getpass,urllib.parse;print(urllib.parse.quote(getpass.getpass(),safe=""))')"
+    supabase db push --db-url "postgresql://postgres:$PGPW@db.izxkcxqmzsaavkbprlfa.supabase.co:5432/postgres"
+    unset PGPW
+
+Die Prozentkodierung ist nicht optional — `--db-url` verlangt sie, und
+Supabase-Passwoerter enthalten regelmaessig Zeichen, die eine URL zerreissen.
+Die Direktverbindung ist ausserdem IPv6-only (kein A-Record).
+
+**Sicherheitslage geprueft:** Anonyme Zugriffe scheitern bereits am fehlenden
+GRANT (42501), also eine Ebene vor RLS — Folge davon, dass "Automatically
+expose new tables" beim Projekt aus ist und die Migration nur `authenticated`
+freigibt.
 
 ### 2. Sprachtranskription (`src/lib/transcribe.functions.ts`)
 Nutzt noch `ai.gateway.lovable.dev` + `LOVABLE_API_KEY`. Ziel ist eine
