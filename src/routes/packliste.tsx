@@ -2,13 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Check, Plus, Trash2, ChevronDown, ChevronRight } from "lucide-react";
 import { AppShell, Card, CardTitle, Field, chipClass, inputClass } from "@/components/app/AppShell";
-import {
-  kidsPacking,
-  petsPacking,
-  uid,
-  useTrip,
-  type PackCategory,
-} from "@/lib/trip-store";
+import { kidsPacking, petsPacking, uid, useTrip, type PackCategory } from "@/lib/trip-store";
 
 export const Route = createFileRoute("/packliste")({
   head: () => ({
@@ -63,16 +57,15 @@ function PackingTab() {
   if (!ready) return <div className="min-h-screen bg-background" />;
 
   return (
-    <AppShell
-      title="Packliste"
-      subtitle={`${done} von ${total} Sachen eingepackt – alle mit dem Link können ergänzen.`}
-    >
+    <AppShell title="Packliste" subtitle={`${done} von ${total} Sachen eingepackt.`}>
       <div className="space-y-4">
         <Card>
           <div className="flex items-center justify-between gap-3">
             <div>
               <CardTitle>Fortschritt</CardTitle>
-              <p className="text-xs text-muted-foreground">{done} / {total} erledigt</p>
+              <p className="text-xs text-muted-foreground">
+                {done} / {total} erledigt
+              </p>
             </div>
             <div className="h-2 w-32 overflow-hidden rounded-full bg-muted">
               <div
@@ -120,7 +113,11 @@ function PackingTab() {
                   onClick={() => setOpen((o) => ({ ...o, [c.id]: !isOpen }))}
                   className="flex flex-1 items-center gap-2 text-left"
                 >
-                  {isOpen ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
+                  {isOpen ? (
+                    <ChevronDown className="size-4" />
+                  ) : (
+                    <ChevronRight className="size-4" />
+                  )}
                   <span className="text-sm font-semibold">{c.name}</span>
                   <span className="text-xs text-muted-foreground">
                     {catDone}/{c.items.length}
@@ -158,7 +155,9 @@ function PackingTab() {
                           )
                         }
                         className={`flex size-6 shrink-0 items-center justify-center rounded-lg border transition ${
-                          item.done ? "border-primary bg-primary text-primary-foreground" : "border-border"
+                          item.done
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-border"
                         }`}
                       >
                         {item.done && <Check className="size-3.5" />}

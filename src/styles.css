@@ -204,8 +204,13 @@
 @utility acrylic-page {
   position: relative;
   background: var(--gradient-sky) fixed;
-  background-size: 180% 180%;
-  animation: acrylic-drift 26s ease-in-out infinite alternate;
+  background-size: 140% 140%;
+  background-position: 0% 45%;
+  /* Der Verlauf stand vorher auf 180% und wanderte dauerhaft ueber
+     background-position (26s, infinite alternate). Auf dem Telefon ist das
+     sichtbares Rutschen hinter jedem Inhalt — Bewegung, die nichts erklaert.
+     Das Design-System verlangt eine Bewegung pro Interaktion; ein Hintergrund,
+     der ohne Anlass wandert, ist keine. */
 
   &::before {
     content: "";

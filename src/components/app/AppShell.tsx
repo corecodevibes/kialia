@@ -96,10 +96,10 @@ export function AppShell({
             className="size-11 shrink-0 rounded-2xl shadow-sm"
           />
           <div className="min-w-0 flex-1">
-            <p className="truncate text-lg font-extrabold leading-tight tracking-tight text-background drop-shadow-sm">
+            <p className="truncate text-lg font-extrabold leading-tight tracking-tight text-foreground">
               kialia · κιάλια
             </p>
-            <h1 className="truncate text-sm font-medium leading-snug text-background/90">
+            <h1 className="truncate text-sm font-medium leading-snug text-foreground/70">
               {title}
             </h1>
           </div>
@@ -107,13 +107,13 @@ export function AppShell({
             type="button"
             onClick={handleSignOut}
             aria-label="Abmelden"
-            className="shrink-0 rounded-xl p-2 text-background/90 transition hover:bg-background/15"
+            className="shrink-0 rounded-xl p-2 text-foreground/70 transition hover:bg-foreground/10"
           >
             <LogOut className="size-5" />
           </button>
         </div>
         {subtitle && (
-          <p className="mx-auto mt-2 max-w-lg text-sm leading-snug text-background/90">
+          <p className="mx-auto mt-2 max-w-lg text-sm leading-snug text-foreground/75">
             {subtitle}
           </p>
         )}
@@ -181,7 +181,7 @@ export const selectClass = `${inputClass} appearance-none bg-background pr-8`;
 
 export function SectionTitle({ children }: { children: ReactNode }) {
   return (
-    <h2 className="mb-2 mt-6 px-1 text-[11px] font-bold uppercase tracking-[0.16em] text-background/95 drop-shadow-sm">
+    <h2 className="mb-2 mt-6 px-1 text-[11px] font-bold uppercase tracking-[0.16em] text-foreground/65">
       {children}
     </h2>
   );
@@ -298,7 +298,7 @@ export function AddButton({ onClick, label }: { onClick: () => void; label: stri
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-background/60 bg-background/25 py-3 text-sm font-semibold text-background backdrop-blur-sm transition hover:bg-background/40"
+      className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-foreground/25 bg-card/70 py-3 text-sm font-semibold text-foreground backdrop-blur-sm transition hover:bg-card"
     >
       <span className="text-base leading-none">+</span> {label}
     </button>

@@ -93,11 +93,11 @@ function OnboardingPage() {
             height={96}
             className="size-20 rounded-3xl shadow-sm"
           />
-          <p className="mt-3 text-xl font-extrabold tracking-tight text-background drop-shadow-sm">
+          <p className="mt-3 text-xl font-extrabold tracking-tight text-foreground">
             kialia · κιάλια
           </p>
-          <p className="text-xs font-medium text-background/90">See more. travel further.</p>
-          <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-background/90">
+          <p className="text-xs font-medium text-foreground/70">See more. travel further.</p>
+          <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-foreground/70">
             Schritt {step + 1} von 2
           </p>
         </div>

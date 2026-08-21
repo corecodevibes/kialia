@@ -1,5 +1,13 @@
 import { describe, expect, test } from "bun:test";
-import { monthsUntil, parseLocalDate, savingsPlan, tripDays, tripTotals } from "./trip-store";
+import {
+  monthsUntil,
+  nextDiaryDay,
+  parseLocalDate,
+  savingsPlan,
+  todayLocalISO,
+  tripDays,
+  tripTotals,
+} from "./trip-store";
 import type { Trip } from "./trip-store";
 
 /* Diese Tests halten drei Fehler fest, die am 22.08.2026 im Budget gefunden
@@ -31,7 +39,10 @@ describe("parseLocalDate", () => {
     const d = parseLocalDate("2026-06-14");
     expect(d?.getFullYear()).toBe(2026);
     expect(d?.getMonth()).toBe(5);
-    expect(d?.getDate()).toBe(14); // wäre bei UTC-Parsing westlich von Greenwich der 13.
+    expect(d?.getDate()).toBe(14);
+    // Der Gegenbeweis: so haette es die naive Variante gemacht. Unter
+    // TZ=America/New_York ist UTC-Mitternacht der Vortag, 20:00 Ortszeit.
+    expect(new Date("2026-06-14").getDate()).toBe(13);
   });
 
   test("weist Unfug zurück, statt Invalid Date weiterzureichen", () => {
@@ -178,5 +189,40 @@ describe("tripTotals — geplant und tatsächlich getrennt", () => {
 describe("tripDays", () => {
   test("zählt beide Randtage mit", () => {
     expect(tripDays(tripWith({ startDate: "2026-06-01", endDate: "2026-06-07" }))).toBe(7);
+  });
+});
+
+describe("Tagebuch — Datum und Tagesnummer", () => {
+  test("stempelt den lokalen Tag, nicht UTC — der Fehler nach Mitternacht", () => {
+    // Die Zusage lautet: der Kalendertag des Geraets, nicht der von UTC.
+    // Bewusst ohne Vergleich gegen toISOString() — dessen Ergebnis haengt von
+    // der Zone des Testlaufs ab, und ein Test, der je nach Umgebung
+    // durchfaellt, belegt nichts.
+    const kurzNachMitternacht = new Date(2026, 7, 22, 1, 33);
+    expect(todayLocalISO(kurzNachMitternacht)).toBe("2026-08-22");
+    const spaetAbends = new Date(2026, 11, 31, 23, 59);
+    expect(todayLocalISO(spaetAbends)).toBe("2026-12-31");
+  });
+
+  test("vergibt nach dem Löschen eines Tages keine doppelte Nummer", () => {
+    const t = tripWith({
+      diary: [
+        { id: "a", day: 1, date: "", text: "", highlight: "", notes: "", expenses: "", spent: 0 },
+        { id: "c", day: 3, date: "", text: "", highlight: "", notes: "", expenses: "", spent: 0 },
+      ],
+    });
+    // diary.length + 1 hätte 3 ergeben — die Nummer gibt es schon.
+    expect(nextDiaryDay(t)).toBe(4);
+  });
+
+  test("zählt mit Reisedatum den echten Reisetag", () => {
+    const t = tripWith({ startDate: "2026-06-14" });
+    expect(nextDiaryDay(t, new Date(2026, 5, 14))).toBe(1);
+    expect(nextDiaryDay(t, new Date(2026, 5, 16))).toBe(3);
+  });
+
+  test("vor Reisebeginn fällt es auf die Zählung zurück, statt 0 oder negativ zu werden", () => {
+    const t = tripWith({ startDate: "2026-06-14" });
+    expect(nextDiaryDay(t, new Date(2026, 5, 1))).toBe(1);
   });
 });

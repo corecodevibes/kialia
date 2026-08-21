@@ -302,10 +302,10 @@ function AuthFrame({ children }: { children: React.ReactNode }) {
             height={160}
             className="size-32 rounded-3xl shadow-sm"
           />
-          <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-background drop-shadow-sm">
+          <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-foreground">
             kialia · κιάλια
           </h1>
-          <p className="mt-1 text-sm font-medium text-background/90">See more. travel further.</p>
+          <p className="mt-1 text-sm font-medium text-foreground/70">See more. travel further.</p>
         </div>
         {children}
       </div>

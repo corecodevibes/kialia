@@ -12,7 +12,7 @@ import {
   dateInputClass,
   inputClass,
 } from "@/components/app/AppShell";
-import { eur, uid, useTrip, type DiaryEntry } from "@/lib/trip-store";
+import { eur, nextDiaryDay, todayLocalISO, uid, useTrip, type DiaryEntry } from "@/lib/trip-store";
 import { useVoiceMemo } from "@/lib/use-voice-memo";
 import { transcribeMemo } from "@/lib/transcribe.functions";
 
@@ -82,8 +82,11 @@ function DiaryTab() {
         ...trip.diary,
         {
           id: uid(),
-          day: trip.diary.length + 1,
-          date: new Date().toISOString().slice(0, 10),
+          // Nicht diary.length + 1: nach dem Loeschen eines Tages vergaebe das
+          // eine schon benutzte Nummer. Und nicht toISOString(): das ist UTC,
+          // wer nach Mitternacht schreibt bekaeme den Vortag gestempelt.
+          day: nextDiaryDay(trip),
+          date: todayLocalISO(),
           text: "",
           highlight: "",
           notes: "",

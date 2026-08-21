@@ -11,7 +11,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "deploy": "bun run build && npx wrangler --cwd .output/server deploy",
-    "test": "bun test",
+    "test": "TZ=America/New_York bun test",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

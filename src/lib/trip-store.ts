@@ -557,3 +557,39 @@ export function savingsPlan(
     return { total, covered, open, months, perMonth: null, source, reason: "no-months" };
   return { total, covered, open, months, perMonth: open / months, source };
 }
+
+/**
+ * Heutiges Datum als `YYYY-MM-DD` in der Zone des Geraets.
+ *
+ * `new Date().toISOString().slice(0,10)` waere UTC. Wer abends nach
+ * Mitternacht ueber seinen Tag schreibt, bekaeme damit den Vortag gestempelt —
+ * und in Asien betrifft das den halben Vormittag. In einem Tagebuch, das
+ * spaeter als Buch gedruckt wird, ist ein falsches Datum nicht korrigierbar.
+ */
+export function todayLocalISO(now: Date = new Date()): string {
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+/**
+ * Die Nummer des naechsten Reisetags.
+ *
+ * Vorher war das `diary.length + 1`. Nach dem Loeschen eines Tages vergibt das
+ * eine bereits benutzte Nummer — zwei Eintraege heissen dann gleich. Und es
+ * sagt nichts darueber aus, der wievielte Reisetag heute wirklich ist.
+ *
+ * Mit Reisedatum wird aus dem Abstand zum Reisebeginn gerechnet, sonst aus der
+ * hoechsten vergebenen Nummer.
+ */
+export function nextDiaryDay(trip: Trip, now: Date = new Date()): number {
+  const start = parseLocalDate(trip.startDate);
+  if (start) {
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const diff = Math.round((today.getTime() - start.getTime()) / 86400000) + 1;
+    if (diff >= 1) return diff;
+  }
+  const highest = trip.diary.reduce((max, e) => Math.max(max, e.day || 0), 0);
+  return highest + 1;
+}
