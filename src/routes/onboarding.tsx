@@ -4,6 +4,8 @@ import { Baby, Dog, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile, useSession } from "@/lib/auth";
 import { Field, inputClass } from "@/components/app/AppShell";
+import { authErrorMessage, type AuthMessage } from "@/lib/auth-errors";
+import { writeOnboardedCache } from "@/lib/onboarding-gate";
 import logo from "@/assets/travelivibes-logo.png";
 
 export const Route = createFileRoute("/onboarding")({
@@ -33,6 +35,7 @@ function OnboardingPage() {
   const { profile, ready: profileReady } = useProfile(session?.user.id);
 
   const [step, setStep] = useState(0);
+  const [saveError, setSaveError] = useState<AuthMessage | null>(null);
   const [name, setName] = useState("");
   const [companions, setCompanions] = useState("");
   const [hasKids, setHasKids] = useState(false);
@@ -40,7 +43,8 @@ function OnboardingPage() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (ready && !session && window.location.pathname !== "/auth") navigate({ to: "/auth", replace: true });
+    if (ready && !session && window.location.pathname !== "/auth")
+      navigate({ to: "/auth", replace: true });
   }, [ready, session, navigate]);
 
   useEffect(() => {
@@ -56,7 +60,8 @@ function OnboardingPage() {
   async function finish() {
     if (!session) return;
     setBusy(true);
-    await supabase.from("profiles").upsert({
+    setSaveError(null);
+    const { error } = await supabase.from("profiles").upsert({
       id: session.user.id,
       name: name.trim().slice(0, 100),
       companions: companions.trim().slice(0, 200),
@@ -65,6 +70,13 @@ function OnboardingPage() {
       onboarding_done: true,
     });
     setBusy(false);
+    if (error) {
+      // Vorher wurde der Fehler verschluckt und trotzdem weitergeleitet —
+      // die Weiche schickte den Nutzer sofort wieder hierher zurueck.
+      setSaveError(authErrorMessage(error));
+      return;
+    }
+    writeOnboardedCache(session.user.id, true);
     navigate({ to: "/", replace: true });
   }
 
@@ -74,7 +86,13 @@ function OnboardingPage() {
     <div className="acrylic-page flex min-h-screen items-center justify-center px-5 py-10">
       <div className="relative z-10 w-full max-w-sm">
         <div className="mb-5 flex flex-col items-center text-center">
-          <img src={logo} alt="kialia Logo" width={96} height={96} className="size-20 rounded-3xl shadow-sm" />
+          <img
+            src={logo}
+            alt="kialia Logo"
+            width={96}
+            height={96}
+            className="size-20 rounded-3xl shadow-sm"
+          />
           <p className="mt-3 text-xl font-extrabold tracking-tight text-background drop-shadow-sm">
             kialia · κιάλια
           </p>
@@ -141,22 +159,24 @@ function OnboardingPage() {
               </h1>
               <div className="space-y-3 text-sm leading-relaxed text-muted-foreground">
                 <p>
-                  Diese App begleitet dich <strong className="text-foreground">vor, während und nach</strong>{" "}
-                  deiner Reise. Sie hilft dir, organisiert zu bleiben und am Ende dein Budget im Blick zu
+                  Diese App begleitet dich{" "}
+                  <strong className="text-foreground">vor, während und nach</strong> deiner Reise.
+                  Sie hilft dir, organisiert zu bleiben und am Ende dein Budget im Blick zu
                   behalten.
                 </p>
                 <p>
-                  Und du hast am Ende ein Tagebuch, das dich immer an die Reise erinnert. Man weiß nie, was
-                  im Leben kommt – und heutzutage vergisst man schöne Sachen viel zu schnell.
+                  Und du hast am Ende ein Tagebuch, das dich immer an die Reise erinnert. Man weiß
+                  nie, was im Leben kommt – und heutzutage vergisst man schöne Sachen viel zu
+                  schnell.
                 </p>
                 <p>
-                  Halte deine Organisation im Griff, plane dein Budget ein und halte deine Erinnerungen
-                  täglich fest. Schau am Ende, ob du im Budget geblieben bist, und teile alles mit deiner
-                  Begleitung oder deiner Familie.
+                  Halte deine Organisation im Griff, plane dein Budget ein und halte deine
+                  Erinnerungen täglich fest. Schau am Ende, ob du im Budget geblieben bist, und
+                  teile alles mit deiner Begleitung oder deiner Familie.
                 </p>
                 <p className="text-foreground">
-                  Bist du bereit, deine Reisen zu planen und Erinnerungen festzuhalten? Dann bist du genau
-                  richtig hier.
+                  Bist du bereit, deine Reisen zu planen und Erinnerungen festzuhalten? Dann bist du
+                  genau richtig hier.
                 </p>
               </div>
               <div className="flex gap-2">
@@ -176,6 +196,22 @@ function OnboardingPage() {
                   {busy ? "Einen Moment …" : "Los geht's"}
                 </button>
               </div>
+
+              {saveError && (
+                <div
+                  role="status"
+                  className={`mt-3 rounded-2xl px-3 py-2 text-sm ${
+                    saveError.offline
+                      ? "bg-card text-foreground"
+                      : "bg-destructive/10 text-destructive"
+                  }`}
+                >
+                  <p className="font-medium">{saveError.text}</p>
+                  {saveError.action && (
+                    <p className="mt-0.5 text-xs opacity-90">{saveError.action}</p>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>

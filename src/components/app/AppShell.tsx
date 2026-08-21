@@ -3,6 +3,7 @@ import { Home, Lightbulb, Wallet, BookOpen, Backpack, LogOut } from "lucide-reac
 import { useEffect, type ReactNode } from "react";
 import logo from "@/assets/travelivibes-logo.png";
 import { signOut, useProfile, useSession } from "@/lib/auth";
+import { onboardingGate, readOnboardedCache } from "@/lib/onboarding-gate";
 
 const tabs = [
   { to: "/", label: "Home", icon: Home },
@@ -24,21 +25,57 @@ export function AppShell({
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { session, ready } = useSession();
-  const { profile, ready: profileReady } = useProfile(session?.user.id);
-  const onboardingDone = !!profile?.onboarding_done;
+  const { profile, failed, ready: profileReady } = useProfile(session?.user.id);
+
+  // "Profil nicht abrufbar" ist keine Aussage darueber, ob jemand das
+  // Onboarding erledigt hat. Ohne diese Unterscheidung landet offline jeder
+  // zurueck im Onboarding — und von dort per fehlgeschlagenem Speichern
+  // wieder hierher.
+  const gate = onboardingGate({
+    profileDone: profile ? !!profile.onboarding_done : null,
+    loadFailed: failed,
+    cachedDone: readOnboardedCache(session?.user.id),
+  });
 
   useEffect(() => {
     if (ready && !session && pathname !== "/auth") navigate({ to: "/auth", replace: true });
   }, [ready, session, pathname, navigate]);
 
   useEffect(() => {
-    if (session && profileReady && !onboardingDone && pathname !== "/onboarding") {
+    if (session && profileReady && gate === "onboarding" && pathname !== "/onboarding") {
       navigate({ to: "/onboarding", replace: true });
     }
-  }, [session, profileReady, onboardingDone, pathname, navigate]);
+  }, [session, profileReady, gate, pathname, navigate]);
 
+  if (!ready || !session || !profileReady) {
+    return <div className="acrylic-page min-h-screen" />;
+  }
 
-  if (!ready || !session || !profileReady || !profile?.onboarding_done) {
+  // Kein Kontakt und kein lokaler Merker: nicht raten, sondern sagen was ist.
+  // Eine leere Flaeche waere hier das Schlimmste — sie sieht aus wie ein
+  // Absturz und nennt keinen naechsten Schritt.
+  if (gate === "offline-unknown") {
+    return (
+      <div className="acrylic-page flex min-h-screen items-center justify-center px-6">
+        <div className="relative z-10 max-w-sm rounded-3xl bg-card p-5 text-center">
+          <h1 className="text-lg font-bold">Keine Verbindung</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Wir konnten dein Konto nicht laden. Sobald du wieder online bist, geht es weiter — deine
+            Reisen auf diesem Gerät bleiben unberührt.
+          </p>
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="acrylic-warm mt-4 w-full rounded-2xl px-4 py-3 text-sm font-semibold text-background"
+          >
+            Erneut versuchen
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (gate !== "app") {
     return <div className="acrylic-page min-h-screen" />;
   }
 
@@ -82,11 +119,9 @@ export function AppShell({
         )}
       </header>
 
-
       <main className="relative z-10 mx-auto max-w-lg px-4 pb-28 pt-1 print:pb-0 print:pt-0">
         {children}
       </main>
-
 
       <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card print:hidden">
         <div className="mx-auto flex max-w-lg items-stretch justify-between px-1 pb-[env(safe-area-inset-bottom)]">
@@ -120,13 +155,7 @@ export function Card({ children, className = "" }: { children: ReactNode; classN
   );
 }
 
-export function Field({
-  label,
-  children,
-}: {
-  label: string;
-  children: ReactNode;
-}) {
+export function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <label className="block min-w-0">
       <span className="block truncate text-xs font-medium text-muted-foreground">{label}</span>
@@ -235,7 +264,13 @@ export function IconButton({
   );
 }
 
-export function DeleteButton({ onClick, ariaLabel = "Eintrag löschen" }: { onClick: () => void; ariaLabel?: string }) {
+export function DeleteButton({
+  onClick,
+  ariaLabel = "Eintrag löschen",
+}: {
+  onClick: () => void;
+  ariaLabel?: string;
+}) {
   return (
     <button
       type="button"
@@ -272,7 +307,8 @@ export function AddButton({ onClick, label }: { onClick: () => void; label: stri
 
 export function chipClass(active: boolean) {
   return `inline-flex items-center justify-center gap-1.5 rounded-full border px-3 py-2 text-xs font-medium transition ${
-    active ? "border-primary bg-primary/10 text-primary" : "border-border bg-background text-muted-foreground"
+    active
+      ? "border-primary bg-primary/10 text-primary"
+      : "border-border bg-background text-muted-foreground"
   }`;
 }
-
