@@ -89,6 +89,30 @@ ist bereits `cloudflare-module`, der Build erzeugt `wrangler.json` von selbst.
 Das gibt eine HTTPS-URL, macht das Handy unabhaengig vom Laptop und schaltet
 Service Worker und Web Push frei.
 
+## E-Mail: eigenes SMTP noetig (offen, 22.08.2026)
+
+Der eingebaute Mailversand von Supabase ist im Free-Tier hart begrenzt und
+blockiert zwei Dinge gleichzeitig:
+
+1. **Eigene Vorlagen sind gesperrt.** `supabase config push` antwortet mit
+   *"Email template modification is not available for free tier projects using
+   the default email provider."* Die fertigen Vorlagen liegen unter
+   `supabase/templates/`, die Konfiguration dafuer steht auskommentiert in
+   `supabase/config.toml`.
+2. **`max_frequency = "1m0s"`** — eine Mail pro Minute und Adresse. Das ist der
+   Grund fuer die Meldung "you can only request this after 51 seconds", die
+   eine echte Registrierung gestoppt hat.
+
+Eigenes SMTP loest beides plus die Zustellbarkeit (Supabase-Standardversand
+landet oft im Spam). Resend ist naheliegend: kostenlos bis 3.000 Mails/Monat,
+und die Domain kialia.app ist bereits vorhanden.
+
+**`supabase config push` ist derzeit nicht benutzbar** — es scheitert am
+Storage-Schema (`SchemaError(Missing key at ["databasePoolMode"])`, CLI 2.108
+gegen die aktuelle API). Ausserdem wollte der Push ungefragt `mfa.totp` von
+true auf false setzen. Bis das behoben ist: Auth-Einstellungen im Dashboard
+aendern, nicht per CLI.
+
 ## Produkt-Baustellen (unabhaengig von der Migration)
 
 - **Alle Reisedaten liegen im `localStorage`** (`src/lib/trip-store.ts`).

@@ -1,0 +1,11 @@
+E-Mail-Vorlagen fuer kialia.
+
+Warum Tabellen und Inline-Styles: E-Mail-Clients kennen kein modernes CSS.
+Outlook rendert mit Word, Gmail entfernt <style>-Bloecke. Jede Regel steht
+deshalb am Element. Webfonts (Jost/Newsreader) werden von den meisten Clients
+ignoriert — die Fallbacks sans-serif/Georgia tragen das Bild.
+
+Der Marken-Verlauf steht auf einer Zelle mit Volltonfarbe darunter: wo der
+Verlauf nicht kommt, bleibt Tintenviolett statt Weiss.
+
+Variablen von Supabase: {{ .ConfirmationURL }}, {{ .Email }}, {{ .SiteURL }}

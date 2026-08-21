@@ -14,6 +14,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IdeenRouteImport } from './routes/ideen'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as PacklisteRouteImport } from './routes/packliste'
+import { Route as PasswortNeuRouteImport } from './routes/passwort-neu'
 import { Route as PlanRouteImport } from './routes/plan'
 import { Route as TagebuchRouteImport } from './routes/tagebuch'
 
@@ -42,6 +43,11 @@ const PacklisteRoute = PacklisteRouteImport.update({
   path: '/packliste',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PasswortNeuRoute = PasswortNeuRouteImport.update({
+  id: '/passwort-neu',
+  path: '/passwort-neu',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlanRoute = PlanRouteImport.update({
   id: '/plan',
   path: '/plan',
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/ideen': typeof IdeenRoute
   '/onboarding': typeof OnboardingRoute
   '/packliste': typeof PacklisteRoute
+  '/passwort-neu': typeof PasswortNeuRoute
   '/plan': typeof PlanRoute
   '/tagebuch': typeof TagebuchRoute
 }
@@ -68,6 +75,7 @@ export interface FileRoutesByTo {
   '/ideen': typeof IdeenRoute
   '/onboarding': typeof OnboardingRoute
   '/packliste': typeof PacklisteRoute
+  '/passwort-neu': typeof PasswortNeuRoute
   '/plan': typeof PlanRoute
   '/tagebuch': typeof TagebuchRoute
 }
@@ -78,6 +86,7 @@ export interface FileRoutesById {
   '/ideen': typeof IdeenRoute
   '/onboarding': typeof OnboardingRoute
   '/packliste': typeof PacklisteRoute
+  '/passwort-neu': typeof PasswortNeuRoute
   '/plan': typeof PlanRoute
   '/tagebuch': typeof TagebuchRoute
 }
@@ -89,6 +98,7 @@ export interface FileRouteTypes {
     | '/ideen'
     | '/onboarding'
     | '/packliste'
+    | '/passwort-neu'
     | '/plan'
     | '/tagebuch'
   fileRoutesByTo: FileRoutesByTo
@@ -98,6 +108,7 @@ export interface FileRouteTypes {
     | '/ideen'
     | '/onboarding'
     | '/packliste'
+    | '/passwort-neu'
     | '/plan'
     | '/tagebuch'
   id:
@@ -107,6 +118,7 @@ export interface FileRouteTypes {
     | '/ideen'
     | '/onboarding'
     | '/packliste'
+    | '/passwort-neu'
     | '/plan'
     | '/tagebuch'
   fileRoutesById: FileRoutesById
@@ -117,6 +129,7 @@ export interface RootRouteChildren {
   IdeenRoute: typeof IdeenRoute
   OnboardingRoute: typeof OnboardingRoute
   PacklisteRoute: typeof PacklisteRoute
+  PasswortNeuRoute: typeof PasswortNeuRoute
   PlanRoute: typeof PlanRoute
   TagebuchRoute: typeof TagebuchRoute
 }
@@ -158,6 +171,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PacklisteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/passwort-neu': {
+      id: '/passwort-neu'
+      path: '/passwort-neu'
+      fullPath: '/passwort-neu'
+      preLoaderRoute: typeof PasswortNeuRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/plan': {
       id: '/plan'
       path: '/plan'
@@ -181,6 +201,7 @@ const rootRouteChildren: RootRouteChildren = {
   IdeenRoute: IdeenRoute,
   OnboardingRoute: OnboardingRoute,
   PacklisteRoute: PacklisteRoute,
+  PasswortNeuRoute: PasswortNeuRoute,
   PlanRoute: PlanRoute,
   TagebuchRoute: TagebuchRoute,
 }

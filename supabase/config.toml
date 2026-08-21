@@ -1,1 +1,44 @@
 project_id = "izxkcxqmzsaavkbprlfa"
+
+[auth]
+# Ohne gesetzte site_url faellt Supabase auf http://localhost:3000 zurueck und
+# schickt Bestaetigungslinks dorthin — genau das ist am 22.08.2026 passiert.
+site_url = "https://kialia.app"
+
+# emailRedirectTo wird gegen diese Liste geprueft. Steht eine Adresse nicht
+# drin, wird sie ignoriert und wieder site_url verwendet.
+additional_redirect_urls = [
+  "https://kialia.app/**",
+  "https://www.kialia.app/**",
+  "http://localhost:8080/**",
+  # Fuer den spaeteren Capacitor-Build kommt hier das native Schema dazu,
+  # z. B. "app.kialia://**" — erst eintragen, wenn die Huelle existiert.
+]
+
+jwt_expiry = 3600
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+# EXPLIZIT true. Die CLI-Vorgabe ist false; ohne diese Zeile wuerde ein
+# `config push` die Bestaetigungspflicht abschalten und jede beliebige
+# Adresse koennte sich registrieren.
+enable_confirmations = true
+double_confirm_changes = true
+
+# --- E-Mail-Vorlagen ---------------------------------------------------------
+# Auskommentiert, weil Supabase sie im Free-Tier mit dem eingebauten
+# Mailversand ablehnt:
+#   "Email template modification is not available for free tier projects
+#    using the default email provider."
+# Sobald eigenes SMTP konfiguriert ist (siehe docs/MIGRATION.md), diese vier
+# Zeilen wieder aktivieren und `supabase config push` erneut ausfuehren.
+# Die Vorlagen liegen fertig unter supabase/templates/.
+#
+# [auth.email.template.confirmation]
+# subject = "Bestätige deine Adresse · kialia"
+# content_path = "./supabase/templates/confirmation.html"
+#
+# [auth.email.template.recovery]
+# subject = "Neues Passwort für kialia"
+# content_path = "./supabase/templates/recovery.html"
