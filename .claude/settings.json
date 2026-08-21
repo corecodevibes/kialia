@@ -1,0 +1,45 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bun install)",
+      "Bash(bun run build)",
+      "Bash(bun run lint)",
+      "Bash(bun run format)",
+      "Bash(bunx tsc:*)",
+      "Bash(bunx prettier:*)",
+      "Bash(bunx eslint:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git branch:*)",
+      "Bash(git checkout:*)",
+      "Bash(git switch:*)",
+      "Bash(git stash:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(find:*)",
+      "Bash(sed -n:*)",
+      "Bash(supabase migration list:*)",
+      "Bash(supabase db diff:*)",
+      "Bash(supabase gen types:*)"
+    ],
+    "deny": [
+      "Bash(rm -rf:*)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git rebase:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(supabase db reset:*)",
+      "Read(./.env)",
+      "Read(./.env.local)"
+    ]
+  }
+}
