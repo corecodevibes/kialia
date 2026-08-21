@@ -118,25 +118,55 @@ function cat(name: string, items: string[]): PackCategory {
 
 export function defaultPacking(): PackCategory[] {
   return [
-    cat("Hygieneartikel", ["Zahnbürste & Zahnpasta", "Duschgel & Shampoo", "Deo", "Sonnencreme", "Rasierer"]),
-    cat("Medikamente / Notfall", ["Persönliche Medikamente", "Schmerztabletten", "Pflaster & Verband", "Reiseübelkeit", "Elektrolyte"]),
+    cat("Hygieneartikel", [
+      "Zahnbürste & Zahnpasta",
+      "Duschgel & Shampoo",
+      "Deo",
+      "Sonnencreme",
+      "Rasierer",
+    ]),
+    cat("Medikamente / Notfall", [
+      "Persönliche Medikamente",
+      "Schmerztabletten",
+      "Pflaster & Verband",
+      "Reiseübelkeit",
+      "Elektrolyte",
+    ]),
     cat("Kleidung – Jacken & Mäntel", ["Regenjacke", "Übergangsjacke"]),
     cat("Kleidung – Oberteile", ["T-Shirts", "Pullover", "Hemd / Bluse"]),
     cat("Kleidung – Unterteile", ["Hosen", "Shorts", "Rock / Kleid"]),
     cat("Unterwäsche & Socken", ["Unterwäsche", "Socken", "Badesachen"]),
     cat("Schuhe", ["Sneaker", "Sandalen", "Wanderschuhe"]),
     cat("Sportkleidung", ["Sport-Shirt", "Sporthose", "Sportschuhe"]),
-    cat("Dokumente & Technik", ["Ausweis / Reisepass", "Ladekabel", "Powerbank", "Adapter", "Versicherungskarte"]),
+    cat("Dokumente & Technik", [
+      "Ausweis / Reisepass",
+      "Ladekabel",
+      "Powerbank",
+      "Adapter",
+      "Versicherungskarte",
+    ]),
     cat("Spielutensilien", ["Kartenspiel", "Buch", "Kopfhörer"]),
   ];
 }
 
 export function kidsPacking(): PackCategory {
-  return cat("Kinder", ["Windeln / Feuchttücher", "Lieblingskuscheltier", "Snacks", "Kindermedikamente", "Wechselkleidung"]);
+  return cat("Kinder", [
+    "Windeln / Feuchttücher",
+    "Lieblingskuscheltier",
+    "Snacks",
+    "Kindermedikamente",
+    "Wechselkleidung",
+  ]);
 }
 
 export function petsPacking(): PackCategory {
-  return cat("Haustiere", ["Futter & Napf", "Leine & Geschirr", "Impfpass", "Transportbox", "Spielzeug"]);
+  return cat("Haustiere", [
+    "Futter & Napf",
+    "Leine & Geschirr",
+    "Impfpass",
+    "Transportbox",
+    "Spielzeug",
+  ]);
 }
 
 export function newTrip(destination = ""): Trip {
@@ -191,7 +221,9 @@ export function loadStore(): Store {
       const parsed = JSON.parse(raw) as Partial<Store>;
       const trips = (parsed.trips ?? []).map(normalize);
       if (trips.length) {
-        const activeId = trips.some((t) => t.id === parsed.activeId) ? parsed.activeId! : trips[0]!.id;
+        const activeId = trips.some((t) => t.id === parsed.activeId)
+          ? parsed.activeId!
+          : trips[0]!.id;
         return { trips, activeId };
       }
     }
@@ -269,14 +301,32 @@ export function useTrip() {
     [mutate],
   );
 
-  const selectTrip = useCallback(
-    (id: string) => mutate((s) => ({ ...s, activeId: id })),
+  const selectTrip = useCallback((id: string) => mutate((s) => ({ ...s, activeId: id })), [mutate]);
+
+  // Importierte Reise bekommt immer eine neue id, damit ein Import die
+  // gleichnamige eigene Reise nicht ueberschreibt.
+  const importTrip = useCallback(
+    (incoming: Partial<Trip>) => {
+      const t = { ...normalize(incoming), id: uid() };
+      mutate((s) => ({ trips: [...s.trips, t], activeId: t.id }));
+      return t.id;
+    },
     [mutate],
   );
 
   const trip = store.trips.find((t) => t.id === store.activeId) ?? store.trips[0] ?? emptyTrip;
 
-  return { trip, trips: store.trips, activeId: store.activeId, update, addTrip, removeTrip, selectTrip, ready };
+  return {
+    trip,
+    trips: store.trips,
+    activeId: store.activeId,
+    update,
+    addTrip,
+    removeTrip,
+    selectTrip,
+    importTrip,
+    ready,
+  };
 }
 
 export function tripDays(trip: Trip) {
@@ -330,4 +380,92 @@ export function normalizeUrl(url: string) {
   const u = url.trim();
   if (!u) return "";
   return /^https?:\/\//i.test(u) ? u : `https://${u}`;
+}
+
+/* ---------------------------------------------------------------------------
+ * Sicherung & Weitergabe
+ *
+ * Solange die Reisedaten ausschliesslich im localStorage liegen, sind sie genau
+ * einen geleerten Browser-Cache von der Loeschung entfernt. Export/Import ist
+ * die Ueberbrueckung, bis die Daten in Supabase liegen — und gleichzeitig der
+ * einzige heute ehrliche Weg, eine Reise an jemanden weiterzugeben.
+ * ------------------------------------------------------------------------ */
+
+export const TRIP_FILE_VERSION = 1;
+
+export type TripFile = {
+  kind: "kialia.trip";
+  version: number;
+  exportedAt: string;
+  trip: Trip;
+};
+
+function safeFileName(name: string) {
+  const base = name
+    .trim()
+    .replace(/[^\p{L}\p{N}]+/gu, "-")
+    .replace(/^-+|-+$/g, "");
+  return (base || "reise").toLowerCase().slice(0, 40);
+}
+
+export function tripToFile(trip: Trip): TripFile {
+  return {
+    kind: "kialia.trip",
+    version: TRIP_FILE_VERSION,
+    exportedAt: new Date().toISOString(),
+    trip,
+  };
+}
+
+/** Loest den Download einer einzelnen Reise als .json aus. */
+export function downloadTrip(trip: Trip) {
+  const blob = new Blob([JSON.stringify(tripToFile(trip), null, 2)], {
+    type: "application/json",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `kialia-${safeFileName(trip.destination)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  // Erst nach dem Klick freigeben, sonst bricht der Download in Safari ab.
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/** Sicherung aller Reisen — fuer den Fall, dass der Browser-Speicher wegfaellt. */
+export function downloadAllTrips(trips: Trip[]) {
+  const payload = {
+    kind: "kialia.backup" as const,
+    version: TRIP_FILE_VERSION,
+    exportedAt: new Date().toISOString(),
+    trips,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  const stamp = new Date().toISOString().slice(0, 10);
+  a.download = `kialia-sicherung-${stamp}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/**
+ * Liest eine exportierte Datei ein. Akzeptiert Einzelreise und Sicherung.
+ * Wirft mit einer Meldung, die direkt anzeigbar ist.
+ */
+export async function readTripFile(file: File): Promise<Partial<Trip>[]> {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(await file.text());
+  } catch {
+    throw new Error("Das ist keine gueltige kialia-Datei.");
+  }
+  const obj = parsed as { kind?: string; trip?: Partial<Trip>; trips?: Partial<Trip>[] };
+  if (obj?.kind === "kialia.trip" && obj.trip) return [obj.trip];
+  if (obj?.kind === "kialia.backup" && Array.isArray(obj.trips)) return obj.trips;
+  throw new Error("Die Datei stammt nicht aus kialia.");
 }

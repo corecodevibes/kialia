@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { Check, Copy, Plus, Trash2, Users, MapPin } from "lucide-react";
+import { useRef, useState, type ChangeEvent } from "react";
+import { Download, Upload, Plus, Trash2, Users, MapPin, ShieldAlert } from "lucide-react";
 import {
   AppShell,
   Card,
@@ -12,7 +12,15 @@ import {
   dateInputClass,
   inputClass,
 } from "@/components/app/AppShell";
-import { eur, tripDays, tripTotals, useTrip } from "@/lib/trip-store";
+import {
+  downloadAllTrips,
+  downloadTrip,
+  eur,
+  readTripFile,
+  tripDays,
+  tripTotals,
+  useTrip,
+} from "@/lib/trip-store";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -36,19 +44,36 @@ export const Route = createFileRoute("/")({
 });
 
 function HomeTab() {
-  const { trip, trips, activeId, update, addTrip, removeTrip, selectTrip, ready } = useTrip();
-  const [copied, setCopied] = useState(false);
+  const { trip, trips, activeId, update, addTrip, removeTrip, selectTrip, importTrip, ready } =
+    useTrip();
+  const fileInput = useRef<HTMLInputElement>(null);
+  const [ioMsg, setIoMsg] = useState<string | null>(null);
   const [newDest, setNewDest] = useState("");
   const days = tripDays(trip);
   const totals = tripTotals(trip);
 
-  async function share() {
+  function handleExportTrip() {
+    downloadTrip(trip);
+    setIoMsg(`„${trip.destination || "Reise"}“ als Datei gespeichert.`);
+  }
+
+  function handleBackup() {
+    downloadAllTrips(trips);
+    setIoMsg(
+      `Sicherung mit ${trips.length} ${trips.length === 1 ? "Reise" : "Reisen"} gespeichert.`,
+    );
+  }
+
+  async function handleImport(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
     try {
-      await navigator.clipboard.writeText(window.location.origin);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      setCopied(false);
+      const incoming = await readTripFile(file);
+      incoming.forEach((t) => importTrip(t));
+      setIoMsg(`${incoming.length} ${incoming.length === 1 ? "Reise" : "Reisen"} importiert.`);
+    } catch (err) {
+      setIoMsg(err instanceof Error ? err.message : "Import fehlgeschlagen.");
     }
   }
 
@@ -77,7 +102,9 @@ function HomeTab() {
                     onClick={() => selectTrip(t.id)}
                     className="flex flex-1 items-center gap-2 text-left"
                   >
-                    <MapPin className={`size-4 shrink-0 ${active ? "text-primary" : "text-muted-foreground"}`} />
+                    <MapPin
+                      className={`size-4 shrink-0 ${active ? "text-primary" : "text-muted-foreground"}`}
+                    />
                     <span className="min-w-0">
                       <span className="block truncate text-sm font-medium">
                         {t.destination || "Neue Reise"}
@@ -187,13 +214,43 @@ function HomeTab() {
           />
         </Card>
 
-        <PrimaryButton onClick={share}>
-          {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
-          {copied ? "Link kopiert" : "Link zum Teilen kopieren"}
-        </PrimaryButton>
-        <p className="px-2 text-center text-xs text-muted-foreground">
-          Teile den Link mit deinem Partner oder deiner Familie – so plant ihr gemeinsam weiter.
-        </p>
+        <Card>
+          <CardTitle>Sichern & weitergeben</CardTitle>
+          <p className="mt-1 flex items-start gap-2 text-xs leading-snug text-muted-foreground">
+            <ShieldAlert className="mt-0.5 size-4 shrink-0" />
+            <span>
+              Deine Reisen liegen aktuell nur in diesem Browser. Wer den Verlauf löscht, verliert
+              sie. Lege regelmäßig eine Sicherung an.
+            </span>
+          </p>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            <PrimaryButton onClick={handleExportTrip}>
+              <Download className="size-4" /> Diese Reise exportieren
+            </PrimaryButton>
+            <PrimaryButton onClick={() => fileInput.current?.click()}>
+              <Upload className="size-4" /> Reise importieren
+            </PrimaryButton>
+          </div>
+          <button
+            type="button"
+            onClick={handleBackup}
+            className="mt-2 w-full rounded-xl px-3 py-2 text-xs font-semibold text-muted-foreground underline-offset-2 transition hover:underline"
+          >
+            Alle {trips.length} {trips.length === 1 ? "Reise" : "Reisen"} sichern
+          </button>
+          <input
+            ref={fileInput}
+            type="file"
+            accept="application/json,.json"
+            onChange={handleImport}
+            className="hidden"
+          />
+          {ioMsg && <p className="mt-2 text-center text-xs font-medium">{ioMsg}</p>}
+          <p className="mt-3 text-center text-xs text-muted-foreground">
+            Gemeinsames Planen in Echtzeit ist noch nicht gebaut. Bis dahin kannst du die Reisedatei
+            weitergeben — dein Partner importiert sie und plant seine Kopie.
+          </p>
+        </Card>
       </div>
     </AppShell>
   );

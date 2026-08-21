@@ -68,6 +68,10 @@ function DiaryTab() {
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [activeKey, setActiveKey] = useState<string | null>(null);
   const voice = useVoiceMemo();
+  // Transkription braucht ein konfiguriertes Backend. Ist keines da, zeigen wir
+  // den Mikrofon-Button gar nicht erst an, statt die Aufnahme ins Leere laufen
+  // zu lassen und den gesprochenen Text zu verlieren.
+  const voiceEnabled = import.meta.env.VITE_VOICE_ENABLED === "true";
 
   const set = (id: string, patch: Partial<DiaryEntry>) =>
     update({ diary: trip.diary.map((e) => (e.id === id ? { ...e, ...patch } : e)) });
@@ -120,6 +124,7 @@ function DiaryTab() {
   }
 
   function MemoButton({ entry, field }: { entry: DiaryEntry; field: FieldKey }) {
+    if (!voiceEnabled) return null;
     const key = `${entry.id}:${field}`;
     const isRec = voice.recording && activeKey === key;
     return (
@@ -153,7 +158,14 @@ function DiaryTab() {
   if (!ready) return <div className="min-h-screen bg-background" />;
 
   return (
-    <AppShell title="Reisetagebuch" subtitle="Sprich deinen Tag ein – wir schreiben ihn auf.">
+    <AppShell
+      title="Reisetagebuch"
+      subtitle={
+        voiceEnabled
+          ? "Sprich deinen Tag ein – wir schreiben ihn auf."
+          : "Halte jeden Reisetag fest."
+      }
+    >
       <div className="space-y-4 print:hidden">
         <Card>
           <Stat label="Bisher ausgegeben" value={eur(totalSpent)} />
@@ -161,6 +173,13 @@ function DiaryTab() {
             <Plus className="size-4" /> Neuer Tag
           </PrimaryButton>
         </Card>
+
+        {!voiceEnabled && (
+          <p className="rounded-2xl bg-muted px-4 py-3 text-xs leading-snug text-muted-foreground">
+            Das Diktieren ist gerade abgeschaltet — die Sprachfunktion wird nach dem Umzug auf das
+            eigene Backend neu angebunden. Tippen funktioniert wie gewohnt.
+          </p>
+        )}
 
         {voice.error && (
           <p className="rounded-2xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
