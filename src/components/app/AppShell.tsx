@@ -1,4 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { eur } from "@/lib/trip-store";
 import { Home, Lightbulb, Wallet, BookOpen, Backpack, LogOut } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
 import logo from "@/assets/travelivibes-logo.png";
@@ -169,6 +170,20 @@ export function FieldRow({ children }: { children: ReactNode }) {
   return (
     <div className="grid grid-cols-1 gap-3 min-[340px]:grid-cols-2 [&>*]:min-w-0">{children}</div>
   );
+}
+
+/**
+ * Ein Geldbetrag.
+ *
+ * Tabellarische Ziffern sind hier nicht Kosmetik: Beträge stehen in dieser App
+ * untereinander und ändern sich beim Tippen. Mit proportionalen Ziffern
+ * springt die Spalte bei jeder Eingabe, weil eine 1 schmaler ist als eine 8.
+ *
+ * Bewusst als Komponente statt als Klasse an jeder Fundstelle — so ist auch
+ * jeder künftige Betrag richtig gesetzt, ohne dass jemand daran denken muss.
+ */
+export function Money({ value, className = "" }: { value: number; className?: string }) {
+  return <span className={`tabular-nums ${className}`.trim()}>{eur(value)}</span>;
 }
 
 export const inputClass =

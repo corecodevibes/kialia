@@ -11,6 +11,7 @@ import {
   Stat,
   dateInputClass,
   inputClass,
+  Money,
 } from "@/components/app/AppShell";
 import { eur, nextDiaryDay, todayLocalISO, uid, useTrip, type DiaryEntry } from "@/lib/trip-store";
 import { useVoiceMemo } from "@/lib/use-voice-memo";
@@ -171,7 +172,7 @@ function DiaryTab() {
     >
       <div className="space-y-4 print:hidden">
         <Card>
-          <Stat label="Bisher ausgegeben" value={eur(totalSpent)} />
+          <Stat label="Bisher ausgegeben" value=<Money value={totalSpent} /> />
           <PrimaryButton onClick={addDay} className="mt-3">
             <Plus className="size-4" /> Neuer Tag
           </PrimaryButton>
@@ -335,7 +336,9 @@ function DiaryTab() {
               <section className="print-block">
                 <h3>Ausgaben</h3>
                 <p>{e.expenses || "—"}</p>
-                <p className="print-total">Summe: {eur(e.spent || 0)}</p>
+                <p className="print-total">
+                  Summe: <Money value={e.spent || 0} />
+                </p>
               </section>
             )}
           </article>

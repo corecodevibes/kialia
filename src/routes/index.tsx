@@ -11,11 +11,11 @@ import {
   PrimaryButton,
   dateInputClass,
   inputClass,
+  Money,
 } from "@/components/app/AppShell";
 import {
   downloadAllTrips,
   downloadTrip,
-  eur,
   readTripFile,
   tripDays,
   tripTotals,
@@ -208,7 +208,7 @@ function HomeTab() {
             hint={
               <>
                 <Users className="mr-1 inline size-4" />
-                {trip.travellers} Personen · bisher geplant {eur(totals.total)}
+                {trip.travellers} Personen · bisher geplant <Money value={totals.total} />
               </>
             }
           />

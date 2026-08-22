@@ -13,6 +13,7 @@ import {
   dateInputClass,
   inputClass,
   selectClass,
+  Money,
 } from "@/components/app/AppShell";
 import { StatusPicker } from "@/components/app/bits";
 
@@ -365,7 +366,7 @@ function PlanTab() {
             </Field>
           </div>
           <p className={`mt-3 text-sm ${overMax ? "text-destructive" : "text-muted-foreground"}`}>
-            Geplant: {eur(perDay)} pro Tag
+            Geplant: <Money value={perDay} /> pro Tag
             {overMax ? ` – ${eur(perDay - trip.meals.maxPerDay)} über deinem Limit.` : "."}
           </p>
         </Card>
@@ -450,17 +451,23 @@ function PlanTab() {
         <Card>
           <CardTitle>Geplant</CardTitle>
           <p className="mt-1 text-3xl font-extrabold tracking-tight tabular-nums">
-            {eur(totals.total)}
+            <Money value={totals.total} />
           </p>
           <div className="mt-3 space-y-1 text-sm text-muted-foreground">
-            <p>Fortbewegung: {eur(totals.transport)}</p>
-            <p>Unterkünfte: {eur(totals.stays)}</p>
             <p>
-              Essen: {eur(totals.food)} ({totals.days} Tage)
+              Fortbewegung: <Money value={totals.transport} />
             </p>
-            <p>Aktivitäten: {eur(totals.activities)}</p>
+            <p>
+              Unterkünfte: <Money value={totals.stays} />
+            </p>
+            <p>
+              Essen: <Money value={totals.food} /> ({totals.days} Tage)
+            </p>
+            <p>
+              Aktivitäten: <Money value={totals.activities} />
+            </p>
             <p className="pt-2 font-medium text-foreground">
-              Bereits bezahlt: {eur(totals.paid)} · offen: {eur(totals.open)}
+              Bereits bezahlt: <Money value={totals.paid} /> · offen: <Money value={totals.open} />
             </p>
           </div>
 
@@ -471,7 +478,9 @@ function PlanTab() {
             <div className="mt-4 rounded-2xl bg-secondary/40 p-3">
               <div className="flex items-baseline justify-between gap-3">
                 <CardTitle>Tatsächlich ausgegeben</CardTitle>
-                <span className="text-lg font-bold tabular-nums">{eur(totals.actual)}</span>
+                <span className="text-lg font-bold tabular-nums">
+                  <Money value={totals.actual} />
+                </span>
               </div>
               <p className="mt-1 text-xs text-muted-foreground">
                 Aus dem Tagebuch, {totals.actualDays}{" "}
@@ -480,10 +489,10 @@ function PlanTab() {
               </p>
               {totals.days > 0 && totals.actualDays > 0 && (
                 <p className="mt-2 text-xs text-muted-foreground">
-                  Im Schnitt {eur(totals.actual / totals.actualDays)} pro erfasstem Tag — bei{" "}
-                  {totals.days} Reisetagen wären das hochgerechnet{" "}
+                  Im Schnitt <Money value={totals.actual / totals.actualDays} /> pro erfasstem Tag —
+                  bei {totals.days} Reisetagen wären das hochgerechnet{" "}
                   <span className="tabular-nums">
-                    {eur((totals.actual / totals.actualDays) * totals.days)}
+                    <Money value={(totals.actual / totals.actualDays) * totals.days} />
                   </span>
                   . Eine Hochrechnung, keine Abrechnung.
                 </p>
@@ -545,20 +554,21 @@ function PlanTab() {
                       {plan.months !== null && plan.months < 0
                         ? "Das Reisedatum liegt in der Vergangenheit."
                         : "Die Reise beginnt noch diesen Monat."}{" "}
-                      Offen sind {eur(plan.open)}.
+                      Offen sind <Money value={plan.open} />.
                     </p>
                   </>
                 ) : plan.reason === "nothing-open" ? (
                   <>
                     <p className="mt-1 text-lg font-semibold">Alles beisammen</p>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      Gespartes und Kredit decken die geplanten {eur(plan.total)} bereits ab.
+                      Gespartes und Kredit decken die geplanten <Money value={plan.total} /> bereits
+                      ab.
                     </p>
                   </>
                 ) : (
                   <>
                     <p className="mt-1 text-2xl font-extrabold tracking-tight tabular-nums">
-                      {eur(plan.perMonth)} / Monat
+                      <Money value={plan.perMonth} /> / Monat
                     </p>
                     <p className="mt-1 text-xs text-muted-foreground">
                       {plan.months} {plan.months === 1 ? "Monat" : "Monate"}{" "}
@@ -572,15 +582,21 @@ function PlanTab() {
                 <dl className="mt-3 space-y-1 border-t border-foreground/10 pt-2 text-xs">
                   <div className="flex justify-between gap-3">
                     <dt className="text-muted-foreground">Geplante Kosten</dt>
-                    <dd className="tabular-nums">{eur(plan.total)}</dd>
+                    <dd className="tabular-nums">
+                      <Money value={plan.total} />
+                    </dd>
                   </div>
                   <div className="flex justify-between gap-3">
                     <dt className="text-muted-foreground">Gespart und Kredit</dt>
-                    <dd className="tabular-nums">− {eur(plan.covered)}</dd>
+                    <dd className="tabular-nums">
+                      − <Money value={plan.covered} />
+                    </dd>
                   </div>
                   <div className="flex justify-between gap-3 font-semibold">
                     <dt>Noch offen</dt>
-                    <dd className="tabular-nums">{eur(plan.open)}</dd>
+                    <dd className="tabular-nums">
+                      <Money value={plan.open} />
+                    </dd>
                   </div>
                 </dl>
               </div>
