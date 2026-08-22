@@ -593,3 +593,20 @@ export function nextDiaryDay(trip: Trip, now: Date = new Date()): number {
   const highest = trip.diary.reduce((max, e) => Math.max(max, e.day || 0), 0);
   return highest + 1;
 }
+
+/**
+ * Datum ausgeschrieben, wie man es in ein Buch druckt: "22. August 2026".
+ *
+ * Das Tagebuch wird als PDF zum Andenken — dort gehoert kein `2026-08-22` hin.
+ * Bewusst ueber parseLocalDate, damit der Tag nicht ueber die UTC-Grenze
+ * rutscht; leere oder unlesbare Werte geben "" zurueck statt "Invalid Date".
+ */
+export function formatDateLong(iso: string): string {
+  const d = parseLocalDate(iso);
+  if (!d) return "";
+  return new Intl.DateTimeFormat("de-DE", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(d);
+}

@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import {
+  formatDateLong,
   monthsUntil,
   nextDiaryDay,
   parseLocalDate,
@@ -224,5 +225,23 @@ describe("Tagebuch — Datum und Tagesnummer", () => {
   test("vor Reisebeginn fällt es auf die Zählung zurück, statt 0 oder negativ zu werden", () => {
     const t = tripWith({ startDate: "2026-06-14" });
     expect(nextDiaryDay(t, new Date(2026, 5, 1))).toBe(1);
+  });
+});
+
+describe("formatDateLong", () => {
+  test("schreibt das Datum aus, wie es ins gedruckte Buch gehört", () => {
+    expect(formatDateLong("2026-08-22")).toBe("22. August 2026");
+    expect(formatDateLong("2026-01-01")).toBe("1. Januar 2026");
+  });
+
+  test("gibt bei fehlendem oder kaputtem Datum nichts zurück statt 'Invalid Date'", () => {
+    expect(formatDateLong("")).toBe("");
+    expect(formatDateLong("22.08.2026")).toBe("");
+  });
+
+  test("rutscht nicht über die UTC-Grenze", () => {
+    // Der Test läuft unter TZ=America/New_York. Naives Parsen ergäbe hier den
+    // Vortag; formatDateLong muss den gemeinten Tag zeigen.
+    expect(formatDateLong("2026-06-14")).toBe("14. Juni 2026");
   });
 });

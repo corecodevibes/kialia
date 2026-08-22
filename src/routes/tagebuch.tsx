@@ -13,7 +13,14 @@ import {
   inputClass,
   Money,
 } from "@/components/app/AppShell";
-import { eur, nextDiaryDay, todayLocalISO, uid, useTrip, type DiaryEntry } from "@/lib/trip-store";
+import {
+  formatDateLong,
+  nextDiaryDay,
+  todayLocalISO,
+  uid,
+  useTrip,
+  type DiaryEntry,
+} from "@/lib/trip-store";
 import { useVoiceMemo } from "@/lib/use-voice-memo";
 import { transcribeMemo } from "@/lib/transcribe.functions";
 
@@ -313,29 +320,39 @@ function DiaryTab() {
               <span className="print-kicker">kialia · Reisetagebuch</span>
               <h2 className="print-day">{e.day}. Reisetag</h2>
               <span className="print-meta">
-                {[trip.destination, e.date].filter(Boolean).join(" · ")}
+                {[trip.destination, formatDateLong(e.date)].filter(Boolean).join(" · ")}
               </span>
             </header>
 
-            <section className="print-block">
-              <h3>Was heute passiert ist</h3>
-              <p>{e.text || "—"}</p>
-            </section>
+            {/* Nur drucken, was auch geschrieben wurde. Vorher stand in jedem
+                leeren Abschnitt ein "—" unter einer Überschrift — auf einem
+                Blatt, das jemand ins Fotoalbum legt, sind das Platzhalter für
+                nichts. */}
+            {e.text.trim() && (
+              <section className="print-block">
+                <h3>Was heute passiert ist</h3>
+                <p>{e.text}</p>
+              </section>
+            )}
 
-            <section className="print-block">
-              <h3>Highlight</h3>
-              <p>{e.highlight || "—"}</p>
-            </section>
+            {e.highlight.trim() && (
+              <section className="print-block">
+                <h3>Highlight</h3>
+                <p>{e.highlight}</p>
+              </section>
+            )}
 
-            <section className="print-block">
-              <h3>Merke dir</h3>
-              <p>{e.notes || "—"}</p>
-            </section>
+            {e.notes.trim() && (
+              <section className="print-block">
+                <h3>Merke dir</h3>
+                <p>{e.notes}</p>
+              </section>
+            )}
 
-            {withBudget && (
+            {withBudget && (e.expenses.trim() || (e.spent || 0) > 0) && (
               <section className="print-block">
                 <h3>Ausgaben</h3>
-                <p>{e.expenses || "—"}</p>
+                {e.expenses.trim() && <p>{e.expenses}</p>}
                 <p className="print-total">
                   Summe: <Money value={e.spent || 0} />
                 </p>
