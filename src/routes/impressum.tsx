@@ -29,8 +29,9 @@ function ImprintPage() {
 
       <H2>Streitbeilegung</H2>
       <p>
-        Wir sind weder bereit noch verpflichtet, an Streitbeilegungsverfahren vor einer
-        Verbraucherschlichtungsstelle teilzunehmen.
+        Der Anbieter betreibt kialia privat und nimmt an keinem Streitbeilegungsverfahren vor einer
+        Verbraucherschlichtungsstelle teil. Bei Problemen genügt eine Nachricht an die oben genannte
+        Adresse — das ist der schnellere Weg.
       </p>
     </LegalPage>
   );

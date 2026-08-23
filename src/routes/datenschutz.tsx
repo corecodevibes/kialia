@@ -89,12 +89,20 @@ function PrivacyPage() {
         ihr die Daten der Website im Browser entfernt oder die App deinstalliert.
       </p>
 
+      <H2>Welches Recht gilt</H2>
+      <p>
+        Der Anbieter sitzt in der Schweiz, es gilt das Schweizer Datenschutzgesetz (DSG). Weil sich
+        die App auch an Nutzerinnen und Nutzer in der EU richtet, gilt zusätzlich die
+        Datenschutz-Grundverordnung. Die Daten liegen in Frankfurt, also innerhalb der EU.
+      </p>
+
       <H2>Eure Rechte</H2>
       <p>
-        Auskunft, Berichtigung, Löschung, Einschränkung, Datenübertragbarkeit und Widerspruch nach
-        der Datenschutz-Grundverordnung. Zusätzlich könnt ihr euch bei einer Aufsichtsbehörde
-        beschweren. Für Auskunft und Export genügt eine Nachricht an die oben genannte Adresse; das
-        Löschen geht direkt in der App.
+        Auskunft, Berichtigung, Löschung, Einschränkung, Datenübertragbarkeit und Widerspruch. Für
+        Auskunft und Export genügt eine Nachricht an die oben genannte Adresse; das Löschen geht
+        direkt in der App. Beschweren könnt ihr euch beim Eidgenössischen Datenschutz- und
+        Öffentlichkeitsbeauftragten (EDÖB) oder, wenn ihr in der EU wohnt, bei der
+        Datenschutzbehörde eures Landes.
       </p>
 
       <H2>Rechtsgrundlagen</H2>
@@ -102,7 +110,8 @@ function PrivacyPage() {
         Konto und Synchronisierung: Vertragserfüllung (Art. 6 Abs. 1 lit. b DSGVO). Die
         KI-Funktionen und die Kursabfrage: euer Auslösen der jeweiligen Funktion (Art. 6 Abs. 1 lit.
         a und b DSGVO). Betrieb und Sicherheit der Auslieferung: berechtigtes Interesse (Art. 6 Abs.
-        1 lit. f DSGVO).
+        1 lit. f DSGVO). Nach Schweizer Recht stützt sich die Bearbeitung auf euer Einverständnis
+        und auf die Erfüllung des Nutzungsverhältnisses.
       </p>
 
       <H2>Änderungen</H2>

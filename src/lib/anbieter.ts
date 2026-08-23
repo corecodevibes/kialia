@@ -24,11 +24,12 @@ export type Anbieter = {
 };
 
 export const ANBIETER: Anbieter = {
-  name: "",
-  strasse: "",
-  ort: "",
-  land: "",
-  email: "",
+  name: "Steffen Leier",
+  strasse: "Neptunstrasse 42",
+  ort: "8032 Zürich",
+  land: "Schweiz",
+  email: "code_n_core@gmx.ch",
+  // Privat betrieben, kein Handelsregistereintrag, keine Umsatzsteuerpflicht.
   firmenangaben: "",
   ustId: "",
 };
