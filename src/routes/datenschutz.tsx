@@ -56,9 +56,12 @@ function PrivacyPage() {
           <strong className="text-foreground">Reisetag einsprechen:</strong> die Tonaufnahme.
         </li>
         <li>
-          <strong className="text-foreground">Vorschläge und Kostenschätzung:</strong> das
-          Reiseziel, die Art der Reise, Dauer und Personenzahl — und, falls hinterlegt, euer
-          Reiseprofil aus den Einstellungen.
+          <strong className="text-foreground">Vorschläge fürs Ziel:</strong> das Reiseziel, die Art
+          der Reise und die Dauer — und, falls hinterlegt, euer Reiseprofil aus den Einstellungen.
+        </li>
+        <li>
+          <strong className="text-foreground">Kosten schätzen:</strong> das Reiseziel, die Art der
+          Reise und die Personenzahl.
         </li>
       </ul>
       <p>
