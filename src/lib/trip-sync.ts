@@ -80,14 +80,48 @@ export async function syncTrips(): Promise<{ ok: boolean; error?: string }> {
   // 1. Lokale Reisen: hochladen oder mit der Serverfassung vergleichen.
   for (const trip of local.trips) {
     if (!trip.remoteId) {
+      // Erst nachsehen, ob diese Reise oben schon existiert. Ohne diese
+      // Prüfung entsteht bei jedem fehlgeschlagenen Zurücklesen eine weitere
+      // Kopie — genau das ist am 23.08. passiert, weil die SELECT-Policy den
+      // Eigentümer im Moment des Anlegens noch nicht kannte.
+      const existing = remote.find((r) => (r.data as Trip)?.id === trip.id);
+      if (existing) {
+        merged.push(fromRow(existing));
+        seen.add(existing.id);
+        continue;
+      }
+
       const { data: created, error: insErr } = await db
         .from("trips")
         .insert({ owner_id: user.id, data: payload(trip) as never })
         .select("id, owner_id, invite_code, data, updated_at")
         .single();
+
       if (insErr || !created) {
-        // Hochladen ging nicht — der lokale Stand bleibt gültig.
-        merged.push(trip);
+        // Zurücklesen ging schief. Die Zeile kann trotzdem angelegt worden
+        // sein — deshalb einmal gezielt nachfragen statt blind erneut
+        // einzufügen.
+        const { data: found } = await db
+          .from("trips")
+          .select("id, owner_id, invite_code, data, updated_at")
+          .eq("owner_id", user.id)
+          .eq("data->>id", trip.id)
+          .order("updated_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (found) {
+          const row = found as unknown as Row;
+          merged.push({
+            ...trip,
+            remoteId: row.id,
+            inviteCode: row.invite_code,
+            updatedAt: row.updated_at,
+          });
+          seen.add(row.id);
+        } else {
+          merged.push(trip);
+        }
         continue;
       }
       const row = created as unknown as Row;

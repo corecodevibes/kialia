@@ -84,6 +84,14 @@ export type DiaryEntry = {
   food: string;
   /** Ein Wort statt Sternen — faerbt spaeter den Rueckblick. */
   mood: string;
+  /**
+   * Wer diesen Tag dokumentiert.
+   *
+   * Bearbeiten darf ihn jedes Mitglied — die Zuordnung ist eine Absprache,
+   * keine Sperre. Auf einer Reise zu zweit wechselt man sich sonst nicht ab
+   * und am Ende schreibt einer alles.
+   */
+  assignedTo: string;
 };
 
 export type PackItem = {
@@ -253,7 +261,12 @@ function normalize(t: Partial<Trip>): Trip {
     })),
     stays: (t.stays ?? []).map((x) => ({ ...x, address: x.address ?? "" })),
     activities: (t.activities ?? []).map((x) => ({ ...x, address: x.address ?? "" })),
-    diary: (t.diary ?? []).map((x) => ({ ...x, mood: x.mood ?? "", food: x.food ?? "" })),
+    diary: (t.diary ?? []).map((x) => ({
+      ...x,
+      mood: x.mood ?? "",
+      food: x.food ?? "",
+      assignedTo: x.assignedTo ?? "",
+    })),
   };
 }
 

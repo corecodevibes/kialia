@@ -305,6 +305,45 @@ function HomeTab() {
               </button>
             </form>
           </details>
+
+          {/* Beitreten gehoert hierher, nicht neben den eigenen Code: wer eine
+              Reise anlegt, soll seinen eigenen Code nicht eingeben muessen. */}
+          <details className="mt-2">
+            <summary className="cursor-pointer list-none text-center text-xs font-semibold text-muted-foreground">
+              Einer geteilten Reise beitreten
+            </summary>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setJoinMsg(null);
+                const res = await joinTrip(joinCode);
+                setJoinMsg(res.ok ? "Reise übernommen." : (res.error ?? "Hat nicht geklappt."));
+                if (res.ok) setJoinCode("");
+              }}
+              className="mt-2"
+            >
+              <Field label="Einer Reise beitreten">
+                <div className="flex items-center gap-2">
+                  <input
+                    value={joinCode}
+                    onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                    placeholder="Code eingeben"
+                    autoCapitalize="characters"
+                    autoCorrect="off"
+                    className={`${inputClass} tracking-[0.14em]`}
+                  />
+                  <button
+                    type="submit"
+                    disabled={joinCode.trim().length < 4}
+                    className="acrylic-warm shrink-0 rounded-xl px-4 py-2.5 text-sm font-semibold text-background disabled:opacity-50"
+                  >
+                    Beitreten
+                  </button>
+                </div>
+              </Field>
+              {joinMsg && <p className="mt-2 text-xs font-medium">{joinMsg}</p>}
+            </form>
+          </details>
         </Card>
 
         <Card>
@@ -398,6 +437,30 @@ function HomeTab() {
                   {copied ? "Kopiert" : "Kopieren"}
                 </button>
               </div>
+
+              {/* Verschicken statt vorlesen: das Teilen-Menue des Geraets
+                  erreicht WhatsApp, Nachrichten und Mail, ohne dass wir
+                  irgendetwas davon einbauen muessen. */}
+              <button
+                type="button"
+                onClick={async () => {
+                  const text = `Plane mit mir die Reise nach ${trip.destination} in kialia.\nCode: ${trip.inviteCode}\nhttps://kialia.app`;
+                  if (navigator.share) {
+                    try {
+                      await navigator.share({ title: "kialia", text });
+                    } catch {
+                      /* abgebrochen — kein Fehler */
+                    }
+                  } else {
+                    await navigator.clipboard.writeText(text);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                  }
+                }}
+                className="acrylic-warm mt-3 w-full rounded-2xl px-4 py-3 text-sm font-semibold text-background"
+              >
+                Einladung senden
+              </button>
               {members !== null && (
                 <p className="mt-2 text-xs text-muted-foreground">
                   {members === 1 ? "Bisher planst nur du mit." : `${members} Personen planen mit.`}
@@ -410,38 +473,6 @@ function HomeTab() {
               hier ein Code zum Teilen.
             </p>
           )}
-
-          <form
-            onSubmit={async (e) => {
-              e.preventDefault();
-              setJoinMsg(null);
-              const res = await joinTrip(joinCode);
-              setJoinMsg(res.ok ? "Reise übernommen." : (res.error ?? "Hat nicht geklappt."));
-              if (res.ok) setJoinCode("");
-            }}
-            className="mt-4"
-          >
-            <Field label="Einer Reise beitreten">
-              <div className="flex items-center gap-2">
-                <input
-                  value={joinCode}
-                  onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                  placeholder="Code eingeben"
-                  autoCapitalize="characters"
-                  autoCorrect="off"
-                  className={`${inputClass} tracking-[0.14em]`}
-                />
-                <button
-                  type="submit"
-                  disabled={joinCode.trim().length < 4}
-                  className="acrylic-warm shrink-0 rounded-xl px-4 py-2.5 text-sm font-semibold text-background disabled:opacity-50"
-                >
-                  Beitreten
-                </button>
-              </div>
-            </Field>
-            {joinMsg && <p className="mt-2 text-xs font-medium">{joinMsg}</p>}
-          </form>
         </Card>
 
         <Card>

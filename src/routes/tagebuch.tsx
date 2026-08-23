@@ -18,6 +18,7 @@ import {
 import {
   formatDateLong,
   missingDiaryDays,
+  travellerNames,
   nextDiaryDay,
   todayLocalISO,
   uid,
@@ -107,6 +108,7 @@ function DiaryTab() {
   const set = (id: string, patch: Partial<DiaryEntry>) =>
     update({ diary: trip.diary.map((e) => (e.id === id ? { ...e, ...patch } : e)) });
 
+  const people = travellerNames(trip);
   const missing = missingDiaryDays(trip);
 
   /** Legt für jeden noch fehlenden Reisetag einen leeren Eintrag an. */
@@ -125,6 +127,7 @@ function DiaryTab() {
           spent: 0,
           food: "",
           mood: "",
+          assignedTo: "",
         })),
       ].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : a.day - b.day)),
     });
@@ -148,6 +151,7 @@ function DiaryTab() {
           spent: 0,
           food: "",
           mood: "",
+          assignedTo: "",
         },
       ],
     });
@@ -278,6 +282,21 @@ function DiaryTab() {
                     onChange={(ev) => set(e.id, { date: ev.target.value })}
                     className={`${dateInputClass} py-1.5`}
                   />
+                </div>
+                <div className="w-[5.5rem] shrink-0">
+                  <select
+                    value={e.assignedTo}
+                    aria-label={`Wer dokumentiert Tag ${e.day}?`}
+                    onChange={(ev) => set(e.id, { assignedTo: ev.target.value })}
+                    className={`${inputClass} appearance-none px-2 py-1.5 text-xs`}
+                  >
+                    <option value="">Wer?</option>
+                    {people.map((n) => (
+                      <option key={n} value={n}>
+                        {n}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <DeleteButton
                   ariaLabel={`Tag ${e.day} löschen`}
