@@ -18,7 +18,10 @@ export function LinkList({
   function add() {
     const clean = normalizeUrl(url);
     if (!clean) return;
-    onChange([...links, { id: uid(), label: label.trim() || clean.replace(/^https?:\/\//, ""), url: clean }]);
+    onChange([
+      ...links,
+      { id: uid(), label: label.trim() || clean.replace(/^https?:\/\//, ""), url: clean },
+    ]);
     setUrl("");
     setLabel("");
   }
@@ -88,7 +91,9 @@ export function StatusPicker({
           type="button"
           onClick={() => onChange(s)}
           className={`min-w-0 truncate rounded-full border px-2 py-2 text-xs font-medium transition ${
-            value === s ? "border-primary bg-primary/10 text-primary" : "border-border bg-background text-muted-foreground"
+            value === s
+              ? "border-primary bg-primary/10 text-primary"
+              : "border-border bg-background text-muted-foreground"
           }`}
         >
           {statusLabels[s]}
@@ -97,4 +102,3 @@ export function StatusPicker({
     </div>
   );
 }
-
