@@ -1044,6 +1044,69 @@ export function missingDiaryDays(trip: Trip): { day: number; date: string }[] {
  * "Ich" steht immer vorn: die eigene Person ist der haeufigste Fall und soll
  * nicht erst getippt werden muessen.
  */
+/**
+ * Die Mitreisenden AUSSER mir.
+ *
+ * `companions` hat einen eingebauten Denkfehler: es speichert "die anderen"
+ * aus Sicht dessen, der es getippt hat. Steffen schreibt "Annalina" — und auf
+ * Annalinas Geraet steht dann unter "Mit wem?" ihr eigener Name, waehrend
+ * Steffen gar nicht auftaucht.
+ *
+ * Die Reise muss deshalb ALLE Namen kennen; wer gerade hinsieht, bekommt die
+ * Liste ohne sich selbst.
+ */
+export function otherTravellers(trip: Trip, myName?: string): string[] {
+  const me = (myName ?? "").trim();
+  return travellerNames(trip, myName).filter(
+    (n) => n.toLowerCase() !== (me || "ich").toLowerCase(),
+  );
+}
+
+/**
+ * Baut den gespeicherten Wert aus dem, was jemand ins Feld tippt.
+ *
+ * Getippt werden die anderen; gespeichert wird die vollstaendige Runde. Nur so
+ * sieht die andere Person spaeter den richtigen Namen.
+ */
+export function rosterFromOthers(others: string, myName?: string): string {
+  const me = (myName ?? "").trim();
+  const liste = others
+    .split(/,|\/|&|\bund\b/gi)
+    .map((v) => v.trim())
+    .filter(Boolean)
+    .filter((v) => v.toLowerCase() !== "ich");
+  const alle = me ? [me, ...liste] : liste;
+  const gesehen = new Set<string>();
+  return alle
+    .filter((n) => {
+      const k = n.toLowerCase();
+      if (gesehen.has(k)) return false;
+      gesehen.add(k);
+      return true;
+    })
+    .join(", ");
+}
+
+/**
+ * Traegt den eigenen Namen nach, falls er in einer geteilten Reise fehlt.
+ *
+ * Bestehende Reisen wurden angelegt, bevor die volle Runde gespeichert wurde.
+ * Jedes Geraet ergaenzt sich selbst; danach ist die Liste auf beiden Seiten
+ * vollstaendig. Gibt `null` zurueck, wenn nichts zu tun ist — sonst liefe bei
+ * jedem Abgleich eine Aenderung los.
+ */
+export function missingSelf(trip: Trip, myName?: string): string | null {
+  const me = (myName ?? "").trim();
+  if (!me) return null;
+  const drin = travellerNames(trip, me).some((n) => n.toLowerCase() === me.toLowerCase());
+  const roh = (trip.companions ?? "")
+    .split(/,|\/|&|\bund\b/gi)
+    .map((v) => v.trim())
+    .filter(Boolean);
+  if (drin && roh.some((n) => n.toLowerCase() === me.toLowerCase())) return null;
+  return rosterFromOthers(trip.companions ?? "", me);
+}
+
 export function travellerNames(trip: Trip, myName?: string): string[] {
   const raw = (trip.companions ?? "")
     .split(/,|\/|&|\bund\b/gi)

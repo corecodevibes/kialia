@@ -19,6 +19,7 @@ import { AiFeatures } from "@/components/app/ai-features";
 import { inviteUrl } from "@/lib/pending-invite";
 import { leaveTrip, syncTrips } from "@/lib/trip-sync";
 import { needsTypedConfirm } from "@/lib/trip-weight";
+import { useMyName } from "@/lib/auth";
 import { flagFor } from "@/lib/country";
 import { countMembers, joinTrip } from "@/lib/trip-sync";
 import { COMMON_CURRENCIES, fetchRate } from "@/lib/currency";
@@ -31,6 +32,9 @@ import {
   useTrip,
   formatDateLong,
   type Trip,
+  otherTravellers,
+  rosterFromOthers,
+  missingSelf,
 } from "@/lib/trip-store";
 
 export const Route = createFileRoute("/")({
@@ -69,6 +73,7 @@ function tripSummary(t: Trip): string {
 }
 
 function HomeTab() {
+  const myName = useMyName();
   const {
     trip,
     trips,
@@ -146,6 +151,16 @@ function HomeTab() {
     // dabei den Speicher der Web-App.
     void syncTrips();
   }
+  // Bestehende Reisen wurden angelegt, bevor die volle Runde gespeichert
+  // wurde. Jedes Geraet traegt sich selbst nach; danach ist die Liste auf
+  // beiden Seiten vollstaendig. `missingSelf` gibt null zurueck, sobald nichts
+  // mehr zu tun ist — sonst liefe bei jedem Abgleich eine Aenderung los.
+  useEffect(() => {
+    if (!hasTrip || !myName) return;
+    const ergaenzt = missingSelf(trip, myName);
+    if (ergaenzt !== null) update({ companions: ergaenzt });
+  }, [hasTrip, myName, trip, update]);
+
   const days = tripDays(trip);
   const totals = tripTotals(trip);
 
@@ -764,10 +779,14 @@ function HomeTab() {
               </Field>
             </FieldRow>
             <FieldRow>
-              <Field label="Mit wem?">
+              {/* Getippt werden die ANDEREN, gespeichert wird die ganze Runde.
+                  Vorher stand hier woertlich, was der Anlegende getippt hatte —
+                  auf Annalinas Geraet also ihr eigener Name, und Steffen kam
+                  gar nicht vor. Wer hinsieht, sieht jetzt immer die anderen. */}
+              <Field label={myName ? `Mit wem? (ausser ${myName})` : "Mit wem?"}>
                 <input
-                  value={trip.companions}
-                  onChange={(e) => update({ companions: e.target.value })}
+                  value={otherTravellers(trip, myName).join(", ")}
+                  onChange={(e) => update({ companions: rosterFromOthers(e.target.value, myName) })}
                   placeholder="Partner, Familie …"
                   className={inputClass}
                 />
