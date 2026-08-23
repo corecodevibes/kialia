@@ -36,6 +36,50 @@ export default defineConfig(({ mode, command }) => {
       tanstackStart({ server: { entry: "server" } }),
       nitro({
         preset: "cloudflare-module",
+        /**
+         * Die HTML-Antwort kam ohne jede Cache-Vorgabe. Dann entscheidet der
+         * Browser selbst, wie lange sie gilt — und Safari haelt eine zum
+         * Homescreen hinzugefuegte Web-App hartnaeckig fest. Ergebnis: eine
+         * Auslieferung ist draussen, aber auf dem Geraet aendert sich nichts,
+         * und niemand versteht warum. Genau das ist im Simulator passiert.
+         *
+         * Das HTML muss deshalb bei jedem Aufruf nachfragen; dank ETag kostet
+         * das im Normalfall nur eine leere Antwort. Die Dateien unter /assets
+         * tragen einen Hash im Namen und duerfen dafuer ewig liegen bleiben —
+         * bei einer neuen Fassung heissen sie ohnehin anders.
+         */
+        routeRules: {
+          // Seiten muessen bei jedem Aufruf nachfragen. Dank ETag kostet das
+          // im Normalfall eine leere Antwort.
+          //
+          // Bewusst einzeln aufgezaehlt statt "/**": eine Regel auf alles wird
+          // von nitro mit der Asset-Regel ZUSAMMENGEFUEHRT, und heraus kam
+          // "no-cache, public, max-age=31536000, immutable" — no-cache gewinnt,
+          // und die Dateien mit Hash im Namen wuerden bei jedem Start erneut
+          // erfragt. Nachgemessen, nicht vermutet.
+          //
+          // Kommt eine neue Seite dazu, gehoert sie hierhin. Vergisst man sie,
+          // faellt sie auf das bisherige Verhalten zurueck — unschoen, aber
+          // nicht kaputt.
+          "/": { headers: { "cache-control": "no-cache" } },
+          "/auth": { headers: { "cache-control": "no-cache" } },
+          "/onboarding": { headers: { "cache-control": "no-cache" } },
+          "/plan": { headers: { "cache-control": "no-cache" } },
+          "/ideen": { headers: { "cache-control": "no-cache" } },
+          "/packliste": { headers: { "cache-control": "no-cache" } },
+          "/tagebuch": { headers: { "cache-control": "no-cache" } },
+          "/einstellungen": { headers: { "cache-control": "no-cache" } },
+          "/passwort-neu": { headers: { "cache-control": "no-cache" } },
+          "/datenschutz": { headers: { "cache-control": "no-cache" } },
+          "/impressum": { headers: { "cache-control": "no-cache" } },
+          // Hash im Namen: eine neue Fassung heisst ohnehin anders.
+          "/assets/**": {
+            headers: { "cache-control": "public, max-age=31536000, immutable" },
+          },
+          "/fonts/**": {
+            headers: { "cache-control": "public, max-age=31536000, immutable" },
+          },
+        },
         cloudflare: {
           wrangler: {
             // Explizit gesetzt: ohne name leitet nitro ihn aus der Git-Remote ab
