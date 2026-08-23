@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
   formatDateLong,
+  tripItinerary,
   monthsUntil,
   nextDiaryDay,
   parseLocalDate,
@@ -243,5 +244,88 @@ describe("formatDateLong", () => {
     // Der Test läuft unter TZ=America/New_York. Naives Parsen ergäbe hier den
     // Vortag; formatDateLong muss den gemeinten Tag zeigen.
     expect(formatDateLong("2026-06-14")).toBe("14. Juni 2026");
+  });
+});
+
+describe("tripItinerary", () => {
+  const stay = (id: string, name: string, from: string, to: string, cost = 0) => ({
+    id, name, url: "", from, to, cost, status: "offen" as const, dueDate: "", board: "nichts" as const,
+  });
+  const transport = (id: string, label: string, date: string) => ({
+    id, mode: "Flugzeug", label, cost: 0, status: "offen" as const, dueDate: "", date, note: "", url: "",
+  });
+
+  test("sortiert nach Datum, egal in welcher Reihenfolge erfasst wurde", () => {
+    const t = tripWith({
+      startDate: "2026-06-01",
+      stays: [stay("b", "Chania", "2026-06-05", "2026-06-08"), stay("a", "Heraklion", "2026-06-01", "2026-06-05")],
+      transports: [transport("f", "Zürich → Kreta", "2026-06-01")],
+    });
+    const it = tripItinerary(t);
+    expect(it.stops.map((s) => s.title)).toEqual(["Zürich → Kreta", "Heraklion", "Chania"]);
+  });
+
+  test("meldet Nächte ohne Unterkunft — der teuerste Planungsfehler", () => {
+    const t = tripWith({
+      stays: [stay("a", "Heraklion", "2026-06-01", "2026-06-05"), stay("b", "Chania", "2026-06-07", "2026-06-09")],
+    });
+    const it = tripItinerary(t);
+    expect(it.gaps).toHaveLength(1);
+    expect(it.gaps[0]?.nights).toBe(2);
+  });
+
+  test("verschluckt Undatiertes nicht, sondern weist es aus", () => {
+    const t = tripWith({
+      stays: [stay("a", "Noch offen", "", "")],
+      transports: [transport("f", "Rückflug", "")],
+    });
+    const it = tripItinerary(t);
+    expect(it.stops).toHaveLength(0);
+    expect(it.undated.map((u) => u.title)).toEqual(["Noch offen", "Rückflug"]);
+  });
+
+  test("zählt Nächte und den Reisetag korrekt", () => {
+    const t = tripWith({
+      startDate: "2026-06-01",
+      stays: [stay("a", "Heraklion", "2026-06-03", "2026-06-06")],
+    });
+    const s = tripItinerary(t).stops[0]!;
+    expect(s.nights).toBe(3);
+    expect(s.day).toBe(3);
+  });
+
+  test("ohne Reisedatum bleibt der Reisetag leer statt geraten zu werden", () => {
+    const t = tripWith({ stays: [stay("a", "Heraklion", "2026-06-03", "2026-06-06")] });
+    expect(tripItinerary(t).stops[0]?.day).toBeNull();
+  });
+});
+
+describe("savingsPlan — Fortschritt", () => {
+  const stay = (cost: number) => ({
+    id: "s", name: "", url: "", from: "", to: "", cost,
+    status: "offen" as const, dueDate: "", board: "nichts" as const,
+  });
+
+  test("rechnet den Anteil der gedeckten Kosten", () => {
+    const t = tripWith({
+      startDate: "2026-06-25",
+      savings: { enabled: true, saved: 2480, monthsLeft: 6, credit: 0 },
+      stays: [stay(4000)],
+    });
+    const plan = savingsPlan(t, tripTotals(t), new Date(2026, 1, 20));
+    expect(plan.progress).toBeCloseTo(0.62, 2);
+  });
+
+  test("eine leere Reise zeigt keinen vollen Balken", () => {
+    const t = tripWith({ savings: { enabled: true, saved: 0, monthsLeft: 6, credit: 0 } });
+    expect(savingsPlan(t, tripTotals(t)).progress).toBe(0);
+  });
+
+  test("mehr gespart als nötig füllt den Balken, läuft aber nicht über", () => {
+    const t = tripWith({
+      savings: { enabled: true, saved: 9000, monthsLeft: 6, credit: 0 },
+      stays: [stay(4000)],
+    });
+    expect(savingsPlan(t, tripTotals(t)).progress).toBe(1);
   });
 });

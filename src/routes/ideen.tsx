@@ -1,9 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Lightbulb, Plus } from "lucide-react";
-import { AppShell, Card, CardTitle, DeleteButton, PrimaryButton, inputClass } from "@/components/app/AppShell";
+import { ArrowRight, Lightbulb, Plus } from "lucide-react";
+import {
+  AppShell,
+  Card,
+  CardTitle,
+  DeleteButton,
+  PrimaryButton,
+  inputClass,
+} from "@/components/app/AppShell";
 import { LinkList } from "@/components/app/bits";
-import { uid, useTrip, type LinkItem } from "@/lib/trip-store";
+import { normalizeUrl, uid, useTrip, type Idea, type LinkItem } from "@/lib/trip-store";
 
 export const Route = createFileRoute("/ideen")({
   head: () => ({
@@ -29,6 +36,7 @@ export const Route = createFileRoute("/ideen")({
 function IdeasTab() {
   const { trip, update, ready } = useTrip();
   const [text, setText] = useState("");
+  const [moved, setMoved] = useState<string | null>(null);
 
   function add() {
     if (!text.trim()) return;
@@ -39,11 +47,45 @@ function IdeasTab() {
   const setLinks = (id: string, links: LinkItem[]) =>
     update({ ideas: trip.ideas.map((i) => (i.id === id ? { ...i, links } : i)) });
 
+  /**
+   * Idee in den Plan uebernehmen.
+   *
+   * Die Sammlung hatte bisher keinen Ausgang — kein einziger Verweis auf Plan,
+   * Aktivitaeten oder Unterkuenfte. Eine Sammelstelle ohne Ausgang fuellt sich
+   * einmal und wird nie wieder geoeffnet.
+   *
+   * Die Idee wird bewusst verschoben, nicht kopiert: sonst steht dieselbe Sache
+   * an zwei Orten und niemand weiss, welche gilt.
+   */
+  function toPlan(idea: Idea) {
+    update({
+      ideas: trip.ideas.filter((i) => i.id !== idea.id),
+      activities: [
+        ...trip.activities,
+        {
+          id: uid(),
+          name: idea.text.trim().slice(0, 120),
+          url: normalizeUrl(idea.links[0]?.url ?? ""),
+          cost: 0,
+          status: "offen",
+          dueDate: "",
+        },
+      ],
+    });
+    setMoved(idea.text.trim().slice(0, 60));
+  }
+
   if (!ready) return <div className="min-h-screen bg-background" />;
 
   return (
     <AppShell title="Ideensammlung" subtitle="Alles, was ihr sehen, essen und erleben wollt.">
       <div className="space-y-4">
+        {moved && (
+          <p role="status" className="rounded-2xl bg-secondary px-4 py-3 text-sm">
+            „{moved}“ steht jetzt unter <span className="font-semibold">Plan → Aktivitäten</span>.
+          </p>
+        )}
+
         <Card>
           <CardTitle>Neue Idee</CardTitle>
           <textarea
@@ -72,6 +114,14 @@ function IdeasTab() {
             <div className="mt-3">
               <LinkList links={idea.links} onChange={(l) => setLinks(idea.id, l)} />
             </div>
+            <button
+              type="button"
+              onClick={() => toPlan(idea)}
+              disabled={!idea.text.trim()}
+              className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-secondary py-2.5 text-xs font-semibold transition hover:bg-secondary/70 disabled:opacity-50"
+            >
+              <ArrowRight className="size-3.5" /> In den Plan übernehmen
+            </button>
           </Card>
         ))}
 

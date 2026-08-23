@@ -31,6 +31,8 @@ import {
   type Stay,
   type Transport,
   type Trip,
+  formatDateLong,
+  tripItinerary,
 } from "@/lib/trip-store";
 
 export const Route = createFileRoute("/plan")({
@@ -89,6 +91,9 @@ function PlanTab() {
   return (
     <AppShell title="Plan" subtitle="Fortbewegung, Unterkunft, Essen und Aktivitäten.">
       <div className="space-y-3">
+        <SectionTitle>Reiseverlauf</SectionTitle>
+        <Itinerary trip={trip} />
+
         <SectionTitle>Fortbewegungsmittel</SectionTitle>
         {trip.transports.map((t, i) => (
           <Card key={t.id}>
@@ -124,6 +129,14 @@ function PlanTab() {
                   </button>
                 ))}
               </div>
+              <Field label="Wann reist ihr?">
+                <input
+                  type="date"
+                  value={t.date}
+                  onChange={(e) => setTransport(t.id, { date: e.target.value })}
+                  className={dateInputClass}
+                />
+              </Field>
               <FieldRow>
                 <Field label="Kosten (€)">
                   <input
@@ -188,6 +201,7 @@ function PlanTab() {
                   label: "",
                   cost: 0,
                   status: "offen",
+                  date: "",
                   dueDate: "",
                   note: "",
                   url: "",
@@ -577,6 +591,35 @@ function PlanTab() {
                   </>
                 )}
 
+                {/* Fortschritt statt nackter Zahl. Zwischen zwei Reisen ist das
+                    der einzige Grund, diese App zu oeffnen — ein Balken, der
+                    sich bewegt, traegt zwoelf Monate, eine Monatsrate nicht. */}
+                {plan.total > 0 && (
+                  <div className="mt-3">
+                    <div
+                      className="h-2.5 w-full overflow-hidden rounded-full bg-foreground/10"
+                      role="progressbar"
+                      aria-valuenow={Math.round(plan.progress * 100)}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-label="Sparfortschritt"
+                    >
+                      <div
+                        className="acrylic-warm h-full rounded-full transition-[width] duration-500 ease-out"
+                        style={{
+                          width: `${Math.max(plan.progress * 100, plan.covered > 0 ? 3 : 0)}%`,
+                        }}
+                      />
+                    </div>
+                    <p className="mt-1.5 text-xs text-muted-foreground">
+                      <span className="font-semibold text-foreground tabular-nums">
+                        {Math.round(plan.progress * 100)} %
+                      </span>{" "}
+                      beisammen — <Money value={plan.covered} /> von <Money value={plan.total} />
+                    </p>
+                  </div>
+                )}
+
                 {/* Herkunft der Zahl — eine Zahl ohne erkennbare Herkunft
                     glaubt niemand zweimal. */}
                 <dl className="mt-3 space-y-1 border-t border-foreground/10 pt-2 text-xs">
@@ -605,5 +648,89 @@ function PlanTab() {
         </Card>
       </div>
     </AppShell>
+  );
+}
+
+/**
+ * Der Reiseverlauf.
+ *
+ * Die Daten dafuer lagen laengst im Modell — Unterkuenfte haben Von/Bis,
+ * Transporte jetzt ein Reisedatum. Sie wurden nur nie als Reise dargestellt,
+ * sondern als Kostenliste. Was kein Datum hat, wird unten ausgewiesen statt
+ * geraten: eine Reise mit unbekannter Reihenfolge soll als solche sichtbar
+ * sein.
+ */
+function Itinerary({ trip }: { trip: Trip }) {
+  const { stops, gaps, undated } = tripItinerary(trip);
+  const gapAfter = new Map(gaps.map((g) => [g.from, g]));
+
+  if (!stops.length && !undated.length) {
+    return (
+      <Card>
+        <p className="text-sm text-muted-foreground">
+          Sobald Unterkünfte oder Fahrten ein Datum haben, entsteht hier euer Verlauf — mit
+          Reisetagen, Nächten und den Lücken, für die noch nichts gebucht ist.
+        </p>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      {stops.length > 0 && (
+        <ol className="space-y-3">
+          {stops.map((s) => {
+            const gap = s.kind === "stay" && s.endDate ? gapAfter.get(s.endDate) : undefined;
+            return (
+              <li key={`${s.kind}-${s.id}`}>
+                <div className="flex items-baseline gap-3">
+                  <span className="w-14 shrink-0 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground tabular-nums">
+                    {s.day ? `Tag ${s.day}` : formatDateLong(s.date).split(" ")[0]}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold">{s.title}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {[
+                        formatDateLong(s.date),
+                        s.nights > 0 ? `${s.nights} ${s.nights === 1 ? "Nacht" : "Nächte"}` : "",
+                        s.detail,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </p>
+                  </div>
+                  {s.cost > 0 && (
+                    <span className="shrink-0 text-xs text-muted-foreground">
+                      <Money value={s.cost} />
+                    </span>
+                  )}
+                </div>
+
+                {gap && (
+                  <p className="ml-[4.25rem] mt-2 rounded-xl bg-destructive/10 px-3 py-1.5 text-xs text-destructive">
+                    {gap.nights} {gap.nights === 1 ? "Nacht" : "Nächte"} ohne Unterkunft
+                  </p>
+                )}
+              </li>
+            );
+          })}
+        </ol>
+      )}
+
+      {undated.length > 0 && (
+        <div className={stops.length ? "mt-4 border-t border-foreground/10 pt-3" : ""}>
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Noch ohne Datum
+          </p>
+          <ul className="mt-1.5 space-y-1">
+            {undated.map((u) => (
+              <li key={`${u.kind}-${u.id}`} className="truncate text-sm text-muted-foreground">
+                {u.title}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </Card>
   );
 }

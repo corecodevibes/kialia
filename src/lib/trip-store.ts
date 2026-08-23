@@ -16,7 +16,11 @@ export type Transport = {
   label: string;
   cost: number;
   status: PayStatus;
+  /** Wann bezahlt sein muss. */
   dueDate: string;
+  /** Wann tatsaechlich gereist wird. Ohne das laesst sich ein Flug nicht in
+      den Reiseverlauf einordnen — dueDate ist die Zahlung, nicht die Fahrt. */
+  date: string;
   note: string;
   url: string;
 };
@@ -68,6 +72,8 @@ export type DiaryEntry = {
   notes: string;
   expenses: string;
   spent: number;
+  /** Ein Wort statt Sternen — faerbt spaeter den Rueckblick. */
+  mood: string;
 };
 
 export type PackItem = {
@@ -207,6 +213,16 @@ function normalize(t: Partial<Trip>): Trip {
     meals: { ...base.meals, ...t.meals },
     savings: { ...base.savings, ...t.savings },
     packing: t.packing && t.packing.length ? t.packing : base.packing,
+    // Gespeicherte Reisen kennen spaeter ergaenzte Felder nicht. Ohne diese
+    // Auffuellung waeren sie `undefined` und jede Stelle, die darauf zugreift,
+    // muesste das einzeln abfangen.
+    transports: (t.transports ?? []).map((x) => ({
+      ...x,
+      date: x.date ?? "",
+      note: x.note ?? "",
+      url: x.url ?? "",
+    })),
+    diary: (t.diary ?? []).map((x) => ({ ...x, mood: x.mood ?? "" })),
   };
 }
 
@@ -524,6 +540,10 @@ export type SavingsPlan = {
   total: number;
   covered: number;
   open: number;
+  /** Anteil der gedeckten Kosten, 0..1. Der Fortschritt ist der eigentliche
+      Grund, die App zu oeffnen, wenn gerade keine Reise laeuft — zwischen zwei
+      Reisen hat sonst nichts in dieser App einen Rueckkehrgrund. */
+  progress: number;
   months: number | null;
   perMonth: number | null;
   /** Woher die Monatszahl stammt — im UI sichtbar zu machen. */
@@ -551,11 +571,15 @@ export function savingsPlan(
   const months = fromDate ?? (trip.savings.monthsLeft || 0);
   const source: SavingsPlan["source"] = fromDate === null ? "manual" : "date";
 
+  // Ohne geplante Kosten gibt es keinen sinnvollen Anteil — 0 statt Division
+  // durch null, damit der Balken bei einer leeren Reise nicht voll erscheint.
+  const progress = total > 0 ? Math.min(1, covered / total) : 0;
+
   if (open <= 0)
-    return { total, covered, open, months, perMonth: 0, source, reason: "nothing-open" };
+    return { total, covered, open, progress, months, perMonth: 0, source, reason: "nothing-open" };
   if (months <= 0)
-    return { total, covered, open, months, perMonth: null, source, reason: "no-months" };
-  return { total, covered, open, months, perMonth: open / months, source };
+    return { total, covered, open, progress, months, perMonth: null, source, reason: "no-months" };
+  return { total, covered, open, progress, months, perMonth: open / months, source };
 }
 
 /**
@@ -609,4 +633,118 @@ export function formatDateLong(iso: string): string {
     month: "long",
     year: "numeric",
   }).format(d);
+}
+
+/* ---------------------------------------------------------------------------
+ * Reiseverlauf
+ * ------------------------------------------------------------------------ */
+
+export type ItineraryStop = {
+  kind: "stay" | "transport";
+  id: string;
+  title: string;
+  detail: string;
+  /** Startdatum, immer gesetzt — undatiertes wird gar nicht erst einsortiert. */
+  date: string;
+  endDate: string;
+  nights: number;
+  /** Der wievielte Reisetag, wenn die Reise ein Startdatum hat. */
+  day: number | null;
+  cost: number;
+};
+
+export type ItineraryGap = {
+  from: string;
+  to: string;
+  nights: number;
+};
+
+export type Itinerary = {
+  stops: ItineraryStop[];
+  /** Naechte zwischen zwei Unterkuenften, fuer die keine gebucht ist. */
+  gaps: ItineraryGap[];
+  /** Posten ohne Datum — bewusst sichtbar, statt sie stillschweigend zu schlucken. */
+  undated: { kind: "stay" | "transport"; id: string; title: string }[];
+};
+
+function nightsBetween(a: Date, b: Date): number {
+  return Math.max(0, Math.round((b.getTime() - a.getTime()) / 86400000));
+}
+
+/**
+ * Baut aus Unterkuenften und Transporten einen datierten Verlauf.
+ *
+ * Die Daten dafuer lagen laengst im Modell — sie wurden nur als Kostenzeilen
+ * gerendert. Was kein Datum hat, wird nicht geraten, sondern getrennt
+ * ausgewiesen: eine Reise mit unbekannter Reihenfolge soll als solche sichtbar
+ * sein, nicht als vollstaendiger Plan erscheinen.
+ *
+ * Luecken zwischen zwei Unterkuenften werden gemeldet, weil eine Nacht ohne
+ * Bett das teuerste ist, was man beim Planen uebersieht.
+ */
+export function tripItinerary(trip: Trip): Itinerary {
+  const start = parseLocalDate(trip.startDate);
+  const dayOf = (iso: string): number | null => {
+    const d = parseLocalDate(iso);
+    if (!d || !start) return null;
+    return nightsBetween(start, d) + 1;
+  };
+
+  const stops: ItineraryStop[] = [];
+  const undated: Itinerary["undated"] = [];
+
+  for (const s of trip.stays) {
+    const from = parseLocalDate(s.from);
+    const to = parseLocalDate(s.to);
+    if (!from) {
+      undated.push({ kind: "stay", id: s.id, title: s.name || "Unterkunft" });
+      continue;
+    }
+    stops.push({
+      kind: "stay",
+      id: s.id,
+      title: s.name || "Unterkunft",
+      detail: boardLabels[s.board] ?? "",
+      date: s.from,
+      endDate: s.to,
+      nights: to ? nightsBetween(from, to) : 0,
+      day: dayOf(s.from),
+      cost: s.cost || 0,
+    });
+  }
+
+  for (const t of trip.transports) {
+    if (!parseLocalDate(t.date)) {
+      undated.push({ kind: "transport", id: t.id, title: t.label || t.mode });
+      continue;
+    }
+    stops.push({
+      kind: "transport",
+      id: t.id,
+      title: t.label || t.mode,
+      detail: t.mode,
+      date: t.date,
+      endDate: "",
+      nights: 0,
+      day: dayOf(t.date),
+      cost: t.cost || 0,
+    });
+  }
+
+  stops.sort((a, b) =>
+    a.date < b.date ? -1 : a.date > b.date ? 1 : a.kind === "transport" ? -1 : 1,
+  );
+
+  // Luecken nur zwischen Unterkuenften — ein Transport dazwischen ist kein Bett.
+  const gaps: ItineraryGap[] = [];
+  const beds = stops.filter((s) => s.kind === "stay" && s.endDate);
+  for (let i = 0; i < beds.length - 1; i++) {
+    const end = parseLocalDate(beds[i]!.endDate);
+    const next = parseLocalDate(beds[i + 1]!.date);
+    if (!end || !next) continue;
+    const n = nightsBetween(end, next);
+    if (n > 0) gaps.push({ from: beds[i]!.endDate, to: beds[i + 1]!.date, nights: n });
+  }
+
+  return { stops, gaps, undated };
 }

@@ -47,6 +47,24 @@ export const Route = createFileRoute("/tagebuch")({
 
 type Layout = "klassisch" | "journal" | "postkarte";
 
+/** Ein Wort statt Sternen. Bewusst kurz und alltagsnah — niemand waehlt
+    abends aus zwanzig Adjektiven. */
+const moods = ["weit", "ruhig", "müde", "überwältigt", "neugierig", "dankbar"] as const;
+
+/** Die Frage darf variieren, aber es bleibt bei einer pro Tag. Fest an die
+    Tagesnummer gebunden, damit sie beim Tippen nicht wechselt. */
+const questions = [
+  "Was bleibt von heute?",
+  "Was war der Moment, den du behalten willst?",
+  "Woran wirst du dich in einem Jahr noch erinnern?",
+  "Was hat dich heute überrascht?",
+  "Wovon willst du zu Hause erzählen?",
+];
+
+function questionFor(day: number): string {
+  return questions[Math.abs(day - 1) % questions.length]!;
+}
+
 const layoutLabels: Record<Layout, string> = {
   klassisch: "Klassisch – ruhige Linien",
   journal: "Journal – mit Farbleiste",
@@ -100,6 +118,7 @@ function DiaryTab() {
           notes: "",
           expenses: "",
           spent: 0,
+          mood: "",
         },
       ],
     });
@@ -215,51 +234,91 @@ function DiaryTab() {
                 />
               </div>
 
-              <div className="mt-3 space-y-4">
-                {(["text", "highlight", "notes"] as FieldKey[]).map((f) => (
-                  <div key={f}>
-                    <div className="mb-1 flex items-center justify-between gap-2">
-                      <span className="text-xs font-medium text-muted-foreground">
-                        {fieldLabels[f]}
-                      </span>
-                      <MemoButton entry={e} field={f} />
-                    </div>
-                    <textarea
-                      value={e[f] ?? ""}
-                      onChange={(ev) => set(e.id, { [f]: ev.target.value } as Partial<DiaryEntry>)}
-                      rows={f === "text" ? 5 : 3}
-                      placeholder={fieldPlaceholders[f]}
-                      className={`${inputClass} resize-y`}
-                    />
-                  </div>
-                ))}
-
-                <div>
-                  <div className="mb-1 flex items-center justify-between gap-2">
-                    <span className="text-xs font-medium text-muted-foreground">
-                      {fieldLabels.expenses}
-                    </span>
-                    <MemoButton entry={e} field="expenses" />
-                  </div>
-                  <textarea
-                    value={e.expenses}
-                    onChange={(ev) => set(e.id, { expenses: ev.target.value })}
-                    rows={3}
-                    placeholder={fieldPlaceholders.expenses}
-                    className={`${inputClass} resize-y`}
-                  />
+              {/* Eine Frage, ein Feld. Vier gleich laute Felder sind ein
+                  Formular — abends nach einem langen Reisetag fuellt das
+                  niemand aus, und genau deshalb bleibt ein Tagebuch leer.
+                  Alles Weitere ist erreichbar, draengt sich aber nicht auf. */}
+              <div className="mt-4">
+                <div className="mb-2 flex items-start justify-between gap-2">
+                  <p className="min-w-0 flex-1 text-[1.05rem] italic leading-snug text-primary">
+                    {questionFor(e.day)}
+                  </p>
+                  <MemoButton entry={e} field="text" />
                 </div>
-
-                <Field label="Summe heute (€)">
-                  <input
-                    type="number"
-                    min={0}
-                    value={e.spent}
-                    onChange={(ev) => set(e.id, { spent: Number(ev.target.value) })}
-                    className={inputClass}
-                  />
-                </Field>
+                <textarea
+                  value={e.text}
+                  onChange={(ev) => set(e.id, { text: ev.target.value })}
+                  rows={5}
+                  placeholder="Ein Satz reicht."
+                  className={`${inputClass} resize-y`}
+                />
               </div>
+
+              {/* Ein Wort statt Sternen — es faerbt spaeter den Rueckblick. */}
+              <div className="mt-3">
+                <span className="text-xs font-medium text-muted-foreground">Wie war der Tag?</span>
+                <div className="mt-1.5 flex flex-wrap gap-1.5">
+                  {moods.map((m) => {
+                    const active = e.mood === m;
+                    return (
+                      <button
+                        key={m}
+                        type="button"
+                        aria-pressed={active}
+                        onClick={() => set(e.id, { mood: active ? "" : m })}
+                        className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+                          active
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-secondary text-muted-foreground hover:bg-secondary/70"
+                        }`}
+                      >
+                        {m}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <details className="group mt-4">
+                <summary className="cursor-pointer list-none rounded-xl bg-secondary/60 px-3 py-2 text-xs font-semibold transition hover:bg-secondary">
+                  Mehr festhalten
+                  <span className="ml-1 font-normal text-muted-foreground">
+                    Highlight, Notizen, Ausgaben
+                  </span>
+                </summary>
+
+                <div className="mt-3 space-y-4">
+                  {(["highlight", "notes", "expenses"] as FieldKey[]).map((f) => (
+                    <div key={f}>
+                      <div className="mb-1 flex items-center justify-between gap-2">
+                        <span className="text-xs font-medium text-muted-foreground">
+                          {fieldLabels[f]}
+                        </span>
+                        <MemoButton entry={e} field={f} />
+                      </div>
+                      <textarea
+                        value={e[f] ?? ""}
+                        onChange={(ev) =>
+                          set(e.id, { [f]: ev.target.value } as Partial<DiaryEntry>)
+                        }
+                        rows={3}
+                        placeholder={fieldPlaceholders[f]}
+                        className={`${inputClass} resize-y`}
+                      />
+                    </div>
+                  ))}
+
+                  <Field label="Summe heute (€)">
+                    <input
+                      type="number"
+                      min={0}
+                      value={e.spent}
+                      onChange={(ev) => set(e.id, { spent: Number(ev.target.value) })}
+                      className={inputClass}
+                    />
+                  </Field>
+                </div>
+              </details>
             </Card>
           ))}
         </div>
