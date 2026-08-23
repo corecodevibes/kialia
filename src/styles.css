@@ -511,13 +511,24 @@
    gewinnen. Hier soll die Barrierefreiheit gewinnen. */
 a:focus-visible,
 button:focus-visible,
-input:focus-visible,
-textarea:focus-visible,
-select:focus-visible,
 summary:focus-visible,
 [tabindex]:focus-visible {
   outline: 2px solid var(--k-copper);
   outline-offset: 2px;
+}
+
+/* Formularfelder bekommen den Ring nach INNEN.
+   Ein Feld ist hier fast so breit wie der Bildschirm. Ein Ring mit positivem
+   Abstand zeichnet ausserhalb des Elements, ragt damit ueber den Rand — und
+   iOS scrollt die Seite seitwaerts, um ihn sichtbar zu machen. Danach ist der
+   gesamte Inhalt verschoben und links abgeschnitten, auch nachdem die Tastatur
+   wieder zu ist. Nach innen gezeichnet ist er genauso deutlich und kann nichts
+   verschieben. */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--k-copper);
+  outline-offset: -2px;
 }
 
 a:focus:not(:focus-visible),
@@ -525,6 +536,17 @@ button:focus:not(:focus-visible),
 input:focus:not(:focus-visible),
 textarea:focus:not(:focus-visible) {
   outline: none;
+}
+
+/* Seitwaerts scrollen gibt es in dieser App nicht.
+   `clip` statt `hidden`: `hidden` macht das Element zum Scroll-Container und
+   bricht damit `position: sticky` weiter innen. `clip` verbietet das Scrollen,
+   ohne etwas anderes zu veraendern. Der Riegel ist bewusst zusaetzlich zur
+   Ursache oben — bei einer Ein-Spalten-App ist waagerechtes Verrutschen immer
+   ein Fehler, egal woher es kommt. */
+html,
+body {
+  overflow-x: clip;
 }
 
 @media print {
