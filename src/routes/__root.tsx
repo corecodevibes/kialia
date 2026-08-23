@@ -111,11 +111,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "manifest", href: "/manifest.webmanifest" },
       // iOS liest fuer den Homescreen dieses Icon, nicht die Manifest-Eintraege.
       { rel: "apple-touch-icon", href: "/icons/icon-180.png", sizes: "180x180" },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      // Die Schrift liegt unter /fonts und wird in styles.css deklariert —
+      // kein Aufruf bei Google, also auch offline vorhanden. Vorgeladen wird
+      // nur das Gewicht, das auf jedem Bildschirm zuerst sichtbar ist.
       {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap",
+        rel: "preload",
+        href: "/fonts/manrope-latin-400.woff2",
+        as: "font",
+        type: "font/woff2",
+        crossOrigin: "anonymous",
       },
     ],
   }),
