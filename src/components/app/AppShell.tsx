@@ -337,14 +337,18 @@ export function AmountField({
   const active = currency || main;
 
   return (
-    <div className="flex items-center gap-2">
-      <NumberField value={value} onChange={onChange} className={inputClass} />
+    // min-w-0 auf Behaelter UND Betragsfeld: ohne das gibt das Zahlenfeld seine
+    // Mindestbreite nicht her, die Zeile wird breiter als die Spalte und der
+    // Betrag schrumpft auf einen Streifen — auf dem iPhone war davon nichts
+    // mehr lesbar. Die Waehrung ist der schmale, feste Teil.
+    <div className="flex min-w-0 items-center gap-2">
+      <NumberField value={value} onChange={onChange} className={`${inputClass} min-w-0 flex-1`} />
       {options.length > 1 ? (
         <select
           value={active}
           aria-label="Währung"
           onChange={(e) => onCurrencyChange(e.target.value)}
-          className={`${inputClass} w-[4.5rem] shrink-0 appearance-none px-2 text-center text-xs font-semibold`}
+          className={`${inputClass} w-[4.25rem] shrink-0 appearance-none px-1 text-center text-xs font-semibold`}
         >
           {options.map((c) => (
             <option key={c} value={c}>
@@ -353,7 +357,7 @@ export function AmountField({
           ))}
         </select>
       ) : (
-        <span className="w-[4.5rem] shrink-0 text-center text-xs font-semibold text-muted-foreground">
+        <span className="w-[4.25rem] shrink-0 text-center text-xs font-semibold text-muted-foreground">
           {main}
         </span>
       )}

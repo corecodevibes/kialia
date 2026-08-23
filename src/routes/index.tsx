@@ -745,8 +745,9 @@ function HomeTab() {
           <p className="mt-1 flex items-start gap-2 text-xs leading-snug text-muted-foreground">
             <ShieldAlert className="mt-0.5 size-4 shrink-0" />
             <span>
-              Deine Reisen liegen aktuell nur in diesem Browser. Wer den Verlauf löscht, verliert
-              sie. Lege regelmäßig eine Sicherung an.
+              {trip.remoteId
+                ? "Diese Reise liegt auf dem Server und kommt auf jedes angemeldete Gerät. Eine Datei zusätzlich zu haben, schadet trotzdem nicht — sie liegt dann bei dir und braucht kein Konto."
+                : "Diese Reise liegt nur auf diesem Gerät. Wer die Website-Daten löscht, verliert sie. Gib sie oben zum Teilen frei oder lege eine Sicherung an."}
             </span>
           </p>
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
@@ -762,7 +763,7 @@ function HomeTab() {
             onClick={handleBackup}
             className="mt-2 w-full rounded-xl px-3 py-2 text-xs font-semibold text-muted-foreground underline-offset-2 transition hover:underline"
           >
-            Alle {trips.length} {trips.length === 1 ? "Reise" : "Reisen"} sichern
+            {trips.length === 1 ? "Auch als Datei sichern" : `Alle ${trips.length} Reisen sichern`}
           </button>
           <input
             ref={fileInput}
@@ -773,8 +774,9 @@ function HomeTab() {
           />
           {ioMsg && <p className="mt-2 text-center text-xs font-medium">{ioMsg}</p>}
           <p className="mt-3 text-center text-xs text-muted-foreground">
-            Gemeinsames Planen in Echtzeit ist noch nicht gebaut. Bis dahin kannst du die Reisedatei
-            weitergeben — dein Partner importiert sie und plant seine Kopie.
+            Zum gemeinsamen Planen brauchst du das hier nicht — dafür gibt es oben den
+            Einladungs­link. Die Datei ist die Kopie für dich: sie funktioniert ohne Konto und ohne
+            Netz.
           </p>
         </Card>
       </div>

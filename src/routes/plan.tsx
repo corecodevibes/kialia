@@ -683,24 +683,6 @@ function PlanTab() {
                         </div>
                       </div>
                       <div className="mt-3 space-y-3">
-                        <Field label="Link (z. B. GetYourGuide)">
-                          <input
-                            value={a.url}
-                            onChange={(e) => setActivity(a.id, { url: e.target.value })}
-                            onBlur={(e) => setActivity(a.id, { url: normalizeUrl(e.target.value) })}
-                            className={inputClass}
-                          />
-                        </Field>
-                        {a.url && (
-                          <a
-                            href={safeHref(a.url)}
-                            target="_blank"
-                            rel="noreferrer noopener"
-                            className="block truncate text-xs font-medium text-primary underline"
-                          >
-                            Website öffnen
-                          </a>
-                        )}
                         <FieldRow>
                           <Field label="Kosten">
                             <AmountField

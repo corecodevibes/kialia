@@ -299,7 +299,11 @@ function PackingTab() {
                                 ),
                               )
                             }
-                            className={`${rowInput} min-w-0 flex-1 text-foreground/90 ${
+                            // Der Name ist die Information, alles andere ist
+                            // Beiwerk. Vorher teilten sich fuenf Bedienelemente
+                            // die Zeile gleichberechtigt und "Zahnbuerste &
+                            // Zahnpasta" wurde zu "Zahnbuerste & Za".
+                            className={`${rowInput} min-w-0 grow basis-0 text-foreground/90 ${
                               item.done ? "text-muted-foreground" : ""
                             }`}
                           />
@@ -323,7 +327,7 @@ function PackingTab() {
                                 ),
                               )
                             }
-                            className={`${rowInput} w-[4.75rem] shrink-0 appearance-none px-2 text-center text-xs font-semibold text-[#2F2A3E]`}
+                            className={`${rowInput} w-[3.6rem] shrink-0 appearance-none px-1 text-center text-[11px] font-semibold text-[#2F2A3E]`}
                             style={
                               item.who ? { background: personColor(trip, item.who) } : undefined
                             }
