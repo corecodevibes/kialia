@@ -853,4 +853,3 @@ export function travellerNames(trip: Trip): string[] {
     .filter((v) => v.toLowerCase() !== "ich");
   return ["Ich", ...Array.from(new Set(raw))];
 }
-
