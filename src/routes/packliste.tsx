@@ -1,7 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Check, Plus, Trash2, ChevronDown, ChevronRight } from "lucide-react";
-import { AppShell, Card, CardTitle, Field, chipClass, inputClass } from "@/components/app/AppShell";
+import {
+  AppShell,
+  Card,
+  CardTitle,
+  Field,
+  chipClass,
+  inputClass,
+  NoTripYet,
+} from "@/components/app/AppShell";
 import { kidsPacking, petsPacking, uid, useTrip, type PackCategory } from "@/lib/trip-store";
 
 export const Route = createFileRoute("/packliste")({
@@ -29,7 +37,7 @@ const rowInput =
   "rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none transition focus:border-primary";
 
 function PackingTab() {
-  const { trip, update, ready } = useTrip();
+  const { trip, update, ready, hasTrip } = useTrip();
   const [newCat, setNewCat] = useState("");
   const [open, setOpen] = useState<Record<string, boolean>>({});
 
@@ -55,6 +63,7 @@ function PackingTab() {
   }
 
   if (!ready) return <div className="min-h-screen bg-background" />;
+  if (!hasTrip) return <NoTripYet what="Eine Packliste" />;
 
   return (
     <AppShell title="Packliste" subtitle={`${done} von ${total} Sachen eingepackt.`}>

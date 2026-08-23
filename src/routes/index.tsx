@@ -13,6 +13,7 @@ import {
   inputClass,
   Money,
 } from "@/components/app/AppShell";
+import { flagFor } from "@/lib/country";
 import {
   downloadAllTrips,
   downloadTrip,
@@ -20,6 +21,8 @@ import {
   tripDays,
   tripTotals,
   useTrip,
+  formatDateLong,
+  type Trip,
 } from "@/lib/trip-store";
 
 export const Route = createFileRoute("/")({
@@ -44,8 +47,18 @@ export const Route = createFileRoute("/")({
 });
 
 function HomeTab() {
-  const { trip, trips, activeId, update, addTrip, removeTrip, selectTrip, importTrip, ready } =
-    useTrip();
+  const {
+    trip,
+    trips,
+    hasTrip,
+    activeId,
+    update,
+    addTrip,
+    removeTrip,
+    selectTrip,
+    importTrip,
+    ready,
+  } = useTrip();
   const fileInput = useRef<HTMLInputElement>(null);
   const [ioMsg, setIoMsg] = useState<string | null>(null);
   const [newDest, setNewDest] = useState("");
@@ -79,17 +92,59 @@ function HomeTab() {
 
   if (!ready) return <div className="min-h-screen bg-background" />;
 
+  // Noch keine Reise: eine Frage, ein Feld, sonst nichts. Vorher stand hier
+  // eine namenlose Platzhalter-Reise "ohne Datum" — die sieht aus wie ein
+  // Fehler und ist das Erste, was ein neuer Nutzer sieht.
+  if (!hasTrip) {
+    return (
+      <AppShell title="Neue Reise" subtitle="">
+        <div className="flex min-h-[55vh] flex-col justify-center">
+          <h2 className="text-2xl font-extrabold leading-tight tracking-tight">
+            Wohin geht die nächste Reise?
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Land oder Region genügt. Alles Weitere — Plan, Budget, Packliste, Tagebuch — gehört
+            danach zu dieser Reise.
+          </p>
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const v = newDest.trim();
+              if (!v) return;
+              addTrip(v);
+              setNewDest("");
+            }}
+            className="mt-6"
+          >
+            <input
+              value={newDest}
+              onChange={(e) => setNewDest(e.target.value)}
+              placeholder="z. B. Griechenland, Vietnam, Norwegen …"
+              autoFocus
+              className={`${inputClass} py-3.5 text-base`}
+            />
+            <PrimaryButton type="submit" disabled={!newDest.trim()} className="mt-3">
+              <Plus className="size-4" /> Reise anlegen
+            </PrimaryButton>
+          </form>
+        </div>
+      </AppShell>
+    );
+  }
+
   return (
-    <AppShell
-      title={trip.destination || "Wohin geht's?"}
-      subtitle="Was sind eure nächsten Reiseziele?"
-    >
+    <AppShell title={trip.destination} subtitle={tripSubtitle(trip, days)}>
       <div className="space-y-4">
+        {/* Der Reisewechsel lebt nur hier. In allen anderen Tabs gilt genau
+            diese eine Reise — sonst weiss niemand, worauf sich ein Budget
+            oder ein Tagebucheintrag bezieht. */}
         <Card>
-          <CardTitle>Eure Reisen</CardTitle>
+          <CardTitle>{trips.length === 1 ? "Eure Reise" : "Eure Reisen"}</CardTitle>
           <div className="mt-3 space-y-2">
             {trips.map((t) => {
               const active = t.id === activeId;
+              const f = flagFor(t.destination);
               return (
                 <div
                   key={t.id}
@@ -100,23 +155,29 @@ function HomeTab() {
                   <button
                     type="button"
                     onClick={() => selectTrip(t.id)}
-                    className="flex flex-1 items-center gap-2 text-left"
+                    className="flex flex-1 items-center gap-2.5 text-left"
                   >
-                    <MapPin
-                      className={`size-4 shrink-0 ${active ? "text-primary" : "text-muted-foreground"}`}
-                    />
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm font-medium">
-                        {t.destination || "Neue Reise"}
+                    {f ? (
+                      <span className="text-xl leading-none" aria-hidden>
+                        {f}
                       </span>
+                    ) : (
+                      <MapPin
+                        className={`size-4 shrink-0 ${active ? "text-primary" : "text-muted-foreground"}`}
+                      />
+                    )}
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-medium">{t.destination}</span>
                       <span className="block text-xs text-muted-foreground">
-                        {t.startDate ? `${t.startDate} – ${t.endDate || "?"}` : "Noch kein Datum"}
+                        {t.startDate
+                          ? `${formatDateLong(t.startDate)}${t.endDate ? ` – ${formatDateLong(t.endDate)}` : ""}`
+                          : "Zeitraum offen"}
                       </span>
                     </span>
                   </button>
                   <button
                     type="button"
-                    aria-label="Reise löschen"
+                    aria-label={`Reise ${t.destination} löschen`}
                     onClick={() => removeTrip(t.id)}
                     className="text-muted-foreground transition hover:text-destructive"
                   >
@@ -126,28 +187,36 @@ function HomeTab() {
               );
             })}
           </div>
-          <div className="mt-3 grid grid-cols-[minmax(0,1fr)_auto] gap-2">
-            <input
-              value={newDest}
-              onChange={(e) => setNewDest(e.target.value)}
-              placeholder="Nächstes Reiseziel …"
-              className={inputClass}
-            />
-            <button
-              type="button"
-              onClick={() => {
-                addTrip(newDest.trim());
+
+          <details className="mt-3">
+            <summary className="cursor-pointer list-none text-xs font-semibold text-muted-foreground">
+              + Weitere Reise
+            </summary>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const v = newDest.trim();
+                if (!v) return;
+                addTrip(v);
                 setNewDest("");
               }}
-              className="acrylic-warm grid size-11 shrink-0 place-items-center rounded-xl text-background"
-              aria-label="Reise hinzufügen"
+              className="mt-2 grid grid-cols-[minmax(0,1fr)_auto] gap-2"
             >
-              <Plus className="size-4" />
-            </button>
-          </div>
-          <p className="mt-2 text-xs text-muted-foreground">
-            Ideen, Plan, Packliste und Tagebuch gehören immer zur ausgewählten Reise.
-          </p>
+              <input
+                value={newDest}
+                onChange={(e) => setNewDest(e.target.value)}
+                placeholder="Nächstes Reiseziel …"
+                className={inputClass}
+              />
+              <button
+                type="submit"
+                className="acrylic-warm grid size-11 shrink-0 place-items-center rounded-xl text-background"
+                aria-label="Reise hinzufügen"
+              >
+                <Plus className="size-4" />
+              </button>
+            </form>
+          </details>
         </Card>
 
         <Card>
@@ -254,4 +323,11 @@ function HomeTab() {
       </div>
     </AppShell>
   );
+}
+
+/** Kopfzeile der Reise: Zeitraum und Dauer, sobald bekannt. */
+function tripSubtitle(trip: Trip, days: number): string {
+  if (!trip.startDate) return "Zeitraum noch offen";
+  const range = `${formatDateLong(trip.startDate)}${trip.endDate ? ` – ${formatDateLong(trip.endDate)}` : ""}`;
+  return days > 0 ? `${range} · ${days} ${days === 1 ? "Tag" : "Tage"}` : range;
 }

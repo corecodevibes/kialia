@@ -12,6 +12,7 @@ import {
   dateInputClass,
   inputClass,
   Money,
+  NoTripYet,
 } from "@/components/app/AppShell";
 import {
   formatDateLong,
@@ -88,7 +89,7 @@ const fieldPlaceholders: Record<FieldKey, string> = {
 };
 
 function DiaryTab() {
-  const { trip, update, ready } = useTrip();
+  const { trip, update, ready, hasTrip } = useTrip();
   const [withBudget, setWithBudget] = useState(true);
   const [layout, setLayout] = useState<Layout>("journal");
   const [busyKey, setBusyKey] = useState<string | null>(null);
@@ -186,6 +187,7 @@ function DiaryTab() {
   const totalSpent = trip.diary.reduce((s, e) => s + (e.spent || 0), 0);
 
   if (!ready) return <div className="min-h-screen bg-background" />;
+  if (!hasTrip) return <NoTripYet what="Ein Reisetagebuch" />;
 
   return (
     <AppShell

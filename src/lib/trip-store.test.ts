@@ -249,16 +249,35 @@ describe("formatDateLong", () => {
 
 describe("tripItinerary", () => {
   const stay = (id: string, name: string, from: string, to: string, cost = 0) => ({
-    id, name, url: "", from, to, cost, status: "offen" as const, dueDate: "", board: "nichts" as const,
+    id,
+    name,
+    url: "",
+    from,
+    to,
+    cost,
+    status: "offen" as const,
+    dueDate: "",
+    board: "nichts" as const,
   });
   const transport = (id: string, label: string, date: string) => ({
-    id, mode: "Flugzeug", label, cost: 0, status: "offen" as const, dueDate: "", date, note: "", url: "",
+    id,
+    mode: "Flugzeug",
+    label,
+    cost: 0,
+    status: "offen" as const,
+    dueDate: "",
+    date,
+    note: "",
+    url: "",
   });
 
   test("sortiert nach Datum, egal in welcher Reihenfolge erfasst wurde", () => {
     const t = tripWith({
       startDate: "2026-06-01",
-      stays: [stay("b", "Chania", "2026-06-05", "2026-06-08"), stay("a", "Heraklion", "2026-06-01", "2026-06-05")],
+      stays: [
+        stay("b", "Chania", "2026-06-05", "2026-06-08"),
+        stay("a", "Heraklion", "2026-06-01", "2026-06-05"),
+      ],
       transports: [transport("f", "Zürich → Kreta", "2026-06-01")],
     });
     const it = tripItinerary(t);
@@ -267,7 +286,10 @@ describe("tripItinerary", () => {
 
   test("meldet Nächte ohne Unterkunft — der teuerste Planungsfehler", () => {
     const t = tripWith({
-      stays: [stay("a", "Heraklion", "2026-06-01", "2026-06-05"), stay("b", "Chania", "2026-06-07", "2026-06-09")],
+      stays: [
+        stay("a", "Heraklion", "2026-06-01", "2026-06-05"),
+        stay("b", "Chania", "2026-06-07", "2026-06-09"),
+      ],
     });
     const it = tripItinerary(t);
     expect(it.gaps).toHaveLength(1);
@@ -302,8 +324,15 @@ describe("tripItinerary", () => {
 
 describe("savingsPlan — Fortschritt", () => {
   const stay = (cost: number) => ({
-    id: "s", name: "", url: "", from: "", to: "", cost,
-    status: "offen" as const, dueDate: "", board: "nichts" as const,
+    id: "s",
+    name: "",
+    url: "",
+    from: "",
+    to: "",
+    cost,
+    status: "offen" as const,
+    dueDate: "",
+    board: "nichts" as const,
   });
 
   test("rechnet den Anteil der gedeckten Kosten", () => {

@@ -227,10 +227,7 @@ function normalize(t: Partial<Trip>): Trip {
 }
 
 export function loadStore(): Store {
-  if (typeof window === "undefined") {
-    const t = newTrip();
-    return { trips: [t], activeId: t.id };
-  }
+  if (typeof window === "undefined") return { trips: [], activeId: "" };
   try {
     const raw = window.localStorage.getItem(KEY);
     if (raw) {
@@ -251,8 +248,10 @@ export function loadStore(): Store {
   } catch {
     /* ignore */
   }
-  const t = newTrip();
-  return { trips: [t], activeId: t.id };
+  // Bewusst LEER statt einer Platzhalter-Reise. Vorher gab es nie den Zustand
+  // "noch keine Reise" — deshalb begruesste die App jeden neuen Nutzer mit
+  // einer namenlosen Reise ohne Datum, die wie ein Fehler aussieht.
+  return { trips: [], activeId: "" };
 }
 
 function save(store: Store) {
@@ -263,7 +262,7 @@ function save(store: Store) {
   }
 }
 
-const fallback: Store = { trips: [emptyTrip], activeId: emptyTrip.id };
+const fallback: Store = { trips: [], activeId: "" };
 
 export function useTrip() {
   const [store, setStore] = useState<Store>(fallback);
@@ -331,9 +330,13 @@ export function useTrip() {
   );
 
   const trip = store.trips.find((t) => t.id === store.activeId) ?? store.trips[0] ?? emptyTrip;
+  // Die Bildschirme brauchen immer ein Trip-Objekt, um nicht ueberall auf
+  // undefined pruefen zu muessen — aber sie muessen wissen, ob es echt ist.
+  const hasTrip = store.trips.length > 0;
 
   return {
     trip,
+    hasTrip,
     trips: store.trips,
     activeId: store.activeId,
     update,

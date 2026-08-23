@@ -14,6 +14,7 @@ import {
   inputClass,
   selectClass,
   Money,
+  NoTripYet,
 } from "@/components/app/AppShell";
 import { StatusPicker } from "@/components/app/bits";
 
@@ -66,7 +67,7 @@ const modes = [
 ];
 
 function PlanTab() {
-  const { trip, update, ready } = useTrip();
+  const { trip, update, ready, hasTrip } = useTrip();
   const totals = tripTotals(trip);
 
   const setTransport = (id: string, patch: Partial<Transport>) =>
@@ -87,6 +88,7 @@ function PlanTab() {
   const plan = savingsPlan(trip, totals);
 
   if (!ready) return <div className="min-h-screen bg-background" />;
+  if (!hasTrip) return <NoTripYet what="Ein Plan mit Kosten" />;
 
   return (
     <AppShell title="Plan" subtitle="Fortbewegung, Unterkunft, Essen und Aktivitäten.">

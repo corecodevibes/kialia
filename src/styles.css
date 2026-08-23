@@ -244,6 +244,31 @@
   }
 }
 
+/* Hero-Auftritt der Landesflagge. Eine Bewegung, einmal, beim Oeffnen des
+   Bildschirms — sie erklaert "hier bist du gerade". Dauerbewegung waere
+   Schmuck; die haben wir bewusst entfernt.
+   Die reduced-motion-Regel weiter unten setzt die Dauer auf 0.01ms, damit
+   der Endzustand sofort steht statt zu ruckeln. */
+@keyframes hero-flag-in {
+  from {
+    opacity: 0;
+    transform: scale(0.72) translateY(6px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.06) translateY(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@utility hero-flag {
+  animation: hero-flag-in 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  filter: drop-shadow(0 6px 14px rgb(47 42 62 / 0.28));
+}
+
 @media (prefers-reduced-motion: reduce) {
   .acrylic,
   .acrylic-warm,

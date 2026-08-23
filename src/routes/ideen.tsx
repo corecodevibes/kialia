@@ -8,6 +8,7 @@ import {
   DeleteButton,
   PrimaryButton,
   inputClass,
+  NoTripYet,
 } from "@/components/app/AppShell";
 import { LinkList } from "@/components/app/bits";
 import { normalizeUrl, uid, useTrip, type Idea, type LinkItem } from "@/lib/trip-store";
@@ -34,7 +35,7 @@ export const Route = createFileRoute("/ideen")({
 });
 
 function IdeasTab() {
-  const { trip, update, ready } = useTrip();
+  const { trip, update, ready, hasTrip } = useTrip();
   const [text, setText] = useState("");
   const [moved, setMoved] = useState<string | null>(null);
 
@@ -76,6 +77,7 @@ function IdeasTab() {
   }
 
   if (!ready) return <div className="min-h-screen bg-background" />;
+  if (!hasTrip) return <NoTripYet what="Eine Ideensammlung" />;
 
   return (
     <AppShell title="Ideensammlung" subtitle="Alles, was ihr sehen, essen und erleben wollt.">

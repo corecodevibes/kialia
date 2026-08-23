@@ -1,5 +1,6 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { eur } from "@/lib/trip-store";
+import { eur, useTrip } from "@/lib/trip-store";
+import { flagFor } from "@/lib/country";
 import { Home, Lightbulb, Wallet, BookOpen, Backpack, LogOut } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
 import logo from "@/assets/travelivibes-logo.png";
@@ -27,6 +28,8 @@ export function AppShell({
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { session, ready } = useSession();
   const { profile, failed, ready: profileReady } = useProfile(session?.user.id);
+  const { trip } = useTrip();
+  const flag = flagFor(trip.destination);
 
   // "Profil nicht abrufbar" ist keine Aussage darueber, ob jemand das
   // Onboarding erledigt hat. Ohne diese Unterscheidung landet offline jeder
@@ -89,18 +92,33 @@ export function AppShell({
     <div className="acrylic-page min-h-screen">
       <header className="relative z-30 px-5 pb-6 pt-6 print:hidden">
         <div className="mx-auto flex max-w-lg items-center gap-3">
-          <img
-            src={logo}
-            alt="App Logo"
-            width={64}
-            height={64}
-            className="size-11 shrink-0 rounded-2xl shadow-sm"
-          />
+          {/* Die Landesflagge ist auf jedem Bildschirm der Anker: sie sagt in
+              einem Zeichen, um welche Reise es hier geht. Ohne erkanntes Land
+              bleibt das Logo stehen — eine falsche Flagge waere schlimmer als
+              keine. Der `key` sorgt dafuer, dass der Auftritt beim Wechsel der
+              Reise erneut laeuft. */}
+          {flag ? (
+            <span
+              key={flag}
+              aria-hidden
+              className="hero-flag grid size-11 shrink-0 place-items-center text-[2rem] leading-none"
+            >
+              {flag}
+            </span>
+          ) : (
+            <img
+              src={logo}
+              alt="kialia"
+              width={64}
+              height={64}
+              className="size-11 shrink-0 rounded-2xl shadow-sm"
+            />
+          )}
           <div className="min-w-0 flex-1">
-            <p className="truncate text-lg font-extrabold leading-tight tracking-tight text-foreground">
+            <p className="truncate text-[11px] font-semibold uppercase tracking-[0.18em] text-foreground/55">
               kialia · κιάλια
             </p>
-            <h1 className="truncate text-sm font-medium leading-snug text-foreground/70">
+            <h1 className="truncate text-lg font-extrabold leading-tight tracking-tight text-foreground">
               {title}
             </h1>
           </div>
@@ -184,6 +202,34 @@ export function FieldRow({ children }: { children: ReactNode }) {
  */
 export function Money({ value, className = "" }: { value: number; className?: string }) {
   return <span className={`tabular-nums ${className}`.trim()}>{eur(value)}</span>;
+}
+
+/**
+ * Zustand fuer alle Tabs ausser Home, solange keine Reise existiert.
+ *
+ * Vorher zeigten Plan, Ideen, Packliste und Tagebuch ein vollstaendiges
+ * Formular fuer eine Reise, die es nicht gab — man konnte ein Budget fuer
+ * nichts pflegen. Jeder Tab gehoert zu genau einer Reise; ohne die gibt es
+ * hier nichts zu tun.
+ */
+export function NoTripYet({ what }: { what: string }) {
+  return (
+    <AppShell title="Noch keine Reise" subtitle="">
+      <div className="flex min-h-[50vh] flex-col justify-center">
+        <h2 className="text-xl font-extrabold leading-tight tracking-tight">Zuerst die Reise</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {what} gehört immer zu einer bestimmten Reise. Lege sie auf der Startseite an — danach ist
+          dieser Bereich für sie da.
+        </p>
+        <Link
+          to="/"
+          className="acrylic-warm mt-5 w-full rounded-2xl px-4 py-3.5 text-center text-sm font-semibold text-background"
+        >
+          Reise anlegen
+        </Link>
+      </div>
+    </AppShell>
+  );
 }
 
 export const inputClass =
