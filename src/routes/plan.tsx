@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { money } from "@/lib/currency";
+import { COST_CATEGORY_LABELS, fetchCosts, midpoint, type Costs } from "@/lib/suggestions";
 import { Attachments } from "@/components/app/attachments";
 import { createFileRoute } from "@tanstack/react-router";
 import { Bike, Bus, Car, Plane, Ship, Train } from "lucide-react";
@@ -92,6 +94,9 @@ function PlanTab() {
   // Bewusst bei jedem Rendern neu berechnet statt gespeichert: die Rate muss
   // mitziehen, wenn sich Datum, Kosten oder Erspartes aendern.
   const plan = savingsPlan(trip, totals);
+  const [costs, setCosts] = useState<Costs | null>(null);
+  const [costBusy, setCostBusy] = useState(false);
+  const [costError, setCostError] = useState<string | null>(null);
 
   if (!ready) return <div className="min-h-screen bg-background" />;
   if (!hasTrip) return <NoTripYet what="Ein Plan mit Kosten" />;
@@ -399,6 +404,75 @@ function PlanTab() {
                 {label}
               </button>
             ))}
+          </div>
+
+          {/* Kostenspanne fuers Ziel. Als SPANNE, nie als Centbetrag: ein
+              exakter Wert waere erfunden. Sie hilft dort, wo ein Budget bei
+              null steht und man keinen Anhaltspunkt hat. */}
+          <div className="mb-3">
+            <button
+              type="button"
+              onClick={async () => {
+                setCostBusy(true);
+                setCostError(null);
+                const res = await fetchCosts(trip.destination, undefined, trip.travellers);
+                setCostBusy(false);
+                if (res.ok) setCosts(res.data);
+                else setCostError(res.error);
+              }}
+              disabled={costBusy || !trip.destination.trim()}
+              className="w-full rounded-2xl bg-secondary px-4 py-2.5 text-xs font-semibold transition hover:bg-secondary/70 disabled:opacity-60"
+            >
+              {costBusy ? "Wird geschätzt …" : `Was kostet das ungefähr in ${trip.destination}?`}
+            </button>
+
+            {costError && <p className="mt-2 text-xs text-destructive">{costError}</p>}
+
+            {costs && (
+              <div className="mt-2 rounded-2xl bg-secondary/50 p-3">
+                <p className="text-xs font-semibold">Grobe Spanne pro Person und Tag</p>
+                <ul className="mt-2 space-y-1">
+                  {costs.perDay.map((r) => (
+                    <li
+                      key={r.category}
+                      className="flex items-center justify-between gap-2 text-xs"
+                    >
+                      <span className="text-muted-foreground">
+                        {COST_CATEGORY_LABELS[r.category] ?? r.category}
+                      </span>
+                      <span className="tabular-nums font-medium">
+                        {money(r.min, costs.currency)} – {money(r.max, costs.currency)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-2 text-[11px] leading-snug text-muted-foreground">
+                  {costs.note} Das ist eine Schätzung, keine Auskunft — prüf sie, bevor du danach
+                  planst.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const get = (c: string) => costs.perDay.find((r) => r.category === c);
+                    const b = get("fruehstueck");
+                    const l = get("mittag");
+                    const d = get("abend");
+                    const sn = get("snacks");
+                    setMeals({
+                      mode: "split",
+                      ...(b ? { breakfast: midpoint(b) } : {}),
+                      ...(l ? { lunch: midpoint(l) } : {}),
+                      ...(d ? { dinner: midpoint(d) } : {}),
+                      ...(sn ? { snacks: midpoint(sn) } : {}),
+                    });
+                  }}
+                  className="mt-3 w-full rounded-xl bg-card py-2 text-xs font-semibold"
+                >
+                  Mittelwerte als Startwert übernehmen
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="space-y-3">
