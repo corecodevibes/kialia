@@ -60,7 +60,7 @@ const moods = ["weit", "ruhig", "müde", "überwältigt", "neugierig", "dankbar"
 /** Die Frage darf variieren, aber es bleibt bei einer pro Tag. Fest an die
     Tagesnummer gebunden, damit sie beim Tippen nicht wechselt. */
 const questions = [
-  "Was bleibt von heute?",
+  "Was hast du heute erlebt?",
   "Was war der Moment, den du behalten willst?",
   "Woran wirst du dich in einem Jahr noch erinnern?",
   "Was hat dich heute überrascht?",
@@ -398,7 +398,7 @@ function DiaryTab() {
               </div>
 
               <div className="mt-4 space-y-4">
-                {(["food", "highlight", "expenses"] as FieldKey[]).map((f) => (
+                {(["food", "highlight"] as FieldKey[]).map((f) => (
                   <div key={f}>
                     <div className="mb-1 flex items-center justify-between gap-2">
                       <span className="text-xs font-medium text-muted-foreground">
@@ -442,13 +442,14 @@ function DiaryTab() {
                   </div>
                 ))}
 
-                <Field label="Summe heute (€)">
-                  <NumberField
-                    value={e.spent}
-                    onChange={(n) => set(e.id, { spent: n })}
-                    className={inputClass}
-                  />
-                </Field>
+                {/* Ausgaben als Satz statt als Formular. Die Aufstellung
+                    entsteht beim Tippen, die Summe wird berechnet — ein
+                    eigenes Summenfeld daneben haette zwei Wahrheiten erzeugt. */}
+                <ExpenseField
+                  entry={e}
+                  onChange={(patch) => set(e.id, patch)}
+                  currency={trip.currency || "EUR"}
+                />
 
                 <details>
                   <summary className="cursor-pointer list-none text-xs font-semibold text-muted-foreground">
