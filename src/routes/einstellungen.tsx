@@ -20,6 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 const db = supabase as unknown as SupabaseClient;
 import { signOut, useProfile, useSession } from "@/lib/auth";
 import { Card, CardTitle, Field, PrimaryButton, inputClass } from "@/components/app/AppShell";
+import { LegalFooter } from "@/components/app/legal";
 import { authErrorMessage, type AuthMessage } from "@/lib/auth-errors";
 import { downloadAllTrips, useTrip } from "@/lib/trip-store";
 
@@ -261,6 +262,8 @@ function SettingsPage() {
               </div>
             )}
           </Card>
+
+          <LegalFooter />
         </div>
       </div>
     </div>

@@ -4,7 +4,7 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Field, inputClass } from "@/components/app/AppShell";
 import { authErrorMessage, type AuthMessage } from "@/lib/auth-errors";
-import logo from "@/assets/travelivibes-logo.png";
+import logo from "@/assets/kialia-logo.png";
 
 export const Route = createFileRoute("/passwort-neu")({
   head: () => ({

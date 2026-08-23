@@ -5,7 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/lib/auth";
 import { Field, inputClass } from "@/components/app/AppShell";
 import { authErrorMessage, type AuthMessage } from "@/lib/auth-errors";
-import logo from "@/assets/travelivibes-logo.png";
+import logo from "@/assets/kialia-logo.png";
+import { LegalFooter } from "@/components/app/legal";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -308,6 +309,10 @@ function AuthFrame({ children }: { children: React.ReactNode }) {
           <p className="mt-1 text-sm font-medium text-foreground/70">See more. travel further.</p>
         </div>
         {children}
+        {/* Muss vor der Anmeldung erreichbar sein: wer wissen will, was mit
+            seinen Daten passiert, soll dafuer kein Konto anlegen muessen —
+            und die Stores pruefen die Seiten, bevor ein Konto existiert. */}
+        <LegalFooter />
       </div>
     </div>
   );

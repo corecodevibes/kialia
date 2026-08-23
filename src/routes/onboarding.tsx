@@ -6,7 +6,7 @@ import { useProfile, useSession } from "@/lib/auth";
 import { Field, inputClass } from "@/components/app/AppShell";
 import { authErrorMessage, type AuthMessage } from "@/lib/auth-errors";
 import { writeOnboardedCache } from "@/lib/onboarding-gate";
-import logo from "@/assets/travelivibes-logo.png";
+import logo from "@/assets/kialia-logo.png";
 
 export const Route = createFileRoute("/onboarding")({
   head: () => ({

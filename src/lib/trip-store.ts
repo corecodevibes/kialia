@@ -289,6 +289,15 @@ export const emptyTrip: Trip = newTrip();
 
 type Store = { trips: Trip[]; activeId: string };
 
+/**
+ * Der Name stammt aus einem Vorprojekt und bleibt so — er ist tragend.
+ *
+ * Wer ihn auf "kialia." umschreibt, macht jede bereits erfasste Reise auf
+ * jedem Geraet unsichtbar: die App sucht dann unter einem Schluessel, unter
+ * dem nichts liegt. Das faellt in der Entwicklung nicht auf, weil dort
+ * ohnehin nichts gespeichert ist. Umbenennen ginge nur mit Umzug der
+ * vorhandenen Eintraege — der Gewinn waere Kosmetik, die niemand sieht.
+ */
 const KEY = "travelivibes.trips.v3";
 const LEGACY_KEY = "travelivibes.trip.v2";
 

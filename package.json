@@ -1,5 +1,7 @@
 {
-  "name": "tanstack_start_ts",
+  "name": "kialia",
+  "version": "1.0.0",
+  "description": "Reisen planen, Budget im Blick, Reisetagebuch — zu zweit.",
   "private": true,
   "sideEffects": false,
   "type": "module",

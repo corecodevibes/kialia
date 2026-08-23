@@ -11,8 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as DatenschutzRouteImport } from './routes/datenschutz'
 import { Route as EinstellungenRouteImport } from './routes/einstellungen'
 import { Route as IdeenRouteImport } from './routes/ideen'
+import { Route as ImpressumRouteImport } from './routes/impressum'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as PacklisteRouteImport } from './routes/packliste'
 import { Route as PasswortNeuRouteImport } from './routes/passwort-neu'
@@ -29,6 +31,11 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DatenschutzRoute = DatenschutzRouteImport.update({
+  id: '/datenschutz',
+  path: '/datenschutz',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EinstellungenRoute = EinstellungenRouteImport.update({
   id: '/einstellungen',
   path: '/einstellungen',
@@ -37,6 +44,11 @@ const EinstellungenRoute = EinstellungenRouteImport.update({
 const IdeenRoute = IdeenRouteImport.update({
   id: '/ideen',
   path: '/ideen',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImpressumRoute = ImpressumRouteImport.update({
+  id: '/impressum',
+  path: '/impressum',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OnboardingRoute = OnboardingRouteImport.update({
@@ -68,8 +80,10 @@ const TagebuchRoute = TagebuchRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/datenschutz': typeof DatenschutzRoute
   '/einstellungen': typeof EinstellungenRoute
   '/ideen': typeof IdeenRoute
+  '/impressum': typeof ImpressumRoute
   '/onboarding': typeof OnboardingRoute
   '/packliste': typeof PacklisteRoute
   '/passwort-neu': typeof PasswortNeuRoute
@@ -79,8 +93,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/datenschutz': typeof DatenschutzRoute
   '/einstellungen': typeof EinstellungenRoute
   '/ideen': typeof IdeenRoute
+  '/impressum': typeof ImpressumRoute
   '/onboarding': typeof OnboardingRoute
   '/packliste': typeof PacklisteRoute
   '/passwort-neu': typeof PasswortNeuRoute
@@ -91,8 +107,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/datenschutz': typeof DatenschutzRoute
   '/einstellungen': typeof EinstellungenRoute
   '/ideen': typeof IdeenRoute
+  '/impressum': typeof ImpressumRoute
   '/onboarding': typeof OnboardingRoute
   '/packliste': typeof PacklisteRoute
   '/passwort-neu': typeof PasswortNeuRoute
@@ -104,8 +122,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/datenschutz'
     | '/einstellungen'
     | '/ideen'
+    | '/impressum'
     | '/onboarding'
     | '/packliste'
     | '/passwort-neu'
@@ -115,8 +135,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/datenschutz'
     | '/einstellungen'
     | '/ideen'
+    | '/impressum'
     | '/onboarding'
     | '/packliste'
     | '/passwort-neu'
@@ -126,8 +148,10 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/auth'
+    | '/datenschutz'
     | '/einstellungen'
     | '/ideen'
+    | '/impressum'
     | '/onboarding'
     | '/packliste'
     | '/passwort-neu'
@@ -138,8 +162,10 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  DatenschutzRoute: typeof DatenschutzRoute
   EinstellungenRoute: typeof EinstellungenRoute
   IdeenRoute: typeof IdeenRoute
+  ImpressumRoute: typeof ImpressumRoute
   OnboardingRoute: typeof OnboardingRoute
   PacklisteRoute: typeof PacklisteRoute
   PasswortNeuRoute: typeof PasswortNeuRoute
@@ -163,6 +189,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/datenschutz': {
+      id: '/datenschutz'
+      path: '/datenschutz'
+      fullPath: '/datenschutz'
+      preLoaderRoute: typeof DatenschutzRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/einstellungen': {
       id: '/einstellungen'
       path: '/einstellungen'
@@ -175,6 +208,13 @@ declare module '@tanstack/react-router' {
       path: '/ideen'
       fullPath: '/ideen'
       preLoaderRoute: typeof IdeenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/impressum': {
+      id: '/impressum'
+      path: '/impressum'
+      fullPath: '/impressum'
+      preLoaderRoute: typeof ImpressumRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onboarding': {
@@ -218,8 +258,10 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  DatenschutzRoute: DatenschutzRoute,
   EinstellungenRoute: EinstellungenRoute,
   IdeenRoute: IdeenRoute,
+  ImpressumRoute: ImpressumRoute,
   OnboardingRoute: OnboardingRoute,
   PacklisteRoute: PacklisteRoute,
   PasswortNeuRoute: PasswortNeuRoute,

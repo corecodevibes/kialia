@@ -6,7 +6,7 @@ import { mapsQuery, mapsUrl } from "@/lib/maps";
 import { startAutoSync, syncTrips, syncTripsThrottled, watchRemote } from "@/lib/trip-sync";
 import { Home, Lightbulb, Wallet, BookOpen, Backpack, MapPin, Settings } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
-import logo from "@/assets/travelivibes-logo.png";
+import logo from "@/assets/kialia-logo.png";
 import { useProfile, useSession, useMyName } from "@/lib/auth";
 import { onboardingGate, readOnboardedCache } from "@/lib/onboarding-gate";
 
