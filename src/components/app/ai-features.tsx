@@ -22,7 +22,7 @@ const FEATURES: { title: string; where: string; note: string }[] = [
   {
     title: "Vorschläge fürs Ziel",
     where: "Ideen",
-    note: "Bekannte Orte und Aktivitäten. Ungeprüfte Anregungen, keine Empfehlungen.",
+    note: "Richten sich nach eurem Reiseprofil aus den Einstellungen. Ungeprüfte Anregungen, keine Empfehlungen.",
   },
   {
     title: "Kosten schätzen",

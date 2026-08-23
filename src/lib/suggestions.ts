@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { loadTaste, tasteForRequest } from "@/lib/taste";
 
 /**
  * Vorschläge und Kostenspannen fürs Reiseziel.
@@ -46,7 +47,10 @@ async function call<T>(body: Record<string, unknown>): Promise<Result<T>> {
 }
 
 export function fetchIdeas(destination: string, tripKind?: string, days?: number) {
-  return call<{ ideas: Idea[] }>({ kind: "ideen", destination, tripKind, days });
+  // Das Reiseprofil geht nur mit, wenn eines hinterlegt ist. Der genannte Ort
+  // ist bereits gesaeubert; die Vorlieben sind feste Schluessel, kein Text.
+  const taste = tasteForRequest(loadTaste());
+  return call<{ ideas: Idea[] }>({ kind: "ideen", destination, tripKind, days, ...(taste ?? {}) });
 }
 
 export function fetchCosts(destination: string, tripKind?: string, travellers?: number) {

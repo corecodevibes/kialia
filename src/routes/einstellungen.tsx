@@ -1,5 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import {
+  EMPTY_TASTE,
+  TASTE_OPTIONS,
+  cleanPlace,
+  loadTaste,
+  saveTaste,
+  type TasteProfile,
+} from "@/lib/taste";
 import { ChevronLeft, LogOut, Trash2 } from "lucide-react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,6 +41,18 @@ function SettingsPage() {
   const [msg, setMsg] = useState<AuthMessage | null>(null);
   const [confirmText, setConfirmText] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [taste, setTaste] = useState<TasteProfile>(EMPTY_TASTE);
+  const [tasteSaved, setTasteSaved] = useState(false);
+
+  useEffect(() => setTaste(loadTaste()), []);
+
+  function saveTasteProfile() {
+    const clean = { ...taste, place: cleanPlace(taste.place) };
+    saveTaste(clean);
+    setTaste(clean);
+    setTasteSaved(true);
+    window.setTimeout(() => setTasteSaved(false), 2000);
+  }
 
   useEffect(() => {
     if (profile) setName(profile.name);
@@ -106,6 +126,65 @@ function SettingsPage() {
             <PrimaryButton onClick={saveName} className="mt-3">
               {saved ? "Gespeichert" : "Namen speichern"}
             </PrimaryButton>
+          </Card>
+
+          {/* Reiseprofil. Nicht "was magst du?" — darauf antwortet niemand
+              brauchbar — sondern "was hat dir DORT gefallen?". Ein Ort, den
+              man kennt, ist die einzige Referenz, die wirklich traegt. */}
+          <Card>
+            <CardTitle>Wie ihr reist</CardTitle>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Einmal beantwortet — danach richten sich die Vorschläge bei jedem Ziel danach.
+            </p>
+            <div className="mt-3">
+              <Field label="Eine Stadt oder Region, die ihr gut kennt">
+                <input
+                  value={taste.place}
+                  maxLength={60}
+                  onChange={(e) => setTaste({ ...taste, place: e.target.value })}
+                  placeholder="z. B. Lissabon"
+                  className={inputClass}
+                />
+              </Field>
+            </div>
+            <p className="mt-4 text-sm font-medium">Was hat euch dort am meisten gefallen?</p>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {TASTE_OPTIONS.map((o) => {
+                const on = taste.likes.includes(o.key);
+                return (
+                  <button
+                    key={o.key}
+                    type="button"
+                    aria-pressed={on}
+                    onClick={() =>
+                      setTaste({
+                        ...taste,
+                        likes: on
+                          ? taste.likes.filter((k) => k !== o.key)
+                          : [...taste.likes, o.key],
+                      })
+                    }
+                    className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                      on ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground"
+                    }`}
+                  >
+                    {o.label}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-3 text-xs text-muted-foreground">
+              Wird nur mitgeschickt, wenn ihr euch Vorschläge holt — und bleibt sonst auf diesem
+              Gerät.
+            </p>
+            <PrimaryButton onClick={saveTasteProfile} className="mt-3">
+              Speichern
+            </PrimaryButton>
+            {tasteSaved && (
+              <p role="status" className="mt-2 text-sm text-muted-foreground">
+                Gespeichert.
+              </p>
+            )}
           </Card>
 
           <Card>

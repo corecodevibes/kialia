@@ -51,7 +51,18 @@ const COSTS_SCHEMA = {
         type: "object",
         additionalProperties: false,
         properties: {
-          category: { type: "string", enum: ["fruehstueck", "mittag", "abend", "snacks", "unterkunft", "transport", "aktivitaet"] },
+          category: {
+            type: "string",
+            enum: [
+              "fruehstueck",
+              "mittag",
+              "abend",
+              "snacks",
+              "unterkunft",
+              "transport",
+              "aktivitaet",
+            ],
+          },
           min: { type: "number" },
           max: { type: "number" },
         },
@@ -95,15 +106,44 @@ Regeln:
  * Ein Reiseziel braucht nichts davon. "Kreta", "Rundreise Nordnorwegen" —
  * mehr steht da nie.
  */
+/**
+ * Vorlieben aus dem Reiseprofil. Der Client schickt Schluessel, keinen Text —
+ * und der Server glaubt ihm nicht: was nicht in dieser Liste steht, faellt
+ * raus. Damit kann ueber dieses Feld nichts in den Prompt gelangen, was hier
+ * nicht schon woertlich steht.
+ */
+const TASTE: Record<string, string> = {
+  essen: "Essen und Märkte",
+  natur: "Natur und Wandern",
+  wasser: "Strand und Wasser",
+  kultur: "Geschichte und Kultur",
+  viertel: "Viertel abseits der Zentren",
+  ruhe: "Ruhe und wenig Trubel",
+  nachtleben: "abends unterwegs",
+  design: "Kunst und Design",
+};
+
+function cleanLikes(v: unknown): string[] {
+  if (!Array.isArray(v)) return [];
+  const out: string[] = [];
+  for (const raw of v.slice(0, 8)) {
+    const label = TASTE[String(raw)];
+    if (label && !out.includes(label)) out.push(label);
+  }
+  return out;
+}
+
 function cleanDestination(v: unknown): string {
-  return String(v ?? "")
-    .replace(/[\r\n\t]+/g, " ")
-    // eslint-disable-next-line no-control-regex
-    .replace(/[\u0000-\u001f\u007f]/g, "")
-    .replace(/[<>{}[\]`|\\]/g, "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, 60);
+  return (
+    String(v ?? "")
+      .replace(/[\r\n\t]+/g, " ")
+      // eslint-disable-next-line no-control-regex
+      .replace(/[\u0000-\u001f\u007f]/g, "")
+      .replace(/[<>{}[\]`|\\]/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 60)
+  );
 }
 
 const TIMEOUT_MS = 20_000;
@@ -120,7 +160,7 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { kind, destination, tripKind, travellers, days } = await req.json();
+    const { kind, destination, tripKind, travellers, days, knownPlace, likes } = await req.json();
     const dest = cleanDestination(destination);
     if (!dest) {
       return new Response(JSON.stringify({ error: "Kein Reiseziel angegeben." }), {
@@ -134,9 +174,19 @@ Deno.serve(async (req: Request) => {
     const nTrav = Math.min(Math.max(Number(travellers) || 0, 0), 20) || undefined;
     const kindClean = cleanDestination(tripKind).slice(0, 30) || undefined;
 
+    // Der bekannte Ort geht durch dieselbe Saeuberung wie das Reiseziel.
+    const known = cleanDestination(knownPlace);
+    const taste = cleanLikes(likes);
+    const profile =
+      known || taste.length
+        ? ` Die Reisenden kennen ${known || "ähnliche Orte"} gut${
+            taste.length ? ` und mochten dort: ${taste.join(", ")}` : ""
+          }. Richte die Vorschläge daran aus, ohne diesen Ort zu erwähnen.`
+        : "";
+
     const wantIdeas = kind !== "kosten";
     const prompt = wantIdeas
-      ? `Reiseziel: ${dest}${kindClean ? `, Art: ${kindClean}` : ""}${nDays ? `, ${nDays} Tage` : ""}.`
+      ? `Reiseziel: ${dest}${kindClean ? `, Art: ${kindClean}` : ""}${nDays ? `, ${nDays} Tage` : ""}.${profile}`
       : `Reiseziel: ${dest}${kindClean ? `, Art: ${kindClean}` : ""}${
           nTrav ? `, ${nTrav} Personen` : ""
         }. Schätze die Kosten pro Person und Tag.`;
