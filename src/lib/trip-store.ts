@@ -5,10 +5,17 @@ export type PayStatus = "offen" | "reserviert" | "bezahlt";
 
 export type LinkItem = { id: string; label: string; url: string };
 
+import type { IdeaKind } from "./idea-kind";
+
 export type Idea = {
   id: string;
   text: string;
   links: LinkItem[];
+  /**
+   * Restaurant, Aktivitaet oder sonstiges — lokal geraten, vom Menschen
+   * bestaetigt. Fehlt das Feld, wurde noch nicht gefragt.
+   */
+  kind?: IdeaKind | undefined;
 };
 
 export type Transport = {
@@ -78,6 +85,11 @@ export type Activity = {
   /** Waehrung dieses Betrags. Leer = Hauptwaehrung der Reise. */
   currency?: string | undefined;
   name: string;
+  /**
+   * Trennt Essen von Erlebnissen im Plan. Ohne Angabe zaehlt es als
+   * Aktivitaet — so sehen alte Reisen unveraendert aus.
+   */
+  kind?: IdeaKind | undefined;
   /** Freie Ortsangabe fuer die Karten-App. */
   address: string;
   url: string;

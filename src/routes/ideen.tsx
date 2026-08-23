@@ -11,6 +11,7 @@ import {
   NoTripYet,
 } from "@/components/app/AppShell";
 import { LinkList } from "@/components/app/bits";
+import { IDEA_KIND_LABELS, guessIdeaKind, type IdeaKind } from "@/lib/idea-kind";
 import { fetchIdeas, IDEA_CATEGORY_LABELS, type Idea as Suggestion } from "@/lib/suggestions";
 import { normalizeUrl, uid, useTrip, type Idea, type LinkItem, tripDays } from "@/lib/trip-store";
 
@@ -38,16 +39,29 @@ export const Route = createFileRoute("/ideen")({
 function IdeasTab() {
   const { trip, update, ready, hasTrip } = useTrip();
   const [text, setText] = useState("");
-  const [moved, setMoved] = useState<string | null>(null);
+  const [moved, setMoved] = useState<{ text: string; kind: IdeaKind } | null>(null);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [sugBusy, setSugBusy] = useState(false);
   const [sugError, setSugError] = useState<string | null>(null);
 
   function add() {
-    if (!text.trim()) return;
-    update({ ideas: [{ id: uid(), text: text.trim(), links: [] }, ...trip.ideas] });
+    const clean = text.trim();
+    if (!clean) return;
+    // Geraten wird lokal. Ist das Ergebnis eindeutig, steht es einfach da und
+    // laesst sich antippen; ist es das nicht, bleibt das Feld leer und die
+    // Karte fragt. Ungefragt einsortieren waere der schlechtere Fehler.
+    const guess = guessIdeaKind(clean);
+    update({
+      ideas: [
+        { id: uid(), text: clean, links: [], ...(guess.sure ? { kind: guess.kind } : {}) },
+        ...trip.ideas,
+      ],
+    });
     setText("");
   }
+
+  const setKind = (id: string, kind: IdeaKind) =>
+    update({ ideas: trip.ideas.map((i) => (i.id === id ? { ...i, kind } : i)) });
 
   const setLinks = (id: string, links: LinkItem[]) =>
     update({ ideas: trip.ideas.map((i) => (i.id === id ? { ...i, links } : i)) });
@@ -70,6 +84,13 @@ function IdeasTab() {
         {
           id: uid(),
           name: idea.text.trim().slice(0, 120),
+          // Die Einordnung wandert mit — sonst muesste man sie im Plan erneut treffen.
+          kind:
+            idea.kind ??
+            guessIdeaKind(
+              idea.text,
+              idea.links.map((l) => l.url),
+            ).kind,
           address: "",
           url: normalizeUrl(idea.links[0]?.url ?? ""),
           // ALLE Links wandern mit, nicht nur der erste — und mit ihren Namen.
@@ -80,7 +101,15 @@ function IdeasTab() {
         },
       ],
     });
-    setMoved(idea.text.trim().slice(0, 60));
+    setMoved({
+      text: idea.text.trim().slice(0, 60),
+      kind:
+        idea.kind ??
+        guessIdeaKind(
+          idea.text,
+          idea.links.map((l) => l.url),
+        ).kind,
+    });
   }
 
   if (!ready) return <div className="min-h-screen bg-background" />;
@@ -91,7 +120,8 @@ function IdeasTab() {
       <div className="space-y-4">
         {moved && (
           <p role="status" className="rounded-2xl bg-secondary px-4 py-3 text-sm">
-            „{moved}“ steht jetzt unter <span className="font-semibold">Plan → Aktivitäten</span>.
+            „{moved.text}“ steht jetzt unter{" "}
+            <span className="font-semibold">Plan → {IDEA_KIND_LABELS[moved.kind]}</span>.
           </p>
         )}
 
@@ -164,7 +194,12 @@ function IdeasTab() {
                       update({
                         ideas: [
                           ...trip.ideas,
-                          { id: uid(), text: `${sug.title} — ${sug.why}`, links: [] },
+                          {
+                            id: uid(),
+                            text: `${sug.title} — ${sug.why}`,
+                            links: [],
+                            kind: sug.category === "essen" ? "restaurant" : "aktivitaet",
+                          },
                         ],
                       });
                       setSuggestions((prev) => prev.filter((_, j) => j !== i));
@@ -190,6 +225,44 @@ function IdeasTab() {
                 onClick={() => update({ ideas: trip.ideas.filter((i) => i.id !== idea.id) })}
               />
             </div>
+            {/* Steht die Einordnung fest, ist sie nur eine Marke, die man
+                antippen kann. Steht sie nicht fest, fragt die Karte aktiv —
+                so bleibt die Eingabe frei und der Plan trotzdem sortiert. */}
+            {idea.kind ? (
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                {(["aktivitaet", "restaurant", "sonstiges"] as const).map((k) => (
+                  <button
+                    key={k}
+                    type="button"
+                    aria-pressed={idea.kind === k}
+                    onClick={() => setKind(idea.id, k)}
+                    className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${
+                      idea.kind === k
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-secondary text-muted-foreground"
+                    }`}
+                  >
+                    {IDEA_KIND_LABELS[k]}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="mt-2 rounded-2xl bg-secondary/50 px-3 py-2.5">
+                <p className="text-xs font-medium">Was ist das — Essen oder Erlebnis?</p>
+                <div className="mt-1.5 flex flex-wrap gap-1.5">
+                  {(["aktivitaet", "restaurant", "sonstiges"] as const).map((k) => (
+                    <button
+                      key={k}
+                      type="button"
+                      onClick={() => setKind(idea.id, k)}
+                      className="rounded-full bg-card px-2.5 py-1 text-[11px] font-semibold shadow-sm"
+                    >
+                      {IDEA_KIND_LABELS[k]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="mt-3">
               <LinkList links={idea.links} onChange={(l) => setLinks(idea.id, l)} />
             </div>

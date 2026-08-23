@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { money } from "@/lib/currency";
 import { COST_CATEGORY_LABELS, fetchCosts, midpoint, type Costs } from "@/lib/suggestions";
 import { Attachments } from "@/components/app/attachments";
@@ -25,6 +25,7 @@ import {
   AmountField,
 } from "@/components/app/AppShell";
 import { StatusPicker } from "@/components/app/bits";
+import { IDEA_KIND_LABELS, type IdeaKind } from "@/lib/idea-kind";
 
 import {
   boardLabels,
@@ -74,6 +75,38 @@ const modes = [
   { key: "Velo", icon: Bike },
   { key: "Schiff", icon: Ship },
 ];
+
+const ACTIVITY_GROUPS: { kind: "restaurant" | "aktivitaet"; title: string }[] = [
+  { kind: "aktivitaet", title: "Aktivitäten" },
+  { kind: "restaurant", title: "Essen & Trinken" },
+];
+
+/** Zwei Knoepfe statt eines Menues — es gibt nur zwei Antworten. */
+function KindPicker({
+  value,
+  onChange,
+}: {
+  value: "restaurant" | "aktivitaet";
+  onChange: (kind: IdeaKind) => void;
+}) {
+  return (
+    <div className="mt-2 inline-flex rounded-full bg-secondary p-0.5">
+      {ACTIVITY_GROUPS.map((g) => (
+        <button
+          key={g.kind}
+          type="button"
+          aria-pressed={value === g.kind}
+          onClick={() => onChange(g.kind)}
+          className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+            value === g.kind ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
+          }`}
+        >
+          {IDEA_KIND_LABELS[g.kind]}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 function PlanTab() {
   const { trip, update, ready, hasTrip } = useTrip();
@@ -537,94 +570,114 @@ function PlanTab() {
           </p>
         </Card>
 
-        <SectionTitle>Aktivitäten</SectionTitle>
-        {trip.activities.map((a) => (
-          <Card key={a.id}>
-            <div className="flex items-start gap-2">
-              <div className="min-w-0 flex-1">
-                <Field label="Name der Aktivität">
-                  <input
-                    value={a.name}
-                    onChange={(e) => setActivity(a.id, { name: e.target.value })}
-                    placeholder="z. B. Bootstour bei Sonnenuntergang"
-                    className={inputClass}
-                  />
-                </Field>
-                <div className="mt-3">
-                  <PlaceField
-                    name={a.name}
-                    address={a.address}
-                    destination={trip.destination}
-                    onChange={(v) => setActivity(a.id, { address: v })}
-                  />
-                  <LinkList
-                    links={a.links ?? []}
-                    onChange={(l) => setActivity(a.id, { links: l })}
-                  />
-                  <Attachments
-                    ownerId={a.id}
-                    label="Ticket / Bestätigung"
-                    currency={trip.currency || "EUR"}
-                    onExtract={(f) =>
-                      setActivity(a.id, {
-                        ...(f.title ? { name: f.title } : {}),
-                        ...(f.address ? { address: f.address } : {}),
-                        ...(f.amount != null ? { cost: f.amount } : {}),
-                        ...(f.currency ? { currency: f.currency } : {}),
-                      })
-                    }
-                  />
-                </div>
-              </div>
-              <div className="pt-5">
-                <DeleteButton
-                  onClick={() =>
-                    update({ activities: trip.activities.filter((x) => x.id !== a.id) })
-                  }
-                />
-              </div>
-            </div>
-            <div className="mt-3 space-y-3">
-              <Field label="Link (z. B. GetYourGuide)">
-                <input
-                  value={a.url}
-                  onChange={(e) => setActivity(a.id, { url: e.target.value })}
-                  onBlur={(e) => setActivity(a.id, { url: normalizeUrl(e.target.value) })}
-                  className={inputClass}
-                />
-              </Field>
-              {a.url && (
-                <a
-                  href={safeHref(a.url)}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className="block truncate text-xs font-medium text-primary underline"
-                >
-                  Website öffnen
-                </a>
-              )}
-              <FieldRow>
-                <Field label="Kosten">
-                  <AmountField
-                    value={a.cost}
-                    currency={a.currency}
-                    onChange={(n) => setActivity(a.id, { cost: n })}
-                    onCurrencyChange={(c) => setActivity(a.id, { currency: c })}
-                  />
-                </Field>
-                <Field label="Zahlen bis">
-                  <input
-                    type="date"
-                    value={a.dueDate}
-                    onChange={(e) => setActivity(a.id, { dueDate: e.target.value })}
-                    className={dateInputClass}
-                  />
-                </Field>
-              </FieldRow>
-              <StatusPicker value={a.status} onChange={(status) => setActivity(a.id, { status })} />
-            </div>
-          </Card>
-        ))}
+        {/* Essen und Erlebnisse stehen getrennt, weil man sie getrennt plant:
+            das eine buchst du Wochen vorher, das andere entscheidest du
+            mittags. In einer Liste gehen beide unter. */}
+        {ACTIVITY_GROUPS.map((group) => {
+          const items = trip.activities.filter(
+            (a) => (a.kind === "restaurant" ? "restaurant" : "aktivitaet") === group.kind,
+          );
+          if (items.length === 0) return null;
+          return (
+            <Fragment key={group.kind}>
+              <SectionTitle>{group.title}</SectionTitle>
+              {items.map((a) => (
+                <Card key={a.id}>
+                  <div className="flex items-start gap-2">
+                    <div className="min-w-0 flex-1">
+                      <Field label="Name der Aktivität">
+                        <input
+                          value={a.name}
+                          onChange={(e) => setActivity(a.id, { name: e.target.value })}
+                          placeholder="z. B. Bootstour bei Sonnenuntergang"
+                          className={inputClass}
+                        />
+                      </Field>
+                      <KindPicker
+                        value={a.kind === "restaurant" ? "restaurant" : "aktivitaet"}
+                        onChange={(kind) => setActivity(a.id, { kind })}
+                      />
+                      <div className="mt-3">
+                        <PlaceField
+                          name={a.name}
+                          address={a.address}
+                          destination={trip.destination}
+                          onChange={(v) => setActivity(a.id, { address: v })}
+                        />
+                        <LinkList
+                          links={a.links ?? []}
+                          onChange={(l) => setActivity(a.id, { links: l })}
+                        />
+                        <Attachments
+                          ownerId={a.id}
+                          label="Ticket / Bestätigung"
+                          currency={trip.currency || "EUR"}
+                          onExtract={(f) =>
+                            setActivity(a.id, {
+                              ...(f.title ? { name: f.title } : {}),
+                              ...(f.address ? { address: f.address } : {}),
+                              ...(f.amount != null ? { cost: f.amount } : {}),
+                              ...(f.currency ? { currency: f.currency } : {}),
+                            })
+                          }
+                        />
+                      </div>
+                    </div>
+                    <div className="pt-5">
+                      <DeleteButton
+                        onClick={() =>
+                          update({ activities: trip.activities.filter((x) => x.id !== a.id) })
+                        }
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-3 space-y-3">
+                    <Field label="Link (z. B. GetYourGuide)">
+                      <input
+                        value={a.url}
+                        onChange={(e) => setActivity(a.id, { url: e.target.value })}
+                        onBlur={(e) => setActivity(a.id, { url: normalizeUrl(e.target.value) })}
+                        className={inputClass}
+                      />
+                    </Field>
+                    {a.url && (
+                      <a
+                        href={safeHref(a.url)}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        className="block truncate text-xs font-medium text-primary underline"
+                      >
+                        Website öffnen
+                      </a>
+                    )}
+                    <FieldRow>
+                      <Field label="Kosten">
+                        <AmountField
+                          value={a.cost}
+                          currency={a.currency}
+                          onChange={(n) => setActivity(a.id, { cost: n })}
+                          onCurrencyChange={(c) => setActivity(a.id, { currency: c })}
+                        />
+                      </Field>
+                      <Field label="Zahlen bis">
+                        <input
+                          type="date"
+                          value={a.dueDate}
+                          onChange={(e) => setActivity(a.id, { dueDate: e.target.value })}
+                          className={dateInputClass}
+                        />
+                      </Field>
+                    </FieldRow>
+                    <StatusPicker
+                      value={a.status}
+                      onChange={(status) => setActivity(a.id, { status })}
+                    />
+                  </div>
+                </Card>
+              ))}
+            </Fragment>
+          );
+        })}
         <AddButton
           label="Aktivität hinzufügen"
           onClick={() =>
@@ -634,6 +687,27 @@ function PlanTab() {
                 {
                   id: uid(),
                   name: "",
+                  kind: "aktivitaet",
+                  address: "",
+                  url: "",
+                  cost: 0,
+                  status: "offen",
+                  dueDate: "",
+                },
+              ],
+            })
+          }
+        />
+        <AddButton
+          label="Restaurant hinzufügen"
+          onClick={() =>
+            update({
+              activities: [
+                ...trip.activities,
+                {
+                  id: uid(),
+                  name: "",
+                  kind: "restaurant",
                   address: "",
                   url: "",
                   cost: 0,
