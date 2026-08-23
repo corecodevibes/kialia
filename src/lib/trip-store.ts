@@ -89,6 +89,8 @@ export type DiaryEntry = {
   spent: number;
   /** Was und wo gegessen wurde — auf Reisen die haltbarste Erinnerung. */
   food: string;
+  /** "Empfehlung" | "Merke" | "War nichts" — leer, wenn nicht bewertet. */
+  foodTag?: string | undefined;
   /** Ein Wort statt Sternen — faerbt spaeter den Rueckblick. */
   mood: string;
   /**

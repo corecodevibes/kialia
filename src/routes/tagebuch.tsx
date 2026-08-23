@@ -1,5 +1,6 @@
+import { ExpenseField } from "@/components/app/expense-field";
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Loader2, Mic, Plus, Printer, Square } from "lucide-react";
 import {
   AppShell,
@@ -110,6 +111,51 @@ function DiaryTab() {
 
   const people = travellerNames(trip);
   const missing = missingDiaryDays(trip);
+  const today = todayLocalISO();
+
+  /**
+   * Waehrend der Reise steht der heutige Tag oben — und entsteht von selbst.
+   *
+   * Wer abends die App oeffnet, will schreiben, nicht erst einen Tag anlegen
+   * und dann durch elf Karten scrollen. Ausserhalb des Reisezeitraums
+   * passiert nichts: im Maerz einen Eintrag fuer heute anzulegen waere Unsinn.
+   */
+  const onTrip = Boolean(
+    trip.startDate && trip.endDate && today >= trip.startDate && today <= trip.endDate,
+  );
+  const hasToday = trip.diary.some((e) => e.date === today);
+
+  useEffect(() => {
+    if (!ready || !onTrip || hasToday) return;
+    update({
+      diary: [
+        ...trip.diary,
+        {
+          id: uid(),
+          day: nextDiaryDay(trip),
+          date: today,
+          text: "",
+          highlight: "",
+          notes: "",
+          expenses: "",
+          spent: 0,
+          food: "",
+          mood: "",
+          assignedTo: "",
+        },
+      ],
+    });
+    // Bewusst nur an diesen drei Werten haengend: sonst legt jede Aenderung
+    // an der Reise einen weiteren Eintrag an.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready, onTrip, hasToday]);
+
+  // Heute zuerst, danach die uebrigen Tage von neu nach alt.
+  const orderedDiary = [...trip.diary].sort((a, b) => {
+    if (a.date === today) return -1;
+    if (b.date === today) return 1;
+    return a.date > b.date ? -1 : a.date < b.date ? 1 : b.day - a.day;
+  });
 
   /** Legt für jeden noch fehlenden Reisetag einen leeren Eintrag an. */
   function fillDays() {
@@ -264,7 +310,7 @@ function DiaryTab() {
         )}
 
         <div className="space-y-4">
-          {trip.diary.map((e) => (
+          {orderedDiary.map((e) => (
             <Card key={e.id}>
               {/* Die Breite steuert der Container, nicht eine zweite
                   Breitenklasse am Eingabefeld: dateInputClass bringt `w-full`
@@ -365,6 +411,32 @@ function DiaryTab() {
                       placeholder={fieldPlaceholders[f]}
                       className={`${inputClass} resize-y`}
                     />
+
+                    {/* Statt eines Fensters nach dem Tippen: drei Chips direkt
+                        darunter. Ein Antippen, kein Unterbrechen, jederzeit
+                        zurücknehmbar. */}
+                    {f === "food" && e.food.trim() && (
+                      <div className="mt-1.5 flex flex-wrap gap-1.5">
+                        {(["Empfehlung", "Merke", "War nichts"] as const).map((tag) => {
+                          const active = e.foodTag === tag;
+                          return (
+                            <button
+                              key={tag}
+                              type="button"
+                              aria-pressed={active}
+                              onClick={() => set(e.id, { foodTag: active ? "" : tag })}
+                              className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+                                active
+                                  ? "bg-primary text-primary-foreground"
+                                  : "bg-secondary text-muted-foreground hover:bg-secondary/70"
+                              }`}
+                            >
+                              {tag}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 ))}
 
