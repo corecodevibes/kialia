@@ -13,6 +13,7 @@ import {
   inputClass,
   Money,
   NoTripYet,
+  NumberField,
 } from "@/components/app/AppShell";
 import {
   formatDateLong,
@@ -311,11 +312,9 @@ function DiaryTab() {
                   ))}
 
                   <Field label="Summe heute (€)">
-                    <input
-                      type="number"
-                      min={0}
+                    <NumberField
                       value={e.spent}
-                      onChange={(ev) => set(e.id, { spent: Number(ev.target.value) })}
+                      onChange={(n) => set(e.id, { spent: n })}
                       className={inputClass}
                     />
                   </Field>

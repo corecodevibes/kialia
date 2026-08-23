@@ -15,6 +15,7 @@ import {
   selectClass,
   Money,
   NoTripYet,
+  NumberField,
 } from "@/components/app/AppShell";
 import { StatusPicker } from "@/components/app/bits";
 
@@ -141,11 +142,9 @@ function PlanTab() {
               </Field>
               <FieldRow>
                 <Field label="Kosten (€)">
-                  <input
-                    type="number"
-                    min={0}
+                  <NumberField
                     value={t.cost}
-                    onChange={(e) => setTransport(t.id, { cost: Number(e.target.value) })}
+                    onChange={(n) => setTransport(t.id, { cost: n })}
                     className={inputClass}
                   />
                 </Field>
@@ -285,11 +284,9 @@ function PlanTab() {
               </Field>
               <FieldRow>
                 <Field label="Kosten (€)">
-                  <input
-                    type="number"
-                    min={0}
+                  <NumberField
                     value={s.cost}
-                    onChange={(e) => setStay(s.id, { cost: Number(e.target.value) })}
+                    onChange={(n) => setStay(s.id, { cost: n })}
                     className={inputClass}
                   />
                 </Field>
@@ -330,53 +327,86 @@ function PlanTab() {
 
         <SectionTitle>Essen pro Tag</SectionTitle>
         <Card>
+          {/* Manche planen einen Tagessatz, andere rechnen pro Mahlzeit. Beides
+              wird getrennt gespeichert: wer umschaltet, verliert seine
+              Eingaben nicht und bekommt sie beim Zurueckschalten wieder. */}
+          <div
+            className="mb-3 grid grid-cols-2 gap-1 rounded-2xl bg-secondary p-1 text-sm font-medium"
+            role="radiogroup"
+            aria-label="Wie plant ihr das Essen?"
+          >
+            {(
+              [
+                ["total", "Gesamt pro Tag"],
+                ["split", "Nach Mahlzeiten"],
+              ] as const
+            ).map(([key, label]) => (
+              <button
+                key={key}
+                type="button"
+                role="radio"
+                aria-checked={trip.meals.mode === key}
+                onClick={() => setMeals({ mode: key })}
+                className={`rounded-xl py-2 transition ${
+                  trip.meals.mode === key
+                    ? "bg-card text-foreground shadow-sm"
+                    : "text-muted-foreground"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
           <div className="space-y-3">
-            <FieldRow>
-              <Field label="Morgens (€)">
-                <input
-                  type="number"
-                  min={0}
-                  value={trip.meals.breakfast}
-                  onChange={(e) => setMeals({ breakfast: Number(e.target.value) })}
+            {trip.meals.mode === "total" ? (
+              <Field label="Essen pro Tag (€)">
+                <NumberField
+                  value={trip.meals.perDay}
+                  onChange={(n) => setMeals({ perDay: n })}
                   className={inputClass}
                 />
               </Field>
-              <Field label="Mittags (€)">
-                <input
-                  type="number"
-                  min={0}
-                  value={trip.meals.lunch}
-                  onChange={(e) => setMeals({ lunch: Number(e.target.value) })}
-                  className={inputClass}
-                />
-              </Field>
-            </FieldRow>
-            <FieldRow>
-              <Field label="Abends (€)">
-                <input
-                  type="number"
-                  min={0}
-                  value={trip.meals.dinner}
-                  onChange={(e) => setMeals({ dinner: Number(e.target.value) })}
-                  className={inputClass}
-                />
-              </Field>
-              <Field label="Snacks (€)">
-                <input
-                  type="number"
-                  min={0}
-                  value={trip.meals.snacks}
-                  onChange={(e) => setMeals({ snacks: Number(e.target.value) })}
-                  className={inputClass}
-                />
-              </Field>
-            </FieldRow>
+            ) : (
+              <>
+                <FieldRow>
+                  <Field label="Morgens (€)">
+                    <NumberField
+                      value={trip.meals.breakfast}
+                      onChange={(n) => setMeals({ breakfast: n })}
+                      className={inputClass}
+                    />
+                  </Field>
+                  <Field label="Mittags (€)">
+                    <NumberField
+                      value={trip.meals.lunch}
+                      onChange={(n) => setMeals({ lunch: n })}
+                      className={inputClass}
+                    />
+                  </Field>
+                </FieldRow>
+                <FieldRow>
+                  <Field label="Abends (€)">
+                    <NumberField
+                      value={trip.meals.dinner}
+                      onChange={(n) => setMeals({ dinner: n })}
+                      className={inputClass}
+                    />
+                  </Field>
+                  <Field label="Snacks (€)">
+                    <NumberField
+                      value={trip.meals.snacks}
+                      onChange={(n) => setMeals({ snacks: n })}
+                      className={inputClass}
+                    />
+                  </Field>
+                </FieldRow>
+              </>
+            )}
             <Field label="Maximal pro Tag (€)">
-              <input
-                type="number"
-                min={0}
+              <NumberField
                 value={trip.meals.maxPerDay}
-                onChange={(e) => setMeals({ maxPerDay: Number(e.target.value) })}
+                onChange={(n) => setMeals({ maxPerDay: n })}
                 className={inputClass}
               />
             </Field>
@@ -430,11 +460,9 @@ function PlanTab() {
               )}
               <FieldRow>
                 <Field label="Kosten (€)">
-                  <input
-                    type="number"
-                    min={0}
+                  <NumberField
                     value={a.cost}
-                    onChange={(e) => setActivity(a.id, { cost: Number(e.target.value) })}
+                    onChange={(n) => setActivity(a.id, { cost: n })}
                     className={inputClass}
                   />
                 </Field>
@@ -530,31 +558,25 @@ function PlanTab() {
             <div className="mt-3 space-y-3 rounded-2xl bg-secondary/40 p-3">
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Schon gespart (€)">
-                  <input
-                    type="number"
-                    min={0}
+                  <NumberField
                     value={trip.savings.saved}
-                    onChange={(e) => setSavings({ saved: Number(e.target.value) })}
+                    onChange={(n) => setSavings({ saved: n })}
                     className={inputClass}
                   />
                 </Field>
                 <Field label="Kredit (€)">
-                  <input
-                    type="number"
-                    min={0}
+                  <NumberField
                     value={trip.savings.credit}
-                    onChange={(e) => setSavings({ credit: Number(e.target.value) })}
+                    onChange={(n) => setSavings({ credit: n })}
                     className={inputClass}
                   />
                 </Field>
               </div>
               {plan.source === "manual" && (
                 <Field label="Monate bis zur Reise">
-                  <input
-                    type="number"
-                    min={1}
+                  <NumberField
                     value={trip.savings.monthsLeft}
-                    onChange={(e) => setSavings({ monthsLeft: Number(e.target.value) })}
+                    onChange={(n) => setSavings({ monthsLeft: n })}
                     className={inputClass}
                   />
                 </Field>

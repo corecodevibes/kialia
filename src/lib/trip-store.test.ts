@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import {
   formatDateLong,
   tripItinerary,
+  mealsPerDay,
   monthsUntil,
   nextDiaryDay,
   parseLocalDate,
@@ -356,5 +357,32 @@ describe("savingsPlan — Fortschritt", () => {
       stays: [stay(4000)],
     });
     expect(savingsPlan(t, tripTotals(t)).progress).toBe(1);
+  });
+});
+
+describe("mealsPerDay — Gesamtbetrag oder Aufteilung", () => {
+  const meals = (patch: Partial<Trip["meals"]>): Trip["meals"] => ({
+    mode: "split",
+    perDay: 0,
+    breakfast: 0,
+    lunch: 0,
+    dinner: 0,
+    snacks: 0,
+    maxPerDay: 100,
+    ...patch,
+  });
+
+  test("teilt auf, wenn nach Mahlzeiten geplant wird", () => {
+    expect(mealsPerDay(meals({ breakfast: 10, lunch: 20, dinner: 25, snacks: 5 }))).toBe(60);
+  });
+
+  test("nimmt im Gesamtmodus nur den Tagesbetrag", () => {
+    expect(mealsPerDay(meals({ mode: "total", perDay: 45 }))).toBe(45);
+  });
+
+  test("summiert die beiden Quellen nie — sonst zählt beim Umschalten alles doppelt", () => {
+    const m = meals({ mode: "total", perDay: 45, breakfast: 10, lunch: 20 });
+    expect(mealsPerDay(m)).toBe(45);
+    expect(mealsPerDay({ ...m, mode: "split" })).toBe(30);
   });
 });

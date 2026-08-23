@@ -12,6 +12,7 @@ import {
   dateInputClass,
   inputClass,
   Money,
+  NumberField,
 } from "@/components/app/AppShell";
 import { flagFor } from "@/lib/country";
 import {
@@ -258,11 +259,9 @@ function HomeTab() {
                 />
               </Field>
               <Field label="Personen">
-                <input
-                  type="number"
-                  min={1}
+                <NumberField
                   value={trip.travellers}
-                  onChange={(e) => update({ travellers: Number(e.target.value) })}
+                  onChange={(n) => update({ travellers: n })}
                   className={inputClass}
                 />
               </Field>

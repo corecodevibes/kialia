@@ -2,7 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { eur, useTrip } from "@/lib/trip-store";
 import { flagFor } from "@/lib/country";
 import { Home, Lightbulb, Wallet, BookOpen, Backpack, LogOut } from "lucide-react";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import logo from "@/assets/travelivibes-logo.png";
 import { signOut, useProfile, useSession } from "@/lib/auth";
 import { onboardingGate, readOnboardedCache } from "@/lib/onboarding-gate";
@@ -229,6 +229,58 @@ export function NoTripYet({ what }: { what: string }) {
         </Link>
       </div>
     </AppShell>
+  );
+}
+
+/**
+ * Zahlenfeld.
+ *
+ * Bewusst `type="text"` mit `inputMode="decimal"` statt `type="number"`:
+ * React aktualisiert bei Zahlenfeldern das DOM nicht, wenn der neue Wert
+ * NUMERISCH gleich dem angezeigten ist. "01" und 1 sind numerisch gleich —
+ * die fuehrende Null blieb also stehen und der naechste Anschlag machte
+ * daraus "010". Der Wert stimmte, die Anzeige nicht, und das fuehlt sich an
+ * wie ein kaputtes Feld.
+ *
+ * `inputMode="decimal"` behaelt die Zifferntastatur auf dem Telefon.
+ * Waehrend des Tippens gilt der Entwurf, damit man das Feld auch leeren kann,
+ * ohne dass sofort eine 0 zurueckspringt.
+ */
+export function NumberField({
+  value,
+  onChange,
+  className = inputClass,
+  placeholder = "0",
+  ariaLabel,
+}: {
+  value: number;
+  onChange: (n: number) => void;
+  className?: string;
+  placeholder?: string;
+  ariaLabel?: string;
+}) {
+  const [draft, setDraft] = useState<string | null>(null);
+  const shown = draft ?? (value === 0 ? "" : String(value));
+
+  return (
+    <input
+      type="text"
+      inputMode="decimal"
+      value={shown}
+      placeholder={placeholder}
+      aria-label={ariaLabel}
+      className={className}
+      onChange={(e) => {
+        const raw = e.target.value
+          .replace(/[^\d.,]/g, "")
+          .replace(",", ".")
+          .replace(/^0+(?=\d)/, "");
+        setDraft(raw);
+        const n = Number(raw);
+        onChange(raw === "" || !Number.isFinite(n) ? 0 : n);
+      }}
+      onBlur={() => setDraft(null)}
+    />
   );
 }
 

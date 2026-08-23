@@ -49,6 +49,10 @@ export type Activity = {
 };
 
 export type Meals = {
+  /** "total": ein Betrag fuer den ganzen Tag. "split": nach Mahlzeiten. */
+  mode: "total" | "split";
+  /** Gilt nur im Modus "total". */
+  perDay: number;
   breakfast: number;
   lunch: number;
   dinner: number;
@@ -190,7 +194,15 @@ export function newTrip(destination = ""): Trip {
     transports: [],
     stays: [],
     activities: [],
-    meals: { breakfast: 0, lunch: 0, dinner: 0, snacks: 0, maxPerDay: 100 },
+    meals: {
+      mode: "split",
+      perDay: 0,
+      breakfast: 0,
+      lunch: 0,
+      dinner: 0,
+      snacks: 0,
+      maxPerDay: 100,
+    },
     savings: { enabled: false, saved: 0, monthsLeft: 6, credit: 0 },
     diary: [],
     packing: defaultPacking(),
@@ -210,7 +222,12 @@ function normalize(t: Partial<Trip>): Trip {
     ...base,
     ...t,
     id: t.id || base.id,
-    meals: { ...base.meals, ...t.meals },
+    meals: {
+      ...base.meals,
+      ...t.meals,
+      mode: t.meals?.mode ?? "split",
+      perDay: t.meals?.perDay ?? 0,
+    },
     savings: { ...base.savings, ...t.savings },
     packing: t.packing && t.packing.length ? t.packing : base.packing,
     // Gespeicherte Reisen kennen spaeter ergaenzte Felder nicht. Ohne diese
@@ -357,7 +374,12 @@ export function tripDays(trip: Trip) {
 }
 
 export function mealsPerDay(m: Meals) {
-  return m.breakfast + m.lunch + m.dinner + m.snacks;
+  // Nur EINE der beiden Quellen zaehlt. Wer aufteilt und spaeter auf
+  // Gesamtbetrag umschaltet, soll nicht ploetzlich beides summiert bekommen —
+  // die jeweils andere Eingabe bleibt aber erhalten und ist beim
+  // Zurueckschalten wieder da.
+  if (m.mode === "total") return m.perDay || 0;
+  return (m.breakfast || 0) + (m.lunch || 0) + (m.dinner || 0) + (m.snacks || 0);
 }
 
 export function tripTotals(trip: Trip) {
