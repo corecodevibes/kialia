@@ -59,6 +59,23 @@ function fromRow(row: Row): Trip {
  * Lokale Reisen ohne remoteId werden hochgeladen — so wandert alles, was vor
  * dem Anmelden entstanden ist, beim ersten Abgleich mit.
  */
+let lastSync = 0;
+
+/**
+ * Abgleich, hoechstens alle 20 Sekunden.
+ *
+ * AppShell wird von JEDER Route gerendert, also bei jedem Tab-Wechsel neu
+ * eingehaengt — ohne Drosselung liefe bei fuenf Tabs fuenfmal ein voller
+ * Abgleich. Das kostet nicht nur Netz: jeder Abgleich schreibt den lokalen
+ * Speicher neu und koennte eine gerade laufende Eingabe ueberholen.
+ */
+export async function syncTripsThrottled(): Promise<void> {
+  const now = Date.now();
+  if (now - lastSync < 20_000) return;
+  lastSync = now;
+  await syncTrips();
+}
+
 export async function syncTrips(): Promise<{ ok: boolean; error?: string }> {
   const { data: session } = await supabase.auth.getSession();
   const user = session.session?.user;

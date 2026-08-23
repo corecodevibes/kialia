@@ -597,3 +597,45 @@ describe("travellerNames — der eigene Name statt 'Ich'", () => {
     expect(travellerNames(t, "Steffen")).toEqual(["Steffen", "Annalina"]);
   });
 });
+
+describe("savingsPlan — fehlende Kurse dürfen nicht stillschweigend fehlen", () => {
+  test("weist Beträge aus, die mangels Kurs nicht in der Summe stecken", () => {
+    const t = tripWith({
+      currency: "CHF",
+      secondCurrency: "EUR",
+      savings: { enabled: true, saved: 0, monthsLeft: 4, credit: 0 },
+      stays: [
+        {
+          id: "a",
+          name: "",
+          address: "",
+          url: "",
+          from: "",
+          to: "",
+          cost: 1000,
+          status: "offen" as const,
+          dueDate: "",
+          board: "nichts" as const,
+        },
+        {
+          id: "b",
+          name: "",
+          address: "",
+          url: "",
+          from: "",
+          to: "",
+          cost: 900,
+          currency: "EUR",
+          status: "offen" as const,
+          dueDate: "",
+          board: "nichts" as const,
+        },
+      ],
+    });
+    const plan = savingsPlan(t, tripTotals(t));
+    // Ohne Kurs steckt nur die CHF-Position in der Summe …
+    expect(plan.total).toBe(1000);
+    // … und die 900 EUR sind ausdrücklich als fehlend ausgewiesen.
+    expect(plan.missing.EUR).toBe(900);
+  });
+});

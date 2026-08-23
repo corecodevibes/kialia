@@ -3,7 +3,7 @@ import { personColor, travellerNames, useTrip, PERSON_COLORS, type Trip } from "
 import { flagFor } from "@/lib/country";
 import { money } from "@/lib/currency";
 import { mapsQuery, mapsUrl } from "@/lib/maps";
-import { startAutoSync, syncTrips, watchRemote } from "@/lib/trip-sync";
+import { startAutoSync, syncTrips, syncTripsThrottled, watchRemote } from "@/lib/trip-sync";
 import { Home, Lightbulb, Wallet, BookOpen, Backpack, MapPin, Settings } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import logo from "@/assets/travelivibes-logo.png";
@@ -37,7 +37,7 @@ export function AppShell({
   // bei eigenen Änderungen hochladen und auf fremde horchen.
   useEffect(() => {
     if (!session) return;
-    void syncTrips();
+    void syncTripsThrottled();
     const stopPush = startAutoSync();
     const stopWatch = watchRemote(() => {
       void syncTrips();

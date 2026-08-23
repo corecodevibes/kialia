@@ -818,6 +818,19 @@ function PlanTab() {
                   </div>
                 )}
 
+                {/* Ohne diesen Hinweis waere die Empfehlung zu niedrig, und
+                    zwar unsichtbar — der teuerste Fehler bei einer Zahl, nach
+                    der jemand sein Geld einteilt. */}
+                {Object.keys(plan.missing).length > 0 && (
+                  <p className="mt-2 rounded-xl bg-destructive/10 px-3 py-2 text-xs text-destructive">
+                    Nicht enthalten:{" "}
+                    {Object.entries(plan.missing)
+                      .map(([c, v]) => money(v, c))
+                      .join(" · ")}{" "}
+                    — dafür fehlt ein Kurs. Die Empfehlung ist so lange zu niedrig.
+                  </p>
+                )}
+
                 {/* Herkunft der Zahl — eine Zahl ohne erkennbare Herkunft
                     glaubt niemand zweimal. */}
                 <dl className="mt-3 space-y-1 border-t border-foreground/10 pt-2 text-xs">

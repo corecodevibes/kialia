@@ -683,6 +683,14 @@ export function monthsUntil(iso: string, now: Date = new Date()): number | null 
 
 export type SavingsPlan = {
   total: number;
+  /**
+   * Betraege, die mangels Kurs NICHT in `total` stecken.
+   *
+   * Ohne diesen Hinweis waere die Sparempfehlung zu niedrig — und zwar
+   * unsichtbar. Bei einer Funktion, deren Zweck "kann ich mir das leisten"
+   * ist, ist eine zu niedrige Zahl der schlimmste Fehler.
+   */
+  missing: Record<string, number>;
   covered: number;
   open: number;
   /** Anteil der gedeckten Kosten, 0..1. Der Fortschritt ist der eigentliche
@@ -709,6 +717,7 @@ export function savingsPlan(
   now: Date = new Date(),
 ): SavingsPlan {
   const total = totals.total;
+  const missing = totals.pending;
   const covered = (trip.savings.saved || 0) + (trip.savings.credit || 0);
   const open = Math.max(0, total - covered);
 
@@ -721,10 +730,30 @@ export function savingsPlan(
   const progress = total > 0 ? Math.min(1, covered / total) : 0;
 
   if (open <= 0)
-    return { total, covered, open, progress, months, perMonth: 0, source, reason: "nothing-open" };
+    return {
+      total,
+      missing,
+      covered,
+      open,
+      progress,
+      months,
+      perMonth: 0,
+      source,
+      reason: "nothing-open",
+    };
   if (months <= 0)
-    return { total, covered, open, progress, months, perMonth: null, source, reason: "no-months" };
-  return { total, covered, open, progress, months, perMonth: open / months, source };
+    return {
+      total,
+      missing,
+      covered,
+      open,
+      progress,
+      months,
+      perMonth: null,
+      source,
+      reason: "no-months",
+    };
+  return { total, missing, covered, open, progress, months, perMonth: open / months, source };
 }
 
 /**
