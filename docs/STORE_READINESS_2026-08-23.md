@@ -26,16 +26,17 @@ Das steht jetzt als Kommentar im Code, damit es niemand später "aufräumt".
 
 ## Blocker vor einer Einreichung
 
+Stand 23.08. abends: von ursprünglich vier ist einer übrig, der wirklich blockiert.
+
+
 1. **SMTP nicht eingerichtet.** Niemand außer euch beiden kann sich registrieren —
    die Bestätigungsmail geht nicht raus. Blockiert jeden Tester und jeden Review,
    weil Apple und Google einen funktionierenden Demo-Zugang verlangen. Brevo-Daten
    liegen bei dir. **Das ist der einzige Punkt, der niemand anders erledigen kann.**
-2. **Verantwortlicher und Kontaktadresse.** Datenschutz und Impressum stehen als
-   Seiten unter `/datenschutz` und `/impressum`, aus Login und Einstellungen
-   verlinkt. Der Datenschutztext ist vollständig und beschreibt die tatsächlichen
-   Datenflüsse. Offen sind nur Name, Anschrift und eine Kontaktadresse — auf den
-   Seiten rot markiert. Bei einer Firma zusätzlich Rechtsform, Register und
-   gegebenenfalls die USt-IdNr.
+2. ~~Verantwortlicher und Kontaktadresse~~ — **erledigt 23.08.** Datenschutz und
+   Impressum sind vollständig, Angaben in `src/lib/anbieter.ts`, Texte auf
+   Schweizer Recht (DSG + DSGVO, EDÖB) umgestellt.
+
 3. **Bundle-ID.** Vor dem ersten nativen Build festlegen (z. B. `app.kialia.app`)
    und die Build-Nummer daran koppeln. Kein Aufwand, aber später nicht mehr
    änderbar, ohne die App im Store neu anzulegen.
