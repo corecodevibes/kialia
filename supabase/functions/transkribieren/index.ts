@@ -37,7 +37,19 @@ Deno.serve(async (req: Request) => {
     const { audioBase64, mimeType } = await req.json();
     if (!audioBase64) return json({ error: "Keine Aufnahme mitgeschickt." }, 400);
 
-    const bin = Uint8Array.from(atob(audioBase64), (c) => c.charCodeAt(0));
+    // Auch data-URLs annehmen. Der Client soll reines base64 schicken, aber
+    // wenn er es einmal nicht tut, darf daraus kein stiller Totalausfall
+    // werden — genau das ist hier schon passiert.
+    const raw = String(audioBase64);
+    const comma = raw.indexOf(",");
+    const clean = raw.startsWith("data:") && comma !== -1 ? raw.slice(comma + 1) : raw;
+
+    let bin: Uint8Array;
+    try {
+      bin = Uint8Array.from(atob(clean), (c) => c.charCodeAt(0));
+    } catch {
+      return json({ error: "Die Aufnahme kam beschädigt an. Bitte nochmal sprechen." }, 400);
+    }
     if (bin.byteLength > MAX_BYTES) {
       return json({ error: "Die Aufnahme ist zu lang. Sprich kürzer und öfter." }, 413);
     }

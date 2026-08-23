@@ -37,18 +37,47 @@ function encodeWav(chunks: Float32Array[], sampleRate: number) {
   view.setUint16(34, 16, true);
   writeStr(36, "data");
   view.setUint32(40, outLength * 2, true);
+  // Mittelwert ueber das Fenster statt einer einzelnen Stichprobe.
+  //
+  // Von 48 kHz auf 16 kHz einfach jeden dritten Wert zu nehmen erzeugt
+  // Aliasing: hohe Anteile falten sich als Zischen in den hoerbaren Bereich.
+  // Fuer das Ohr klingt beides aehnlich, fuer die Spracherkennung nicht —
+  // und genau davon haengt hier alles ab. Der Mittelwert ist ein simpler
+  // Tiefpass und kostet nichts.
   for (let i = 0; i < outLength; i++) {
-    const sample = merged[Math.floor(i * ratio)] ?? 0;
+    const from = Math.floor(i * ratio);
+    const to = Math.min(merged.length, Math.floor((i + 1) * ratio));
+    let sum = 0;
+    let count = 0;
+    for (let j = from; j < to; j++) {
+      sum += merged[j] ?? 0;
+      count++;
+    }
+    const sample = count > 0 ? sum / count : (merged[from] ?? 0);
     const clamped = Math.max(-1, Math.min(1, sample));
     view.setInt16(44 + i * 2, clamped < 0 ? clamped * 0x8000 : clamped * 0x7fff, true);
   }
   return new Blob([buffer], { type: "audio/wav" });
 }
 
+/**
+ * Schneidet den Kopf einer data-URL ab.
+ *
+ * `readAsDataURL` liefert "data:audio/wav;base64,UklGR…". Der Server steckt
+ * den Wert direkt in `atob()`, und die Zeichen ":" und ";" sind kein gueltiges
+ * base64 — die Umwandlung scheiterte also immer, und zwar mit einer Meldung,
+ * die nach einem Netzproblem aussah. Genau die Art Fehler, die man nicht
+ * findet, wenn man nur prueft, ob der Knopf reagiert.
+ */
+export function stripDataUrl(value: string): string {
+  const comma = value.indexOf(",");
+  return value.startsWith("data:") && comma !== -1 ? value.slice(comma + 1) : value;
+}
+
 function blobToBase64(blob: Blob) {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
+    reader.onload = () => resolve(stripDataUrl(String(reader.result)));
     reader.onerror = () => reject(new Error("Aufnahme konnte nicht gelesen werden."));
     reader.readAsDataURL(blob);
   });
@@ -67,6 +96,10 @@ export function useVoiceMemo() {
         window.AudioContext ??
         (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       const ctx = new AudioCtx();
+      // Auf iOS startet der Kontext haeufig im Zustand "suspended", auch
+      // innerhalb einer Nutzeraktion. Dann laeuft onaudioprocess nie und man
+      // haelt eine stumme Aufnahme in der Hand, ohne dass irgendetwas meldet.
+      if (ctx.state === "suspended") await ctx.resume();
       const source = ctx.createMediaStreamSource(stream);
       const node = ctx.createScriptProcessor(4096, 1, 1);
       const chunks: Float32Array[] = [];
