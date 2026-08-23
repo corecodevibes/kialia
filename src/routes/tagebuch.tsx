@@ -17,6 +17,7 @@ import {
 } from "@/components/app/AppShell";
 import {
   formatDateLong,
+  missingDiaryDays,
   nextDiaryDay,
   todayLocalISO,
   uid,
@@ -73,20 +74,22 @@ const layoutLabels: Record<Layout, string> = {
   postkarte: "Postkarte – Sunset-Rahmen",
 };
 
-type FieldKey = "text" | "highlight" | "notes" | "expenses";
+type FieldKey = "text" | "food" | "highlight" | "notes" | "expenses";
 
 const fieldLabels: Record<FieldKey, string> = {
-  text: "Was ist heute alles passiert?",
-  highlight: "Mein Highlight",
-  notes: "Merke dir (Restaurants, Tipps, meiden …)",
-  expenses: "Ausgaben heute",
+  text: "Was hast du heute erlebt?",
+  food: "Was habt ihr gegessen — und wo?",
+  highlight: "Nochmal machen? Empfehlung oder Merke",
+  notes: "Sonst noch etwas",
+  expenses: "Ausgaben: Essen, Souvenirs, Shops …",
 };
 
 const fieldPlaceholders: Record<FieldKey, string> = {
-  text: "Sprich einfach los – der Text landet hier.",
-  highlight: "Der schönste Moment des Tages …",
-  notes: "Restaurant Da Vinci top, Hafenstraße abends meiden …",
-  expenses: "Mittagessen 24 €, Museum 12 € …",
+  text: "Ein Satz reicht.",
+  food: "Taverne am Hafen, gegrillter Oktopus …",
+  highlight: "Was ihr weiterempfehlen würdet — oder beim nächsten Mal anders macht.",
+  notes: "Namen, Adressen, Kleinigkeiten.",
+  expenses: "Mittagessen 24, Souvenirs 15, Bootsticket 30 …",
 };
 
 function DiaryTab() {
@@ -104,6 +107,29 @@ function DiaryTab() {
   const set = (id: string, patch: Partial<DiaryEntry>) =>
     update({ diary: trip.diary.map((e) => (e.id === id ? { ...e, ...patch } : e)) });
 
+  const missing = missingDiaryDays(trip);
+
+  /** Legt für jeden noch fehlenden Reisetag einen leeren Eintrag an. */
+  function fillDays() {
+    update({
+      diary: [
+        ...trip.diary,
+        ...missing.map((m) => ({
+          id: uid(),
+          day: m.day,
+          date: m.date,
+          text: "",
+          highlight: "",
+          notes: "",
+          expenses: "",
+          spent: 0,
+          food: "",
+          mood: "",
+        })),
+      ].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : a.day - b.day)),
+    });
+  }
+
   function addDay() {
     update({
       diary: [
@@ -120,6 +146,7 @@ function DiaryTab() {
           notes: "",
           expenses: "",
           spent: 0,
+          food: "",
           mood: "",
         },
       ],
@@ -205,6 +232,18 @@ function DiaryTab() {
           <PrimaryButton onClick={addDay} className="mt-3">
             <Plus className="size-4" /> Neuer Tag
           </PrimaryButton>
+
+          {/* Steht der Zeitraum fest, kennt die Reise ihre Tage — niemand soll
+              elf Tage von Hand anlegen. Bestehende Eintraege bleiben unberuehrt. */}
+          {missing.length > 0 && (
+            <button
+              type="button"
+              onClick={fillDays}
+              className="mt-2 w-full rounded-2xl bg-secondary px-4 py-3 text-sm font-semibold transition hover:bg-secondary/70"
+            >
+              Alle {missing.length} Reisetage anlegen
+            </button>
+          )}
         </Card>
 
         {!voiceEnabled && (
@@ -223,16 +262,25 @@ function DiaryTab() {
         <div className="space-y-4">
           {trip.diary.map((e) => (
             <Card key={e.id}>
+              {/* Die Breite steuert der Container, nicht eine zweite
+                  Breitenklasse am Eingabefeld: dateInputClass bringt `w-full`
+                  mit, und zwei Breiten-Utilities entscheiden sich nach
+                  CSS-Reihenfolge, nicht nach Klassenreihenfolge. Genau daran
+                  lief die Karte rechts aus dem Bild. */}
               <div className="flex items-center gap-2">
-                <h2 className="min-w-0 flex-1 truncate text-lg font-semibold">{e.day}. Reisetag</h2>
-                <input
-                  type="date"
-                  value={e.date}
-                  onChange={(ev) => set(e.id, { date: ev.target.value })}
-                  className={`${dateInputClass} w-[9.5rem] shrink-0 py-1.5`}
-                />
+                <h2 className="min-w-0 flex-1 truncate text-base font-semibold">
+                  {e.day}. Reisetag
+                </h2>
+                <div className="w-[7.75rem] shrink-0">
+                  <input
+                    type="date"
+                    value={e.date}
+                    onChange={(ev) => set(e.id, { date: ev.target.value })}
+                    className={`${dateInputClass} py-1.5`}
+                  />
+                </div>
                 <DeleteButton
-                  ariaLabel="Tag löschen"
+                  ariaLabel={`Tag ${e.day} löschen`}
                   onClick={() => update({ diary: trip.diary.filter((x) => x.id !== e.id) })}
                 />
               </div>
@@ -282,44 +330,54 @@ function DiaryTab() {
                 </div>
               </div>
 
-              <details className="group mt-4">
-                <summary className="cursor-pointer list-none rounded-xl bg-secondary/60 px-3 py-2 text-xs font-semibold transition hover:bg-secondary">
-                  Mehr festhalten
-                  <span className="ml-1 font-normal text-muted-foreground">
-                    Highlight, Notizen, Ausgaben
-                  </span>
-                </summary>
-
-                <div className="mt-3 space-y-4">
-                  {(["highlight", "notes", "expenses"] as FieldKey[]).map((f) => (
-                    <div key={f}>
-                      <div className="mb-1 flex items-center justify-between gap-2">
-                        <span className="text-xs font-medium text-muted-foreground">
-                          {fieldLabels[f]}
-                        </span>
-                        <MemoButton entry={e} field={f} />
-                      </div>
-                      <textarea
-                        value={e[f] ?? ""}
-                        onChange={(ev) =>
-                          set(e.id, { [f]: ev.target.value } as Partial<DiaryEntry>)
-                        }
-                        rows={3}
-                        placeholder={fieldPlaceholders[f]}
-                        className={`${inputClass} resize-y`}
-                      />
+              <div className="mt-4 space-y-4">
+                {(["food", "highlight", "expenses"] as FieldKey[]).map((f) => (
+                  <div key={f}>
+                    <div className="mb-1 flex items-center justify-between gap-2">
+                      <span className="text-xs font-medium text-muted-foreground">
+                        {fieldLabels[f]}
+                      </span>
+                      <MemoButton entry={e} field={f} />
                     </div>
-                  ))}
-
-                  <Field label="Summe heute (€)">
-                    <NumberField
-                      value={e.spent}
-                      onChange={(n) => set(e.id, { spent: n })}
-                      className={inputClass}
+                    <textarea
+                      value={e[f] ?? ""}
+                      onChange={(ev) => set(e.id, { [f]: ev.target.value } as Partial<DiaryEntry>)}
+                      rows={3}
+                      placeholder={fieldPlaceholders[f]}
+                      className={`${inputClass} resize-y`}
                     />
-                  </Field>
-                </div>
-              </details>
+                  </div>
+                ))}
+
+                <Field label="Summe heute (€)">
+                  <NumberField
+                    value={e.spent}
+                    onChange={(n) => set(e.id, { spent: n })}
+                    className={inputClass}
+                  />
+                </Field>
+
+                <details>
+                  <summary className="cursor-pointer list-none text-xs font-semibold text-muted-foreground">
+                    + Sonstige Notizen
+                  </summary>
+                  <div className="mt-2">
+                    <div className="mb-1 flex items-center justify-between gap-2">
+                      <span className="text-xs font-medium text-muted-foreground">
+                        {fieldLabels.notes}
+                      </span>
+                      <MemoButton entry={e} field="notes" />
+                    </div>
+                    <textarea
+                      value={e.notes}
+                      onChange={(ev) => set(e.id, { notes: ev.target.value })}
+                      rows={3}
+                      placeholder={fieldPlaceholders.notes}
+                      className={`${inputClass} resize-y`}
+                    />
+                  </div>
+                </details>
+              </div>
             </Card>
           ))}
         </div>

@@ -76,6 +76,8 @@ export type DiaryEntry = {
   notes: string;
   expenses: string;
   spent: number;
+  /** Was und wo gegessen wurde — auf Reisen die haltbarste Erinnerung. */
+  food: string;
   /** Ein Wort statt Sternen — faerbt spaeter den Rueckblick. */
   mood: string;
 };
@@ -239,7 +241,7 @@ function normalize(t: Partial<Trip>): Trip {
       note: x.note ?? "",
       url: x.url ?? "",
     })),
-    diary: (t.diary ?? []).map((x) => ({ ...x, mood: x.mood ?? "" })),
+    diary: (t.diary ?? []).map((x) => ({ ...x, mood: x.mood ?? "", food: x.food ?? "" })),
   };
 }
 
@@ -804,3 +806,26 @@ export function tripItinerary(trip: Trip): Itinerary {
 
   return { stops, gaps, undated };
 }
+
+/**
+ * Alle Reisetage, die noch keinen Tagebucheintrag haben.
+ *
+ * Steht der Zeitraum fest, muss niemand Tage von Hand anlegen — die Reise
+ * kennt ihre Tage. Wichtig ist nur, nichts zu ueberschreiben: Tage mit
+ * Eintrag bleiben unberuehrt.
+ */
+export function missingDiaryDays(trip: Trip): { day: number; date: string }[] {
+  const start = parseLocalDate(trip.startDate);
+  const days = tripDays(trip);
+  if (!start || days <= 0) return [];
+
+  const taken = new Set(trip.diary.map((e) => e.date).filter(Boolean));
+  const out: { day: number; date: string }[] = [];
+  for (let i = 0; i < days; i++) {
+    const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+    const iso = todayLocalISO(d);
+    if (!taken.has(iso)) out.push({ day: i + 1, date: iso });
+  }
+  return out;
+}
+

@@ -3,6 +3,7 @@ import {
   formatDateLong,
   tripItinerary,
   mealsPerDay,
+  missingDiaryDays,
   monthsUntil,
   nextDiaryDay,
   parseLocalDate,
@@ -384,5 +385,33 @@ describe("mealsPerDay — Gesamtbetrag oder Aufteilung", () => {
     const m = meals({ mode: "total", perDay: 45, breakfast: 10, lunch: 20 });
     expect(mealsPerDay(m)).toBe(45);
     expect(mealsPerDay({ ...m, mode: "split" })).toBe(30);
+  });
+});
+
+describe("missingDiaryDays", () => {
+  test("leitet die Reisetage aus dem Zeitraum ab", () => {
+    const t = tripWith({ startDate: "2026-06-01", endDate: "2026-06-04" });
+    const days = missingDiaryDays(t);
+    expect(days).toHaveLength(4);
+    expect(days[0]).toEqual({ day: 1, date: "2026-06-01" });
+    expect(days[3]).toEqual({ day: 4, date: "2026-06-04" });
+  });
+
+  test("überschreibt bestehende Einträge nicht", () => {
+    const t = tripWith({
+      startDate: "2026-06-01",
+      endDate: "2026-06-03",
+      diary: [
+        {
+          id: "a", day: 2, date: "2026-06-02", text: "war schön",
+          highlight: "", notes: "", expenses: "", spent: 0, food: "", mood: "",
+        },
+      ],
+    });
+    expect(missingDiaryDays(t).map((d) => d.date)).toEqual(["2026-06-01", "2026-06-03"]);
+  });
+
+  test("ohne Zeitraum wird nichts geraten", () => {
+    expect(missingDiaryDays(tripWith({}))).toEqual([]);
   });
 });
