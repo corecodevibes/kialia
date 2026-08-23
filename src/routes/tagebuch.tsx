@@ -51,7 +51,7 @@ export const Route = createFileRoute("/tagebuch")({
   component: DiaryTab,
 });
 
-type Layout = "klassisch" | "journal" | "postkarte";
+type Layout = "schlicht" | "klassisch" | "journal" | "postkarte";
 
 /** Ein Wort statt Sternen. Bewusst kurz und alltagsnah — niemand waehlt
     abends aus zwanzig Adjektiven. */
@@ -72,6 +72,7 @@ function questionFor(day: number): string {
 }
 
 const layoutLabels: Record<Layout, string> = {
+  schlicht: "Schlicht – fortlaufend auf A4",
   klassisch: "Klassisch – ruhige Linien",
   journal: "Journal – mit Farbleiste",
   postkarte: "Postkarte – Sunset-Rahmen",
@@ -98,7 +99,9 @@ const fieldPlaceholders: Record<FieldKey, string> = {
 function DiaryTab() {
   const { trip, update, ready, hasTrip } = useTrip();
   const [withBudget, setWithBudget] = useState(true);
-  const [layout, setLayout] = useState<Layout>("journal");
+  // Schlicht ist die Vorgabe: das ist das Blatt, das man verschickt oder
+  // ablegt. Die verzierten Fassungen sind fuer den Ausdruck ins Album.
+  const [layout, setLayout] = useState<Layout>("schlicht");
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [activeKey, setActiveKey] = useState<string | null>(null);
   const voice = useVoiceMemo();
@@ -491,7 +494,8 @@ function DiaryTab() {
         <Card>
           <CardTitle>Als PDF speichern</CardTitle>
           <p className="mt-1 text-xs text-muted-foreground">
-            Fertiges A5-Layout – zum Ausdrucken oder als PDF in Canva & Co. weiterverwenden.
+            Schlicht läuft fortlaufend auf A4 – ein Dokument, das man verschickt oder ablegt. Die
+            anderen drei sind A5, ein Blatt pro Tag, zum Einkleben.
           </p>
 
           <div className="mt-3 space-y-2">
@@ -525,10 +529,16 @@ function DiaryTab() {
           </label>
 
           <PrimaryButton onClick={() => window.print()} className="mt-3">
-            <Printer className="size-4" /> Als A5-PDF speichern
+            <Printer className="size-4" /> Als PDF speichern
           </PrimaryButton>
         </Card>
       </div>
+
+      {/* @page kennt keine Klassen, also wird die Regel zum Layout erzeugt.
+          A5 ist schoen fuers Album und verschwenderisch fuer ein Dokument. */}
+      <style>{`@page { size: ${layout === "schlicht" ? "A4" : "A5"}; margin: ${
+        layout === "schlicht" ? "18mm 16mm" : "12mm"
+      }; }`}</style>
 
       {/* Druck-Layout */}
       <div className="hidden print:block">

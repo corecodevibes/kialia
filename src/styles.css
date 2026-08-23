@@ -592,6 +592,31 @@ textarea:focus:not(:focus-visible) {
   }
 
   /* Journal – Farbleiste links */
+  /* Schlicht: fortlaufend statt ein Blatt pro Tag.
+     Bei elf Reisetagen, von denen die Haelfte drei Saetze hat, erzeugt ein
+     erzwungener Seitenumbruch elf ueberwiegend leere Blaetter. Ein Tag darf
+     hier einfach unter dem vorigen weitergehen; nur mitten in einem Tag soll
+     nicht umbrochen werden. */
+  .print-page--schlicht {
+    break-after: auto;
+    page-break-after: auto;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    padding: 0 0 7mm;
+  }
+  .print-page--schlicht .print-head {
+    border-bottom: 0.3mm solid #e6ded6;
+    padding-bottom: 2mm;
+  }
+  /* Der Kicker wiederholt auf jedem Tag "kialia · Reisetagebuch" — in einem
+     fortlaufenden Dokument ist das Laerm statt Kopfzeile. */
+  .print-page--schlicht .print-kicker {
+    display: none;
+  }
+  .print-page--schlicht + .print-page--schlicht {
+    padding-top: 3mm;
+  }
+
   .print-page--journal {
     padding-left: 6mm;
     border-left: 2.5mm solid #f7d67f;
