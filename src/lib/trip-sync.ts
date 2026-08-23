@@ -95,6 +95,8 @@ export async function syncTrips(): Promise<{ ok: boolean; error?: string }> {
   const byRemoteId = new Map(remote.map((r) => [r.id, r]));
   const merged: Trip[] = [];
   const seen = new Set<string>();
+  /** Reisen, die nicht hochgeladen werden konnten — samt Grund. */
+  const fehlgeschlagen: string[] = [];
 
   // 1. Lokale Reisen: hochladen oder mit der Serverfassung vergleichen.
   for (const trip of local.trips) {
@@ -139,6 +141,12 @@ export async function syncTrips(): Promise<{ ok: boolean; error?: string }> {
           });
           seen.add(row.id);
         } else {
+          // Weder angelegt noch auffindbar. Frueher wurde die Reise hier
+          // einfach unveraendert uebernommen und der Abgleich meldete Erfolg —
+          // der Nutzer druckte auf "Jetzt zum Teilen freigeben", es passierte
+          // nichts, und nichts sagte warum. Ein stiller Fehlschlag ist
+          // schlimmer als ein lauter.
+          fehlgeschlagen.push(insErr?.message ?? "Anlegen auf dem Server hat nicht geklappt.");
           merged.push(trip);
         }
         continue;
@@ -186,6 +194,13 @@ export async function syncTrips(): Promise<{ ok: boolean; error?: string }> {
     ? local.activeId
     : (merged[0]?.id ?? "");
   saveStore({ trips: merged, activeId });
+
+  // Gespeichert wird trotzdem — was hochgeladen werden konnte, soll es auch
+  // bleiben. Gemeldet wird der Fehlschlag aber, sonst sucht der Nutzer ihn
+  // bei sich.
+  if (fehlgeschlagen.length > 0) {
+    return { ok: false, error: fehlgeschlagen[0] ?? "Unbekannter Fehler" };
+  }
   return { ok: true };
 }
 
