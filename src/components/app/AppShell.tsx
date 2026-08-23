@@ -139,6 +139,21 @@ export function AppShell({
 
   return (
     <div className="acrylic-page min-h-screen">
+      {/* Streifen hinter der Statusleiste.
+          `viewport-fit=cover` laesst den Inhalt bis an den oberen Rand laufen.
+          Ein Abstand in der Kopfzeile hilft nur im ungescrollten Zustand —
+          sobald man scrollt, wandern Karten wieder unter Uhrzeit und Akku.
+          Deshalb ein fester, leicht milchiger Streifen genau in Hoehe des
+          Sicherheitsbereichs. Auf Geraeten ohne Aussparung ist er zwar da,
+          aber zwanzig Pixel hoch null — er kostet dort nichts. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-x-0 top-0 z-40 backdrop-blur-md print:hidden"
+        style={{
+          height: "env(safe-area-inset-top)",
+          background: "color-mix(in oklab, var(--background) 70%, transparent)",
+        }}
+      />
       {/* Der obere Sicherheitsabstand fehlte.
           `viewport-fit=cover` im Meta-Tag laesst den Inhalt bewusst unter die
           Statusleiste laufen — damit der Verlauf bis zum Rand geht. Dann muss

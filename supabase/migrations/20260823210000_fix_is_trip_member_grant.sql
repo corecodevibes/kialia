@@ -1,0 +1,28 @@
+-- ---------------------------------------------------------------------------
+-- Fehlendes EXECUTE-Recht auf is_trip_member.
+--
+-- In 20260823090000 wurde das Recht dreimal entzogen und nur zweimal
+-- zurueckgegeben:
+--
+--   revoke execute on function public.is_trip_member(uuid) from public;
+--   revoke execute on function public.join_trip(text)      from public;
+--   revoke execute on function public.generate_invite_code() from public;
+--   grant  execute on function public.join_trip(text)      to authenticated;
+--
+-- is_trip_member fehlte. Die Regeln auf public.trips rufen aber genau diese
+-- Funktion auf, und Regelausdruecke laufen mit den Rechten des fragenden
+-- Rollennamens — nicht mit denen des Eigentuemers. Ergebnis:
+-- "permission denied for function is_trip_member".
+--
+-- Warum es erst beim Teilen auffiel: die Bedingung lautet
+--   owner_id = auth.uid() or public.is_trip_member(id)
+-- Bei eigenen Reisen ist die linke Seite wahr und Postgres wertet die Funktion
+-- oft gar nicht erst aus. Lesen und Bearbeiten der eigenen Reise ging deshalb.
+-- Erst beim Anlegen schlug die Pruefung durch — also genau in dem Moment, in
+-- dem eine Reise zum ersten Mal auf den Server sollte. Ohne das ist Teilen
+-- unmoeglich, und die App konnte nur sagen "liegt noch nur auf diesem Geraet".
+--
+-- generate_invite_code braucht nichts: sie wird ausschliesslich aus
+-- trips_before_insert heraus aufgerufen, und die laeuft als security definer.
+-- ---------------------------------------------------------------------------
+grant execute on function public.is_trip_member(uuid) to authenticated;
