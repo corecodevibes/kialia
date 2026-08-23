@@ -54,6 +54,20 @@ export const Route = createFileRoute("/")({
   component: HomeTab,
 });
 
+/** Woran man zwei gleichnamige Reisen auseinanderhaelt: am Inhalt. */
+function tripSummary(t: Trip): string {
+  const teile: string[] = [];
+  const n = (t.transports?.length ?? 0) + (t.stays?.length ?? 0);
+  if (n) teile.push(`${n} Station${n === 1 ? "" : "en"}`);
+  const a = t.activities?.length ?? 0;
+  if (a) teile.push(`${a} Programmpunkt${a === 1 ? "" : "e"}`);
+  const i = t.ideas?.length ?? 0;
+  if (i) teile.push(`${i} Idee${i === 1 ? "" : "n"}`);
+  const d = (t.diary ?? []).filter((e) => e.text?.trim()).length;
+  if (d) teile.push(`${d} Tagebuchtag${d === 1 ? "" : "e"}`);
+  return teile.length ? `· ${teile.join(" · ")}` : "· noch leer";
+}
+
 function HomeTab() {
   const {
     trip,
@@ -123,6 +137,14 @@ function HomeTab() {
     });
     setDraft({ destination: "", startDate: "", endDate: "", companions: "", people: 2 });
     setDraftColors({});
+    // Sofort hochladen, nicht beim naechsten Abgleich.
+    //
+    // Der laufende Abgleich hat eine Sperrfrist von 20 Sekunden, und das
+    // automatische Hochschieben ueberspringt Reisen ohne Server-Kennung —
+    // eine frische Reise lag also im Zweifel minutenlang nur lokal. Wer in
+    // dieser Zeit die App vom Homescreen entfernt, verliert sie: iOS loescht
+    // dabei den Speicher der Web-App.
+    void syncTrips();
   }
   const days = tripDays(trip);
   const totals = tripTotals(trip);
@@ -288,6 +310,27 @@ function HomeTab() {
                         {t.startDate
                           ? `${formatDateLong(t.startDate)}${t.endDate ? ` – ${formatDateLong(t.endDate)}` : ""}`
                           : "Zeitraum offen"}
+                      </span>
+                      {/* Zwei Angaben, die es vorher nicht gab und die genau
+                          dann fehlen, wenn man sie braucht:
+
+                          1. Liegt die Reise auf dem Server? Wer die App vom
+                             Homescreen loescht und neu hinzufuegt, verliert den
+                             lokalen Speicher. Was nicht oben liegt, ist dann
+                             weg — und das sieht man vorher nirgends.
+                          2. Wie viel steckt drin? Drei Reisen namens "Kreta"
+                             sind sonst nicht auseinanderzuhalten. */}
+                      <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px]">
+                        <span
+                          className={
+                            t.remoteId && !t.orphan ? "text-muted-foreground" : "text-destructive"
+                          }
+                        >
+                          {t.remoteId && !t.orphan
+                            ? "Auf dem Server gesichert"
+                            : "Nur auf diesem Gerät"}
+                        </span>
+                        <span className="text-muted-foreground">{tripSummary(t)}</span>
                       </span>
                     </span>
                   </button>
