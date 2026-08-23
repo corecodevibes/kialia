@@ -2,7 +2,7 @@ import { useMyName } from "@/lib/auth";
 import { ExpenseField } from "@/components/app/expense-field";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Loader2, Mic, Plus, Printer, Square } from "lucide-react";
+import { ChevronDown, Loader2, Mic, Plus, Printer, Square } from "lucide-react";
 import {
   AppShell,
   Card,
@@ -97,6 +97,13 @@ const fieldPlaceholders: Record<FieldKey, string> = {
   expenses: "Mittagessen 24, Souvenirs 15, Bootsticket 30 …",
 };
 
+/** Ein Blick auf den Tag, ohne ihn aufzuklappen. */
+function daySummary(e: DiaryEntry): string {
+  const text = (e.text || e.highlight || e.food || "").trim().replace(/\s+/g, " ");
+  if (text) return text.length > 48 ? `${text.slice(0, 47)}…` : text;
+  return "noch leer";
+}
+
 function DiaryTab() {
   const { trip, update, ready, hasTrip } = useTrip();
   const [withBudget, setWithBudget] = useState(true);
@@ -116,6 +123,9 @@ function DiaryTab() {
 
   // Das Ergebnis des Sortierens wartet auf Bestaetigung — uebernommen wird
   // nichts von selbst. `take` merkt sich, was abgehakt wurde.
+  // Zugeklappt ist der Normalfall. Waehrend der Reise ist der heutige Tag
+  // offen — das ist der, den man abends schreiben will.
+  const [openDay, setOpenDay] = useState<string | null>(null);
   const [sorted, setSorted] = useState<{
     id: string;
     fields: DayFields;
@@ -164,12 +174,24 @@ function DiaryTab() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, onTrip, hasToday]);
 
-  // Heute zuerst, danach die uebrigen Tage von neu nach alt.
-  const orderedDiary = [...trip.diary].sort((a, b) => {
-    if (a.date === today) return -1;
-    if (b.date === today) return 1;
-    return a.date > b.date ? -1 : a.date < b.date ? 1 : b.day - a.day;
-  });
+  // Chronologisch vorwaerts: Tag 1 oben, Tag 11 unten.
+  //
+  // Vorher stand der neueste Tag oben. Waehrend der Reise war das plausibel,
+  // beim Anlegen aller Tage aber sah man den 6. September zuerst und zaehlte
+  // rueckwaerts — ein Tagebuch, das hinten anfaengt. Der heutige Tag wird
+  // stattdessen aufgeklappt und hervorgehoben; gefunden wird er darueber,
+  // nicht ueber die Reihenfolge.
+  const orderedDiary = [...trip.diary].sort((a, b) =>
+    a.date < b.date ? -1 : a.date > b.date ? 1 : a.day - b.day,
+  );
+
+  useEffect(() => {
+    if (openDay) return;
+    const heute = trip.diary.find((e) => e.date === today);
+    if (heute) setOpenDay(heute.id);
+    // Nur beim ersten Mal: danach entscheidet der Mensch, was offen ist.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [trip.diary.length, today]);
 
   /** Legt für jeden noch fehlenden Reisetag einen leeren Eintrag an. */
   function fillDays() {
@@ -202,8 +224,12 @@ function DiaryTab() {
           // Nicht diary.length + 1: nach dem Loeschen eines Tages vergaebe das
           // eine schon benutzte Nummer. Und nicht toISOString(): das ist UTC,
           // wer nach Mitternacht schreibt bekaeme den Vortag gestempelt.
-          day: nextDiaryDay(trip),
-          date: todayLocalISO(),
+          // Liegt heute in der Reise, ist heute gemeint. Sonst der naechste
+          // noch fehlende Reisetag — vor der Abreise einen Eintrag mit dem
+          // heutigen Datum anzulegen ergibt keinen Sinn, der Tag gehoert
+          // nicht zur Reise.
+          day: onTrip ? nextDiaryDay(trip) : (missing[0]?.day ?? nextDiaryDay(trip)),
+          date: onTrip ? todayLocalISO() : (missing[0]?.date ?? todayLocalISO()),
           text: "",
           highlight: "",
           notes: "",
@@ -385,10 +411,36 @@ function DiaryTab() {
                   mit, und zwei Breiten-Utilities entscheiden sich nach
                   CSS-Reihenfolge, nicht nach Klassenreihenfolge. Genau daran
                   lief die Karte rechts aus dem Bild. */}
+              {/* Zugeklappt: Tag, Datum und ein Blick auf den Inhalt.
+                  Elf Tage mit je sechs Feldern sind aufgeklappt eine Wand.
+                  Was man beim Durchblaettern sucht, ist "welcher Tag ist schon
+                  geschrieben" — nicht die Felder. */}
               <div className="flex items-center gap-2">
-                <h2 className="min-w-0 flex-1 truncate text-base font-semibold">
-                  {e.day}. Reisetag
-                </h2>
+                <button
+                  type="button"
+                  onClick={() => setOpenDay((v) => (v === e.id ? null : e.id))}
+                  aria-expanded={openDay === e.id}
+                  className="flex min-w-0 flex-1 items-center gap-2 text-left"
+                >
+                  <ChevronDown
+                    className={`size-4 shrink-0 text-muted-foreground transition ${
+                      openDay === e.id ? "rotate-180" : ""
+                    }`}
+                  />
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-baseline gap-2">
+                      <span className="truncate text-base font-semibold">{e.day}. Reisetag</span>
+                      {e.date === today && (
+                        <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-primary">
+                          heute
+                        </span>
+                      )}
+                    </span>
+                    <span className="block truncate text-xs text-muted-foreground">
+                      {[formatDateLong(e.date), daySummary(e)].filter(Boolean).join(" · ")}
+                    </span>
+                  </span>
+                </button>
                 {/* Einmal sprechen, alles fuellen. Die Knoepfe an den
                     einzelnen Feldern bleiben — fuer den Nachtrag, wenn nur
                     eine Kleinigkeit fehlt. */}
@@ -438,194 +490,202 @@ function DiaryTab() {
                 />
               </div>
 
-              {sorted && sorted.id === e.id && (
-                <div className="mt-3 rounded-2xl bg-secondary/50 p-3">
-                  <p className="text-sm font-semibold">Das habe ich verstanden</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    Hak ab, was stimmen soll. Was du weglässt, bleibt wie es war.
-                  </p>
-                  <ul className="mt-2 space-y-1.5">
-                    {filledEntries(sorted.fields).map(([k, label]) => (
-                      <li key={k}>
-                        <label className="flex items-start gap-2">
-                          <input
-                            type="checkbox"
-                            checked={sorted.take[k] ?? true}
-                            onChange={(ev) =>
-                              setSorted({
-                                ...sorted,
-                                take: { ...sorted.take, [k]: ev.target.checked },
-                              })
+              {openDay === e.id && (
+                <>
+                  {sorted && sorted.id === e.id && (
+                    <div className="mt-3 rounded-2xl bg-secondary/50 p-3">
+                      <p className="text-sm font-semibold">Das habe ich verstanden</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        Hak ab, was stimmen soll. Was du weglässt, bleibt wie es war.
+                      </p>
+                      <ul className="mt-2 space-y-1.5">
+                        {filledEntries(sorted.fields).map(([k, label]) => (
+                          <li key={k}>
+                            <label className="flex items-start gap-2">
+                              <input
+                                type="checkbox"
+                                checked={sorted.take[k] ?? true}
+                                onChange={(ev) =>
+                                  setSorted({
+                                    ...sorted,
+                                    take: { ...sorted.take, [k]: ev.target.checked },
+                                  })
+                                }
+                                className="mt-0.5 size-4 shrink-0 accent-[var(--primary)]"
+                              />
+                              <span className="min-w-0 flex-1 text-xs">
+                                <span className="font-semibold">{label}: </span>
+                                <span className="text-muted-foreground">
+                                  {k === "spent"
+                                    ? `${sorted.fields.spent} ${trip.currency || "EUR"}`
+                                    : String(sorted.fields[k])}
+                                </span>
+                              </span>
+                            </label>
+                          </li>
+                        ))}
+                      </ul>
+                      {filledEntries(sorted.fields).length === 0 && (
+                        <p className="mt-2 text-xs text-muted-foreground">
+                          Nichts Verwertbares dabei — sprich nochmal oder schreib es auf.
+                        </p>
+                      )}
+                      <div className="mt-3 flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setSorted(null)}
+                          className="flex-1 rounded-xl bg-card py-2 text-xs font-semibold"
+                        >
+                          Verwerfen
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            // Nur Abgehaktes, und nur was auch Inhalt hat.
+                            const patch: Partial<DiaryEntry> = {};
+                            for (const [k] of filledEntries(sorted.fields)) {
+                              if (sorted.take[k] === false) continue;
+                              const v = sorted.fields[k];
+                              if (k === "spent") patch.spent = Number(v);
+                              else (patch as Record<string, unknown>)[k] = String(v);
                             }
-                            className="mt-0.5 size-4 shrink-0 accent-[var(--primary)]"
-                          />
-                          <span className="min-w-0 flex-1 text-xs">
-                            <span className="font-semibold">{label}: </span>
-                            <span className="text-muted-foreground">
-                              {k === "spent"
-                                ? `${sorted.fields.spent} ${trip.currency || "EUR"}`
-                                : String(sorted.fields[k])}
-                            </span>
-                          </span>
-                        </label>
-                      </li>
-                    ))}
-                  </ul>
-                  {filledEntries(sorted.fields).length === 0 && (
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      Nichts Verwertbares dabei — sprich nochmal oder schreib es auf.
-                    </p>
+                            set(e.id, patch);
+                            setSorted(null);
+                          }}
+                          className="acrylic-warm flex-1 rounded-xl py-2 text-xs font-semibold text-background"
+                        >
+                          Übernehmen
+                        </button>
+                      </div>
+                    </div>
                   )}
-                  <div className="mt-3 flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setSorted(null)}
-                      className="flex-1 rounded-xl bg-card py-2 text-xs font-semibold"
-                    >
-                      Verwerfen
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        // Nur Abgehaktes, und nur was auch Inhalt hat.
-                        const patch: Partial<DiaryEntry> = {};
-                        for (const [k] of filledEntries(sorted.fields)) {
-                          if (sorted.take[k] === false) continue;
-                          const v = sorted.fields[k];
-                          if (k === "spent") patch.spent = Number(v);
-                          else (patch as Record<string, unknown>)[k] = String(v);
-                        }
-                        set(e.id, patch);
-                        setSorted(null);
-                      }}
-                      className="acrylic-warm flex-1 rounded-xl py-2 text-xs font-semibold text-background"
-                    >
-                      Übernehmen
-                    </button>
-                  </div>
-                </div>
-              )}
 
-              {/* Eine Frage, ein Feld. Vier gleich laute Felder sind ein
+                  {/* Eine Frage, ein Feld. Vier gleich laute Felder sind ein
                   Formular — abends nach einem langen Reisetag fuellt das
                   niemand aus, und genau deshalb bleibt ein Tagebuch leer.
                   Alles Weitere ist erreichbar, draengt sich aber nicht auf. */}
-              <div className="mt-4">
-                <div className="mb-2 flex items-start justify-between gap-2">
-                  <p className="min-w-0 flex-1 text-[1.05rem] italic leading-snug text-primary">
-                    {questionFor(e.day)}
-                  </p>
-                  <MemoButton entry={e} field="text" />
-                </div>
-                <textarea
-                  value={e.text}
-                  onChange={(ev) => set(e.id, { text: ev.target.value })}
-                  rows={5}
-                  placeholder="Ein Satz reicht."
-                  className={`${inputClass} resize-y`}
-                />
-              </div>
-
-              {/* Ein Wort statt Sternen — es faerbt spaeter den Rueckblick. */}
-              <div className="mt-3">
-                <span className="text-xs font-medium text-muted-foreground">Wie war der Tag?</span>
-                <div className="mt-1.5 flex flex-wrap gap-1.5">
-                  {moods.map((m) => {
-                    const active = e.mood === m;
-                    return (
-                      <button
-                        key={m}
-                        type="button"
-                        aria-pressed={active}
-                        onClick={() => set(e.id, { mood: active ? "" : m })}
-                        className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
-                          active
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-secondary text-muted-foreground hover:bg-secondary/70"
-                        }`}
-                      >
-                        {m}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="mt-4 space-y-4">
-                {(["food", "highlight"] as FieldKey[]).map((f) => (
-                  <div key={f}>
-                    <div className="mb-1 flex items-center justify-between gap-2">
-                      <span className="text-xs font-medium text-muted-foreground">
-                        {fieldLabels[f]}
-                      </span>
-                      <MemoButton entry={e} field={f} />
+                  <div className="mt-4">
+                    <div className="mb-2 flex items-start justify-between gap-2">
+                      <p className="min-w-0 flex-1 text-[1.05rem] italic leading-snug text-primary">
+                        {questionFor(e.day)}
+                      </p>
+                      <MemoButton entry={e} field="text" />
                     </div>
                     <textarea
-                      value={e[f] ?? ""}
-                      onChange={(ev) => set(e.id, { [f]: ev.target.value } as Partial<DiaryEntry>)}
-                      rows={3}
-                      placeholder={fieldPlaceholders[f]}
+                      value={e.text}
+                      onChange={(ev) => set(e.id, { text: ev.target.value })}
+                      rows={5}
+                      placeholder="Ein Satz reicht."
                       className={`${inputClass} resize-y`}
                     />
+                  </div>
 
-                    {/* Statt eines Fensters nach dem Tippen: drei Chips direkt
+                  {/* Ein Wort statt Sternen — es faerbt spaeter den Rueckblick. */}
+                  <div className="mt-3">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Wie war der Tag?
+                    </span>
+                    <div className="mt-1.5 flex flex-wrap gap-1.5">
+                      {moods.map((m) => {
+                        const active = e.mood === m;
+                        return (
+                          <button
+                            key={m}
+                            type="button"
+                            aria-pressed={active}
+                            onClick={() => set(e.id, { mood: active ? "" : m })}
+                            className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+                              active
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-secondary text-muted-foreground hover:bg-secondary/70"
+                            }`}
+                          >
+                            {m}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="mt-4 space-y-4">
+                    {(["food", "highlight"] as FieldKey[]).map((f) => (
+                      <div key={f}>
+                        <div className="mb-1 flex items-center justify-between gap-2">
+                          <span className="text-xs font-medium text-muted-foreground">
+                            {fieldLabels[f]}
+                          </span>
+                          <MemoButton entry={e} field={f} />
+                        </div>
+                        <textarea
+                          value={e[f] ?? ""}
+                          onChange={(ev) =>
+                            set(e.id, { [f]: ev.target.value } as Partial<DiaryEntry>)
+                          }
+                          rows={3}
+                          placeholder={fieldPlaceholders[f]}
+                          className={`${inputClass} resize-y`}
+                        />
+
+                        {/* Statt eines Fensters nach dem Tippen: drei Chips direkt
                         darunter. Ein Antippen, kein Unterbrechen, jederzeit
                         zurücknehmbar. */}
-                    {f === "food" && e.food.trim() && (
-                      <div className="mt-1.5 flex flex-wrap gap-1.5">
-                        {(["Empfehlung", "Merke", "War nichts"] as const).map((tag) => {
-                          const active = e.foodTag === tag;
-                          return (
-                            <button
-                              key={tag}
-                              type="button"
-                              aria-pressed={active}
-                              onClick={() => set(e.id, { foodTag: active ? "" : tag })}
-                              className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
-                                active
-                                  ? "bg-primary text-primary-foreground"
-                                  : "bg-secondary text-muted-foreground hover:bg-secondary/70"
-                              }`}
-                            >
-                              {tag}
-                            </button>
-                          );
-                        })}
+                        {f === "food" && e.food.trim() && (
+                          <div className="mt-1.5 flex flex-wrap gap-1.5">
+                            {(["Empfehlung", "Merke", "War nichts"] as const).map((tag) => {
+                              const active = e.foodTag === tag;
+                              return (
+                                <button
+                                  key={tag}
+                                  type="button"
+                                  aria-pressed={active}
+                                  onClick={() => set(e.id, { foodTag: active ? "" : tag })}
+                                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+                                    active
+                                      ? "bg-primary text-primary-foreground"
+                                      : "bg-secondary text-muted-foreground hover:bg-secondary/70"
+                                  }`}
+                                >
+                                  {tag}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                ))}
+                    ))}
 
-                {/* Ausgaben als Satz statt als Formular. Die Aufstellung
+                    {/* Ausgaben als Satz statt als Formular. Die Aufstellung
                     entsteht beim Tippen, die Summe wird berechnet — ein
                     eigenes Summenfeld daneben haette zwei Wahrheiten erzeugt. */}
-                <ExpenseField
-                  entry={e}
-                  onChange={(patch) => set(e.id, patch)}
-                  currency={trip.currency || "EUR"}
-                />
-
-                <details>
-                  <summary className="cursor-pointer list-none text-xs font-semibold text-muted-foreground">
-                    + Sonstige Notizen
-                  </summary>
-                  <div className="mt-2">
-                    <div className="mb-1 flex items-center justify-between gap-2">
-                      <span className="text-xs font-medium text-muted-foreground">
-                        {fieldLabels.notes}
-                      </span>
-                      <MemoButton entry={e} field="notes" />
-                    </div>
-                    <textarea
-                      value={e.notes}
-                      onChange={(ev) => set(e.id, { notes: ev.target.value })}
-                      rows={3}
-                      placeholder={fieldPlaceholders.notes}
-                      className={`${inputClass} resize-y`}
+                    <ExpenseField
+                      entry={e}
+                      onChange={(patch) => set(e.id, patch)}
+                      currency={trip.currency || "EUR"}
                     />
+
+                    <details>
+                      <summary className="cursor-pointer list-none text-xs font-semibold text-muted-foreground">
+                        + Sonstige Notizen
+                      </summary>
+                      <div className="mt-2">
+                        <div className="mb-1 flex items-center justify-between gap-2">
+                          <span className="text-xs font-medium text-muted-foreground">
+                            {fieldLabels.notes}
+                          </span>
+                          <MemoButton entry={e} field="notes" />
+                        </div>
+                        <textarea
+                          value={e.notes}
+                          onChange={(ev) => set(e.id, { notes: ev.target.value })}
+                          rows={3}
+                          placeholder={fieldPlaceholders.notes}
+                          className={`${inputClass} resize-y`}
+                        />
+                      </div>
+                    </details>
                   </div>
-                </details>
-              </div>
+                </>
+              )}
             </Card>
           ))}
         </div>
