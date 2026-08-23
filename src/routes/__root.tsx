@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SplashScreen } from "@/components/app/splash-screen";
 import { codeFromUrl, rememberInvite } from "@/lib/pending-invite";
+import { watchForStaleBuild } from "@/lib/stale-reload";
 import {
   Outlet,
   Link,
@@ -167,6 +168,10 @@ function RootComponent() {
 
   // Einen Code aus dem Link sofort sichern — noch bevor irgendeine Route auf
   // die Anmeldung umleitet. Danach ist die Adresse weg, und mit ihr der Code.
+  // Muss so frueh wie moeglich laufen: greift, bevor eine Route nachgeladen
+  // wird und dabei auf eine geloeschte Datei stoesst.
+  useEffect(() => watchForStaleBuild(), []);
+
   useEffect(() => {
     const code = codeFromUrl(window.location.search);
     if (!code) return;
