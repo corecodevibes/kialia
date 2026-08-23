@@ -284,7 +284,13 @@
     radial-gradient(90% 140% at 0% 0%, oklch(0.938 0.011 330.2) 0%, transparent 65%),
     radial-gradient(80% 130% at 100% 20%, oklch(0.886 0.113 89.3 / 0.35) 0%, transparent 60%),
     linear-gradient(160deg, oklch(1 0 0), oklch(0.978 0.004 56.4));
-  --shadow-soft: 0 18px 40px -24px oklch(0.279 0.038 302.4 / 0.45);
+  /* Ruhiger. Der vorige Schatten war 40px weich mit 45% Deckung — jede Karte
+     schwebte deutlich sichtbar ueber dem Verlauf. Bei zwoelf Karten
+     untereinander wird daraus Unruhe. Teuer wirkende Oberflaechen tragen
+     wenig Schatten und dafuer klare Kanten: hier eine feine Linie plus ein
+     kaum sichtbarer Absatz. */
+  --shadow-soft:
+    0 1px 2px oklch(0.279 0.038 302.4 / 0.06), 0 8px 24px -18px oklch(0.279 0.038 302.4 / 0.28);
   --shadow-lift: 0 28px 60px -30px oklch(0.62 0.055 348 / 0.55);
 
   --chart-1: oklch(0.707 0.102 275.9);
@@ -388,11 +394,16 @@
     content: "";
     position: fixed;
     inset: 0;
+    /* Mehr Milch als vorher (0.18/0.30).
+       Der Verlauf ist die Marke, aber er darf nicht mit dem Inhalt um
+       Aufmerksamkeit ringen. Weiter oben bleibt er kraeftig — dort steht der
+       Kopf mit Logo und Ziel — und wird nach unten hin ruhiger, wo die Karten
+       liegen. */
     background: linear-gradient(
       to bottom,
-      transparent 0%,
-      oklch(1 0 0 / 0.18) 18%,
-      oklch(1 0 0 / 0.3) 100%
+      oklch(1 0 0 / 0.1) 0%,
+      oklch(1 0 0 / 0.34) 22%,
+      oklch(1 0 0 / 0.52) 100%
     );
     pointer-events: none;
   }

@@ -411,87 +411,102 @@ function DiaryTab() {
                   mit, und zwei Breiten-Utilities entscheiden sich nach
                   CSS-Reihenfolge, nicht nach Klassenreihenfolge. Genau daran
                   lief die Karte rechts aus dem Bild. */}
-              {/* Zugeklappt: Tag, Datum und ein Blick auf den Inhalt.
-                  Elf Tage mit je sechs Feldern sind aufgeklappt eine Wand.
-                  Was man beim Durchblaettern sucht, ist "welcher Tag ist schon
-                  geschrieben" — nicht die Felder. */}
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setOpenDay((v) => (v === e.id ? null : e.id))}
-                  aria-expanded={openDay === e.id}
-                  className="flex min-w-0 flex-1 items-center gap-2 text-left"
-                >
-                  <ChevronDown
-                    className={`size-4 shrink-0 text-muted-foreground transition ${
-                      openDay === e.id ? "rotate-180" : ""
-                    }`}
-                  />
-                  <span className="min-w-0 flex-1">
-                    <span className="flex items-baseline gap-2">
-                      <span className="truncate text-base font-semibold">{e.day}. Reisetag</span>
-                      {e.date === today && (
-                        <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-primary">
-                          heute
-                        </span>
-                      )}
+              {/* Zugeklappt ist die Zeile TEXT, kein Formular.
+                  Vorher standen hier Mikrofon, Datumsfeld, Zustaendigkeit und
+                  Papierkorb nebeneinander — vier Bedienelemente, die Titel und
+                  Kurzfassung komplett aus der Zeile gedraengt haben. Uebrig
+                  blieb eine Reihe Eingabefelder: sieht aus wie ein Formular,
+                  nicht wie ein Tagebuch.
+
+                  Jetzt kleines Label, darunter das Datum, darunter ein Blick
+                  auf den Inhalt, rechts ein Chevron. Bedient wird erst
+                  aufgeklappt. */}
+              <button
+                type="button"
+                onClick={() => setOpenDay((v) => (v === e.id ? null : e.id))}
+                aria-expanded={openDay === e.id}
+                className="flex w-full items-center gap-3 text-left"
+              >
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-center gap-2">
+                    <span className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                      {e.day}. Reisetag
                     </span>
-                    <span className="block truncate text-xs text-muted-foreground">
-                      {[formatDateLong(e.date), daySummary(e)].filter(Boolean).join(" · ")}
-                    </span>
+                    {e.date === today && (
+                      <span className="rounded-full bg-primary/12 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-wider text-primary">
+                        heute
+                      </span>
+                    )}
                   </span>
-                </button>
-                {/* Einmal sprechen, alles fuellen. Die Knoepfe an den
-                    einzelnen Feldern bleiben — fuer den Nachtrag, wenn nur
-                    eine Kleinigkeit fehlt. */}
-                <button
-                  type="button"
-                  onClick={() => void toggleWholeDay(e)}
-                  disabled={busyKey === `${e.id}:ganz`}
-                  aria-label="Ganzen Tag einsprechen"
-                  className={`grid size-9 shrink-0 place-items-center rounded-xl transition ${
-                    voice.recording && activeKey === `${e.id}:ganz`
-                      ? "bg-destructive text-background"
-                      : "acrylic-warm text-background"
-                  } disabled:opacity-50`}
-                >
-                  {busyKey === `${e.id}:ganz` ? (
-                    <span className="text-[10px] font-bold">…</span>
-                  ) : (
-                    <Mic className="size-4" />
-                  )}
-                </button>
-                <div className="w-[7.75rem] shrink-0">
-                  <input
-                    type="date"
-                    value={e.date}
-                    onChange={(ev) => set(e.id, { date: ev.target.value })}
-                    className={`${dateInputClass} py-1.5`}
-                  />
-                </div>
-                <div className="w-[5.5rem] shrink-0">
-                  <select
-                    value={e.assignedTo}
-                    aria-label={`Wer dokumentiert Tag ${e.day}?`}
-                    onChange={(ev) => set(e.id, { assignedTo: ev.target.value })}
-                    className={`${inputClass} appearance-none px-2 py-1.5 text-xs`}
-                  >
-                    <option value="">Offen</option>
-                    {people.map((n) => (
-                      <option key={n} value={n}>
-                        {n}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <DeleteButton
-                  ariaLabel={`Tag ${e.day} löschen`}
-                  onClick={() => update({ diary: trip.diary.filter((x) => x.id !== e.id) })}
+                  <span className="mt-0.5 block truncate text-[0.95rem] font-semibold leading-snug">
+                    {formatDateLong(e.date) || "Ohne Datum"}
+                  </span>
+                  <span className="block truncate text-xs text-muted-foreground">
+                    {daySummary(e)}
+                  </span>
+                </span>
+                <ChevronDown
+                  className={`size-4 shrink-0 text-muted-foreground transition ${
+                    openDay === e.id ? "rotate-180" : ""
+                  }`}
                 />
-              </div>
+              </button>
 
               {openDay === e.id && (
                 <>
+                  {/* Aufnahme und Datum — hier, nicht in der zugeklappten
+                      Zeile. Dort haben vier Bedienelemente den Titel und die
+                      Kurzfassung aus dem Bild gedraengt. */}
+                  <div className="mt-3 flex items-center gap-2 border-t border-border pt-3">
+                    <button
+                      type="button"
+                      onClick={() => void toggleWholeDay(e)}
+                      disabled={busyKey === `${e.id}:ganz`}
+                      className={`flex min-w-0 flex-1 items-center justify-center gap-2 rounded-2xl py-2.5 text-sm font-semibold transition ${
+                        voice.recording && activeKey === `${e.id}:ganz`
+                          ? "bg-destructive text-background"
+                          : "acrylic-warm text-background"
+                      } disabled:opacity-50`}
+                    >
+                      {busyKey === `${e.id}:ganz` ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <Mic className="size-4" />
+                      )}
+                      {voice.recording && activeKey === `${e.id}:ganz`
+                        ? "Aufnahme beenden"
+                        : "Tag einsprechen"}
+                    </button>
+                    <div className="w-[7.75rem] shrink-0">
+                      <input
+                        type="date"
+                        value={e.date}
+                        onChange={(ev) => set(e.id, { date: ev.target.value })}
+                        className={`${dateInputClass} py-1.5`}
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-2 flex items-center gap-2">
+                    <div className="min-w-0 flex-1">
+                      <select
+                        value={e.assignedTo}
+                        aria-label={`Wer dokumentiert Tag ${e.day}?`}
+                        onChange={(ev) => set(e.id, { assignedTo: ev.target.value })}
+                        className={`${inputClass} appearance-none py-1.5 text-xs`}
+                      >
+                        <option value="">Zuständig: offen</option>
+                        {people.map((n) => (
+                          <option key={n} value={n}>
+                            Zuständig: {n}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <DeleteButton
+                      ariaLabel={`Tag ${e.day} löschen`}
+                      onClick={() => update({ diary: trip.diary.filter((x) => x.id !== e.id) })}
+                    />
+                  </div>
                   {sorted && sorted.id === e.id && (
                     <div className="mt-3 rounded-2xl bg-secondary/50 p-3">
                       <p className="text-sm font-semibold">Das habe ich verstanden</p>
