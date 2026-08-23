@@ -1,3 +1,4 @@
+import { Attachments } from "@/components/app/attachments";
 import { createFileRoute } from "@tanstack/react-router";
 import { Bike, Bus, Car, Plane, Ship, Train } from "lucide-react";
 import {
@@ -178,6 +179,7 @@ function PlanTab() {
                   className={inputClass}
                 />
               </Field>
+              <Attachments ownerId={t.id} label="Buchung / Ticket" />
               {t.url && (
                 <a
                   href={t.url}
@@ -240,6 +242,7 @@ function PlanTab() {
                 destination={trip.destination}
                 onChange={(v) => setStay(s.id, { address: v })}
               />
+              <Attachments ownerId={s.id} label="Buchung / Bestätigung" />
               <FieldRow>
                 <Field label="Von">
                   <input
@@ -445,6 +448,7 @@ function PlanTab() {
                     destination={trip.destination}
                     onChange={(v) => setActivity(a.id, { address: v })}
                   />
+                  <Attachments ownerId={a.id} label="Ticket / Bestätigung" />
                 </div>
               </div>
               <div className="pt-5">
