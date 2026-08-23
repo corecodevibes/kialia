@@ -17,7 +17,8 @@ import {
 } from "@/components/app/AppShell";
 import { AiFeatures } from "@/components/app/ai-features";
 import { inviteUrl } from "@/lib/pending-invite";
-import { syncTrips } from "@/lib/trip-sync";
+import { leaveTrip, syncTrips } from "@/lib/trip-sync";
+import { needsTypedConfirm } from "@/lib/trip-weight";
 import { flagFor } from "@/lib/country";
 import { countMembers, joinTrip } from "@/lib/trip-sync";
 import { COMMON_CURRENCIES, fetchRate } from "@/lib/currency";
@@ -68,6 +69,10 @@ function HomeTab() {
   } = useTrip();
   const fileInput = useRef<HTMLInputElement>(null);
   const [ioMsg, setIoMsg] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const [typedName, setTypedName] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [sharePrep, setSharePrep] = useState<string>("idle");
   const [copied, setCopied] = useState(false);
   const [joinCode, setJoinCode] = useState("");
@@ -288,8 +293,12 @@ function HomeTab() {
                   </button>
                   <button
                     type="button"
-                    aria-label={`Reise ${t.destination} löschen`}
-                    onClick={() => removeTrip(t.id)}
+                    aria-label={`Reise ${t.destination || "ohne Namen"} entfernen`}
+                    onClick={() => {
+                      setPendingDelete(t.id);
+                      setTypedName("");
+                      setDeleteError(null);
+                    }}
                     className="text-muted-foreground transition hover:text-destructive"
                   >
                     <Trash2 className="size-4" />
@@ -480,6 +489,102 @@ function HomeTab() {
         {/* Teilen nach dem Muster eines Haushalts: ein Code, den man
             vorliest. Kein Konto-Suchen, keine E-Mail-Einladung — beides
             scheitert unterwegs an fehlendem Netz oder Tippfehlern. */}
+        {/* Loeschen mit Reibung, die zum Inhalt passt. Bei einem leeren
+            Geruest waere eine Sicherheitsfrage nur Erziehung zum Wegklicken;
+            bei einer durchgeplanten Reise ist ein Fehlgriff nicht zu
+            reparieren. */}
+        {pendingDelete && (
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/40 px-4 pb-6 pt-16 backdrop-blur-sm sm:items-center"
+            onClick={() => setPendingDelete(null)}
+          >
+            <div
+              className="w-full max-w-md rounded-3xl bg-card p-5"
+              onClick={(ev) => ev.stopPropagation()}
+            >
+              {(() => {
+                const t = trips.find((x) => x.id === pendingDelete);
+                if (!t) return null;
+                const schwer = needsTypedConfirm(t);
+                const name = t.destination.trim();
+                const passt = !schwer || typedName.trim().toLowerCase() === name.toLowerCase();
+                return (
+                  <>
+                    <p className="text-lg font-bold tracking-tight">
+                      „{name || "Reise ohne Namen"}" entfernen?
+                    </p>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Sie verschwindet von deinen Geräten.{" "}
+                      {t.remoteId
+                        ? "Wer sonst noch mitplant, behält sie unverändert — erst wenn niemand mehr dabei ist, wird sie endgültig gelöscht."
+                        : "Diese Reise war nie auf dem Server, sie ist danach weg."}
+                    </p>
+
+                    {schwer && (
+                      <div className="mt-4">
+                        <p className="text-sm">
+                          Hier steckt Arbeit drin. Tippe zur Bestätigung{" "}
+                          <span className="font-semibold text-foreground">{name}</span>:
+                        </p>
+                        <input
+                          value={typedName}
+                          onChange={(ev) => setTypedName(ev.target.value)}
+                          autoComplete="off"
+                          placeholder={name}
+                          className={`${inputClass} mt-2`}
+                        />
+                      </div>
+                    )}
+
+                    {deleteError && (
+                      <p role="status" className="mt-3 text-xs text-destructive">
+                        {deleteError}
+                      </p>
+                    )}
+
+                    <div className="mt-4 flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setPendingDelete(null)}
+                        className="flex-1 rounded-2xl bg-secondary py-3 text-sm font-semibold"
+                      >
+                        Behalten
+                      </button>
+                      <button
+                        type="button"
+                        disabled={!passt || deleting}
+                        onClick={async () => {
+                          setDeleting(true);
+                          setDeleteError(null);
+                          const r = await leaveTrip(t);
+                          setDeleting(false);
+                          if (!r.ok) {
+                            // Lokal NICHT entfernen, wenn der Server nicht
+                            // mitgezogen hat — sonst holt der naechste Abgleich
+                            // sie zurueck und es sieht aus, als sei das Loeschen
+                            // wirkungslos.
+                            setDeleteError(
+                              `Der Server hat nicht mitgezogen: ${r.error ?? "unbekannt"}. Ohne Netz geht es nicht.`,
+                            );
+                            return;
+                          }
+                          removeTrip(t.id);
+                          setPendingDelete(null);
+                        }}
+                        className="flex-1 rounded-2xl bg-destructive py-3 text-sm font-semibold text-background disabled:opacity-50"
+                      >
+                        {deleting ? "Wird entfernt …" : "Entfernen"}
+                      </button>
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
+          </div>
+        )}
+
         <Card>
           <CardTitle>Gemeinsam planen</CardTitle>
 

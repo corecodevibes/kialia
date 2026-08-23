@@ -282,3 +282,26 @@ export async function countMembers(remoteId: string): Promise<number | null> {
     .eq("trip_id", remoteId);
   return error ? null : (count ?? null);
 }
+
+/**
+ * Eine Reise fuer sich selbst entfernen.
+ *
+ * Auf dem Server heisst das: Mitgliedschaft aufloesen. Sind danach noch andere
+ * dabei, behalten die sie unveraendert — sie haben mitgeplant, und dass eine
+ * Person aufraeumt, ist kein Grund, ihnen die Reise wegzunehmen. Ist niemand
+ * mehr dabei, verschwindet sie ganz.
+ *
+ * Ohne `remoteId` war sie nie oben; dann gibt es nichts zu tun und das lokale
+ * Entfernen genuegt.
+ */
+export async function leaveTrip(
+  trip: Trip,
+): Promise<{ ok: boolean; outcome?: "left" | "deleted"; error?: string }> {
+  if (!trip.remoteId) return { ok: true, outcome: "deleted" };
+
+  const { data, error } = await db.rpc("leave_trip", { p_trip: trip.remoteId });
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+  return { ok: true, outcome: data === "left" ? "left" : "deleted" };
+}

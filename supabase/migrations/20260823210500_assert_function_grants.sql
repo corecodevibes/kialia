@@ -18,7 +18,8 @@ begin
   foreach f in array array[
     'public.is_trip_member(uuid)',
     'public.join_trip(text)',
-    'public.delete_own_account()'
+    'public.delete_own_account()',
+    'public.leave_trip(uuid)'
   ] loop
     if not has_function_privilege('authenticated', f, 'execute') then
       fehlend := fehlend || f;
