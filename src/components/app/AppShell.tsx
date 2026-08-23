@@ -1,7 +1,8 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { eur, useTrip } from "@/lib/trip-store";
 import { flagFor } from "@/lib/country";
-import { Home, Lightbulb, Wallet, BookOpen, Backpack, LogOut } from "lucide-react";
+import { mapsQuery, mapsUrl } from "@/lib/maps";
+import { Home, Lightbulb, Wallet, BookOpen, Backpack, LogOut, MapPin } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import logo from "@/assets/travelivibes-logo.png";
 import { signOut, useProfile, useSession } from "@/lib/auth";
@@ -97,23 +98,27 @@ export function AppShell({
               bleibt das Logo stehen — eine falsche Flagge waere schlimmer als
               keine. Der `key` sorgt dafuer, dass der Auftritt beim Wechsel der
               Reise erneut laeuft. */}
-          {flag ? (
-            <span
-              key={flag}
-              aria-hidden
-              className="hero-flag grid size-11 shrink-0 place-items-center text-[2rem] leading-none"
-            >
-              {flag}
-            </span>
-          ) : (
+          {/* Das Logo bleibt der Anker der Marke — die Flagge sitzt als
+              Abzeichen darauf. Vorher ersetzte die Flagge das Logo, damit war
+              die Marke auf jedem Bildschirm mit erkanntem Land verschwunden. */}
+          <div className="relative shrink-0">
             <img
               src={logo}
               alt="kialia"
               width={64}
               height={64}
-              className="size-11 shrink-0 rounded-2xl shadow-sm"
+              className="size-11 rounded-2xl shadow-sm"
             />
-          )}
+            {flag && (
+              <span
+                key={flag}
+                aria-hidden
+                className="hero-flag absolute -bottom-1 -right-1 grid size-[1.35rem] place-items-center rounded-full bg-card text-[0.8rem] leading-none ring-2 ring-card"
+              >
+                {flag}
+              </span>
+            )}
+          </div>
           <div className="min-w-0 flex-1">
             {/* Der Bildschirmname ist die Nebensache, die Reise die Identitaet.
                 Vorher stand im Plan-Tab "Plan" und auf Home "Kreta" — zwei
@@ -284,6 +289,56 @@ export function NumberField({
       }}
       onBlur={() => setDraft(null)}
     />
+  );
+}
+
+/**
+ * Ortsangabe mit Sprung in die Karten-App.
+ *
+ * Bewusst keine eingebettete Karte: die kostet pro Aufruf, braucht einen
+ * Schluessel und funktioniert ohne Netz nicht — fuer eine Reise-App der wunde
+ * Punkt. Der Sprung in die installierte Karten-App ist kostenlos und bringt
+ * Navigation und Offline-Karten mit, die dort ohnehin liegen.
+ */
+export function PlaceField({
+  name,
+  address,
+  destination,
+  onChange,
+}: {
+  name: string;
+  address: string;
+  destination: string;
+  onChange: (v: string) => void;
+}) {
+  const query = mapsQuery(name, address, destination);
+  const href = mapsUrl(query, typeof navigator === "undefined" ? "" : navigator.userAgent);
+
+  return (
+    <Field label="Adresse oder Ort">
+      <div className="flex items-center gap-2">
+        <input
+          value={address}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="Straße, Ort — oder einfach der Name"
+          className={inputClass}
+        />
+        <a
+          href={href || undefined}
+          target="_blank"
+          rel="noreferrer"
+          aria-disabled={!href}
+          aria-label={query ? `${query} in Karten öffnen` : "Erst einen Ort eintragen"}
+          className={`grid size-11 shrink-0 place-items-center rounded-xl transition ${
+            href
+              ? "bg-secondary text-foreground hover:bg-secondary/70"
+              : "pointer-events-none bg-secondary/40 text-muted-foreground"
+          }`}
+        >
+          <MapPin className="size-4" />
+        </a>
+      </div>
+    </Field>
   );
 }
 

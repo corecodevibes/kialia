@@ -16,6 +16,7 @@ import {
   Money,
   NoTripYet,
   NumberField,
+  PlaceField,
 } from "@/components/app/AppShell";
 import { StatusPicker } from "@/components/app/bits";
 
@@ -233,6 +234,12 @@ function PlanTab() {
               </div>
             </div>
             <div className="mt-3 space-y-3">
+              <PlaceField
+                name={s.name}
+                address={s.address}
+                destination={trip.destination}
+                onChange={(v) => setStay(s.id, { address: v })}
+              />
               <FieldRow>
                 <Field label="Von">
                   <input
@@ -312,6 +319,7 @@ function PlanTab() {
                 {
                   id: uid(),
                   name: "",
+                  address: "",
                   url: "",
                   from: "",
                   to: "",
@@ -430,6 +438,14 @@ function PlanTab() {
                     className={inputClass}
                   />
                 </Field>
+                <div className="mt-3">
+                  <PlaceField
+                    name={a.name}
+                    address={a.address}
+                    destination={trip.destination}
+                    onChange={(v) => setActivity(a.id, { address: v })}
+                  />
+                </div>
               </div>
               <div className="pt-5">
                 <DeleteButton
@@ -485,7 +501,15 @@ function PlanTab() {
             update({
               activities: [
                 ...trip.activities,
-                { id: uid(), name: "", url: "", cost: 0, status: "offen", dueDate: "" },
+                {
+                  id: uid(),
+                  name: "",
+                  address: "",
+                  url: "",
+                  cost: 0,
+                  status: "offen",
+                  dueDate: "",
+                },
               ],
             })
           }

@@ -30,6 +30,8 @@ export type Board = "nichts" | "fruehstueck" | "halbpension" | "vollpension" | "
 export type Stay = {
   id: string;
   name: string;
+  /** Freie Ortsangabe fuer die Karten-App. */
+  address: string;
   url: string;
   from: string;
   to: string;
@@ -42,6 +44,8 @@ export type Stay = {
 export type Activity = {
   id: string;
   name: string;
+  /** Freie Ortsangabe fuer die Karten-App. */
+  address: string;
   url: string;
   cost: number;
   status: PayStatus;
@@ -241,6 +245,8 @@ function normalize(t: Partial<Trip>): Trip {
       note: x.note ?? "",
       url: x.url ?? "",
     })),
+    stays: (t.stays ?? []).map((x) => ({ ...x, address: x.address ?? "" })),
+    activities: (t.activities ?? []).map((x) => ({ ...x, address: x.address ?? "" })),
     diary: (t.diary ?? []).map((x) => ({ ...x, mood: x.mood ?? "", food: x.food ?? "" })),
   };
 }
@@ -356,10 +362,10 @@ export function useTrip() {
     (id: string) => {
       mutate((s) => {
         const trips = s.trips.filter((t) => t.id !== id);
-        if (!trips.length) {
-          const t = newTrip();
-          return { trips: [t], activeId: t.id };
-        }
+        // Bewusst KEINE Ersatzreise anlegen. Wer die letzte Reise loescht, will
+        // zurueck auf Null — nicht eine namenlose neue vorgesetzt bekommen.
+        // Dieselbe Falle steckte frueher in loadStore().
+        if (!trips.length) return { trips: [], activeId: "" };
         return { trips, activeId: s.activeId === id ? trips[0]!.id : s.activeId };
       });
     },

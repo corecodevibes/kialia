@@ -209,7 +209,7 @@ function HomeTab() {
             diese eine Reise — sonst weiss niemand, worauf sich ein Budget
             oder ein Tagebucheintrag bezieht. */}
         <Card>
-          <CardTitle>{trips.length === 1 ? "Eure Reise" : "Eure Reisen"}</CardTitle>
+          <CardTitle>{trips.length === 1 ? "Deine Reise" : "Deine Reisen"}</CardTitle>
           <div className="mt-3 space-y-2">
             {trips.map((t) => {
               const active = t.id === activeId;
@@ -289,7 +289,7 @@ function HomeTab() {
         </Card>
 
         <Card>
-          <CardTitle>Eckdaten</CardTitle>
+          <CardTitle>Eure Reise</CardTitle>
           <div className="mt-3 space-y-3">
             <Field label="Wohin geht die Reise?">
               <input

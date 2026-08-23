@@ -66,6 +66,7 @@ function IdeasTab() {
         {
           id: uid(),
           name: idea.text.trim().slice(0, 120),
+          address: "",
           url: normalizeUrl(idea.links[0]?.url ?? ""),
           cost: 0,
           status: "offen",
