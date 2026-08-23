@@ -168,15 +168,6 @@ export function AppShell({
               height={64}
               className="size-11 rounded-2xl shadow-sm"
             />
-            {flag && (
-              <span
-                key={flag}
-                aria-hidden
-                className="hero-flag absolute -bottom-1 -right-1 grid size-[1.35rem] place-items-center rounded-full bg-card text-[0.8rem] leading-none ring-2 ring-card"
-              >
-                {flag}
-              </span>
-            )}
           </div>
           <div className="min-w-0 flex-1">
             {/* Der Bildschirmname ist die Nebensache, die Reise die Identitaet.
@@ -185,9 +176,25 @@ export function AppShell({
             <p className="truncate text-[10.5px] font-semibold uppercase tracking-[0.2em] text-foreground/55">
               {title || "kialia · κιάλια"}
             </p>
-            <h1 className="truncate text-[1.35rem] font-extrabold leading-tight tracking-[-0.02em] text-foreground">
-              {trip.destination || "kialia"}
-            </h1>
+            {/* Die Flagge steht NEBEN dem Namen, nicht auf der Marke.
+                Auf dem Logo lag sie halb darueber und verdeckte ein Glas —
+                und inhaltlich gehoert sie ohnehin zur Reise, nicht zur Marke.
+                `shrink-0` und `min-w-0` am Namen sorgen dafuer, dass bei langen
+                Zielen der Name gekuerzt wird und nicht die Flagge wegfaellt. */}
+            <div className="flex items-baseline gap-2">
+              {flag && (
+                <span
+                  key={flag}
+                  aria-hidden
+                  className="hero-flag shrink-0 text-[1.2rem] leading-none"
+                >
+                  {flag}
+                </span>
+              )}
+              <h1 className="min-w-0 truncate text-[1.35rem] font-extrabold leading-tight tracking-[-0.02em] text-foreground">
+                {trip.destination || "kialia"}
+              </h1>
+            </div>
           </div>
           {/* Zahnrad statt Abmelden: ein versehentlicher Klick soll nicht
               mitten in der Planung die Sitzung beenden. Abmelden liegt jetzt
