@@ -102,6 +102,12 @@ export type PackCategory = {
 
 export type Trip = {
   id: string;
+  /** Die uuid in Supabase, sobald die Reise dort liegt. Leer = nur lokal. */
+  remoteId?: string;
+  /** Einladungscode der geteilten Reise. */
+  inviteCode?: string;
+  /** Stand der zuletzt geladenen Fassung — entscheidet, wer gewinnt. */
+  updatedAt?: string;
   destination: string;
   startDate: string;
   endDate: string;
@@ -279,7 +285,7 @@ export function loadStore(): Store {
   return { trips: [], activeId: "" };
 }
 
-function save(store: Store) {
+export function saveStore(store: Store) {
   try {
     window.localStorage.setItem(KEY, JSON.stringify(store));
   } catch {
@@ -305,6 +311,17 @@ const listeners = new Set<() => void>();
 
 function emit() {
   for (const l of listeners) l();
+}
+
+/** Fuer den Abgleich: auf Aenderungen am Speicher hoeren. */
+export function subscribeStore(listener: () => void) {
+  return subscribe(listener);
+}
+
+/** Der aktuelle Stand, ohne React. */
+export function currentStore(): Store {
+  ensureLoaded();
+  return current;
 }
 
 function subscribe(listener: () => void) {
@@ -333,7 +350,7 @@ export function useTrip() {
 
   const mutate = useCallback((fn: (s: Store) => Store) => {
     current = fn(current);
-    save(current);
+    saveStore(current);
     emit();
   }, []);
 

@@ -15,6 +15,7 @@ import {
   NumberField,
 } from "@/components/app/AppShell";
 import { flagFor } from "@/lib/country";
+import { joinTrip } from "@/lib/trip-sync";
 import {
   downloadAllTrips,
   downloadTrip,
@@ -62,6 +63,9 @@ function HomeTab() {
   } = useTrip();
   const fileInput = useRef<HTMLInputElement>(null);
   const [ioMsg, setIoMsg] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [joinCode, setJoinCode] = useState("");
+  const [joinMsg, setJoinMsg] = useState<string | null>(null);
   const [newDest, setNewDest] = useState("");
   const [draft, setDraft] = useState({
     destination: "",
@@ -348,6 +352,74 @@ function HomeTab() {
               </>
             }
           />
+        </Card>
+
+        {/* Teilen nach dem Muster eines Haushalts: ein Code, den man
+            vorliest. Kein Konto-Suchen, keine E-Mail-Einladung — beides
+            scheitert unterwegs an fehlendem Netz oder Tippfehlern. */}
+        <Card>
+          <CardTitle>Gemeinsam planen</CardTitle>
+
+          {trip.inviteCode ? (
+            <>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Gib diesen Code weiter — wer ihn eingibt, sieht und bearbeitet dieselbe Reise.
+              </p>
+              <div className="mt-3 flex items-center gap-2 rounded-2xl bg-secondary/60 px-3 py-3">
+                <span className="min-w-0 flex-1 truncate text-xl font-bold tracking-[0.18em] tabular-nums">
+                  {trip.inviteCode}
+                </span>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await navigator.clipboard.writeText(trip.inviteCode ?? "");
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                  }}
+                  className="shrink-0 rounded-xl bg-card px-3 py-2 text-xs font-semibold"
+                >
+                  {copied ? "Kopiert" : "Kopieren"}
+                </button>
+              </div>
+            </>
+          ) : (
+            <p className="mt-1 text-xs text-muted-foreground">
+              Diese Reise liegt noch nur auf diesem Gerät. Sobald sie abgeglichen ist, erscheint
+              hier ein Code zum Teilen.
+            </p>
+          )}
+
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              setJoinMsg(null);
+              const res = await joinTrip(joinCode);
+              setJoinMsg(res.ok ? "Reise übernommen." : (res.error ?? "Hat nicht geklappt."));
+              if (res.ok) setJoinCode("");
+            }}
+            className="mt-4"
+          >
+            <Field label="Einer Reise beitreten">
+              <div className="flex items-center gap-2">
+                <input
+                  value={joinCode}
+                  onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                  placeholder="Code eingeben"
+                  autoCapitalize="characters"
+                  autoCorrect="off"
+                  className={`${inputClass} tracking-[0.14em]`}
+                />
+                <button
+                  type="submit"
+                  disabled={joinCode.trim().length < 4}
+                  className="acrylic-warm shrink-0 rounded-xl px-4 py-2.5 text-sm font-semibold text-background disabled:opacity-50"
+                >
+                  Beitreten
+                </button>
+              </div>
+            </Field>
+            {joinMsg && <p className="mt-2 text-xs font-medium">{joinMsg}</p>}
+          </form>
         </Card>
 
         <Card>
