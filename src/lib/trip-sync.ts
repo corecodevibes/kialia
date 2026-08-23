@@ -201,3 +201,18 @@ export function watchRemote(onChange: () => void): () => void {
     void supabase.removeChannel(channel);
   };
 }
+
+/**
+ * Wie viele Menschen an dieser Reise mitplanen.
+ *
+ * Nur die Anzahl, keine Namen: die Policy auf `profiles` gibt jedem nur das
+ * eigene Profil frei — und das ist richtig so. Für die Rückmeldung "sie ist
+ * beigetreten" reicht die Zahl.
+ */
+export async function countMembers(remoteId: string): Promise<number | null> {
+  const { count, error } = await db
+    .from("trip_members")
+    .select("user_id", { count: "exact", head: true })
+    .eq("trip_id", remoteId);
+  return error ? null : (count ?? null);
+}

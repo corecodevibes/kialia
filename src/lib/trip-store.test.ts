@@ -8,6 +8,7 @@ import {
   monthsUntil,
   nextDiaryDay,
   parseLocalDate,
+  safeHref,
   savingsPlan,
   todayLocalISO,
   tripDays,
@@ -450,5 +451,43 @@ describe("travellerNames", () => {
 
   test("ohne Angabe bleibt nur 'Ich'", () => {
     expect(travellerNames(tripWith({ companions: "" }))).toEqual(["Ich"]);
+  });
+});
+
+describe("safeHref", () => {
+  test("lässt normale Adressen durch und ergänzt das Schema", () => {
+    expect(safeHref("https://booking.com/x")).toBe("https://booking.com/x");
+    expect(safeHref("booking.com/x")).toBe("https://booking.com/x");
+  });
+
+  test("blockt javascript: — der eigentliche Anlass", () => {
+    expect(safeHref("javascript:alert(1)")).toBeUndefined();
+    expect(safeHref("JavaScript:alert(1)")).toBeUndefined();
+    expect(safeHref("  javascript:alert(1)  ")).toBeUndefined();
+  });
+
+  test("gibt NIEMALS etwas anderes als http/https zurück — das ist die Zusicherung", () => {
+    // Manche Eingaben werden zu harmlosem https-Unsinn statt zu undefined
+    // (aus "file:///x" wird "https://file///x"). Das ist in Ordnung: die
+    // Zusicherung lautet nicht "undefined bei Unfug", sondern "niemals ein
+    // gefährliches Schema".
+    for (const bad of [
+      "data:text/html,<script>alert(1)</script>",
+      "file:///etc/passwd",
+      "vbscript:msgbox(1)",
+      "javascript:alert(1)",
+      "  JAVASCRIPT:alert(1)",
+      "\u0000javascript:alert(1)",
+    ]) {
+      const out = safeHref(bad);
+      if (out !== undefined) {
+        expect(out.startsWith("http://") || out.startsWith("https://")).toBe(true);
+      }
+    }
+  });
+
+  test("leer bleibt leer statt zu einem toten Link zu werden", () => {
+    expect(safeHref("")).toBeUndefined();
+    expect(safeHref("   ")).toBeUndefined();
   });
 });

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useRef, useState, type ChangeEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { Download, Upload, Plus, Trash2, Users, MapPin, ShieldAlert } from "lucide-react";
 import {
   AppShell,
@@ -15,7 +15,7 @@ import {
   NumberField,
 } from "@/components/app/AppShell";
 import { flagFor } from "@/lib/country";
-import { joinTrip } from "@/lib/trip-sync";
+import { countMembers, joinTrip } from "@/lib/trip-sync";
 import {
   downloadAllTrips,
   downloadTrip,
@@ -66,6 +66,21 @@ function HomeTab() {
   const [copied, setCopied] = useState(false);
   const [joinCode, setJoinCode] = useState("");
   const [joinMsg, setJoinMsg] = useState<string | null>(null);
+  const [members, setMembers] = useState<number | null>(null);
+
+  // Bestaetigt sichtbar, dass das Teilen wirkt — sonst weiss niemand, ob der
+  // Code angekommen ist.
+  useEffect(() => {
+    let cancelled = false;
+    if (!trip.remoteId) {
+      setMembers(null);
+      return;
+    }
+    void countMembers(trip.remoteId).then((n) => !cancelled && setMembers(n));
+    return () => {
+      cancelled = true;
+    };
+  }, [trip.remoteId, trip.updatedAt]);
   const [newDest, setNewDest] = useState("");
   const [draft, setDraft] = useState({
     destination: "",
@@ -363,7 +378,9 @@ function HomeTab() {
           {trip.inviteCode ? (
             <>
               <p className="mt-1 text-xs text-muted-foreground">
-                Gib diesen Code weiter — wer ihn eingibt, sieht und bearbeitet dieselbe Reise.
+                Gib diesen Code weiter — wer ihn eingibt, sieht und bearbeitet dieselbe Reise. Das
+                gilt für <span className="font-medium text-foreground">alles</span>: Plan, Budget,
+                Packliste und auch die Tagebucheinträge.
               </p>
               <div className="mt-3 flex items-center gap-2 rounded-2xl bg-secondary/60 px-3 py-3">
                 <span className="min-w-0 flex-1 truncate text-xl font-bold tracking-[0.18em] tabular-nums">
@@ -381,6 +398,11 @@ function HomeTab() {
                   {copied ? "Kopiert" : "Kopieren"}
                 </button>
               </div>
+              {members !== null && (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {members === 1 ? "Bisher planst nur du mit." : `${members} Personen planen mit.`}
+                </p>
+              )}
             </>
           ) : (
             <p className="mt-1 text-xs text-muted-foreground">

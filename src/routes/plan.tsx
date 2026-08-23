@@ -37,6 +37,7 @@ import {
   type Trip,
   formatDateLong,
   tripItinerary,
+  safeHref,
 } from "@/lib/trip-store";
 
 export const Route = createFileRoute("/plan")({
@@ -182,7 +183,7 @@ function PlanTab() {
               <Attachments ownerId={t.id} label="Buchung / Ticket" />
               {t.url && (
                 <a
-                  href={t.url}
+                  href={safeHref(t.url)}
                   target="_blank"
                   rel="noreferrer noopener"
                   className="block truncate text-xs font-medium text-primary underline"
@@ -271,7 +272,7 @@ function PlanTab() {
               </Field>
               {s.url && (
                 <a
-                  href={s.url}
+                  href={safeHref(s.url)}
                   target="_blank"
                   rel="noreferrer noopener"
                   className="block truncate text-xs font-medium text-primary underline"
@@ -470,7 +471,7 @@ function PlanTab() {
               </Field>
               {a.url && (
                 <a
-                  href={a.url}
+                  href={safeHref(a.url)}
                   target="_blank"
                   rel="noreferrer noopener"
                   className="block truncate text-xs font-medium text-primary underline"

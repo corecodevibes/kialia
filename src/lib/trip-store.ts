@@ -870,3 +870,27 @@ export function travellerNames(trip: Trip): string[] {
     .filter((v) => v.toLowerCase() !== "ich");
   return ["Ich", ...Array.from(new Set(raw))];
 }
+
+/**
+ * Eine Adresse, die gefahrlos in ein href darf.
+ *
+ * `normalizeUrl` greift beim Verlassen des Feldes — waehrend des Tippens steht
+ * dort der Rohwert, und ueber den Abgleich kommen Werte anderer Mitglieder
+ * ganz ohne diese Pruefung an. Ein `javascript:`-Link wuerde beim Anklicken
+ * ausgefuehrt.
+ *
+ * Deshalb wird hier beim ANZEIGEN geprueft, nicht beim Speichern: nur http und
+ * https kommen durch, alles andere ergibt `undefined` — dann fehlt das href
+ * und der Link ist tot statt gefaehrlich.
+ */
+export function safeHref(url: string): string | undefined {
+  const raw = (url ?? "").trim();
+  if (!raw) return undefined;
+  try {
+    const parsed = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return undefined;
+    return parsed.href;
+  } catch {
+    return undefined;
+  }
+}

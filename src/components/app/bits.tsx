@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { ExternalLink, Link2, Plus, Trash2 } from "lucide-react";
-import { normalizeUrl, statusLabels, uid, type LinkItem, type PayStatus } from "@/lib/trip-store";
+import {
+  normalizeUrl,
+  statusLabels,
+  uid,
+  type LinkItem,
+  type PayStatus,
+  safeHref,
+} from "@/lib/trip-store";
 import { inputClass } from "./AppShell";
 
 export function LinkList({
@@ -32,7 +39,7 @@ export function LinkList({
         <div key={l.id} className="flex items-center gap-2 rounded-xl bg-secondary/50 px-3 py-2">
           <Link2 className="size-4 shrink-0 text-primary" />
           <a
-            href={l.url}
+            href={safeHref(l.url)}
             target="_blank"
             rel="noreferrer noopener"
             className="min-w-0 flex-1 truncate text-sm font-medium underline-offset-2 hover:underline"
