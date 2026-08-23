@@ -573,9 +573,17 @@ export function tripTotals(trip: Trip) {
   const days = tripDays(trip);
   const transport = trip.transports.reduce((s, t) => s + toMain(t.cost || 0, t.currency), 0);
   const stays = trip.stays.reduce((s, t) => s + toMain(t.cost || 0, t.currency), 0);
-  const activities = trip.activities.reduce((s, t) => s + toMain(t.cost || 0, t.currency), 0);
+  // Aufgeteilt wie im Plan: dort stehen Essen und Erlebnisse getrennt, in der
+  // Summe standen sie zusammen unter "Aktivitäten". Wer ein Restaurant mit 60 €
+  // eintraegt und die Zeile "Essen" bei 0 sieht, glaubt an einen Fehler.
+  const restaurants = trip.activities
+    .filter((t) => t.kind === "restaurant")
+    .reduce((s, t) => s + toMain(t.cost || 0, t.currency), 0);
+  const activities = trip.activities
+    .filter((t) => t.kind !== "restaurant")
+    .reduce((s, t) => s + toMain(t.cost || 0, t.currency), 0);
   const food = mealsPerDay(trip.meals) * days;
-  const total = transport + stays + activities + food;
+  const total = transport + stays + activities + restaurants + food;
   const paid = [...trip.transports, ...trip.stays, ...trip.activities]
     .filter((i) => i.status === "bezahlt")
     .reduce((s, i) => {
@@ -598,6 +606,7 @@ export function tripTotals(trip: Trip) {
   return {
     days,
     transport,
+    restaurants,
     stays,
     activities,
     food,

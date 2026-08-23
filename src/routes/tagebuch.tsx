@@ -491,47 +491,51 @@ function DiaryTab() {
           </p>
         )}
 
-        <Card>
-          <CardTitle>Als PDF speichern</CardTitle>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Schlicht läuft fortlaufend auf A4 – ein Dokument, das man verschickt oder ablegt. Die
-            anderen drei sind A5, ein Blatt pro Tag, zum Einkleben.
-          </p>
+        {/* Erst anbieten, wenn es etwas zu drucken gibt. Ein Export-Angebot
+            direkt unter "Noch kein Eintrag" verspricht ein leeres Blatt. */}
+        {trip.diary.length > 0 && (
+          <Card>
+            <CardTitle>Als PDF speichern</CardTitle>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Schlicht läuft fortlaufend auf A4 – ein Dokument, das man verschickt oder ablegt. Die
+              anderen drei sind A5, ein Blatt pro Tag, zum Einkleben.
+            </p>
 
-          <div className="mt-3 space-y-2">
-            {(Object.keys(layoutLabels) as Layout[]).map((l) => (
-              <label
-                key={l}
-                className={`flex cursor-pointer items-center gap-2 rounded-2xl border px-3 py-2.5 text-sm ${
-                  layout === l ? "border-primary bg-primary/10" : "border-border"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="pdf-layout"
-                  checked={layout === l}
-                  onChange={() => setLayout(l)}
-                  className="size-4 accent-[var(--primary)]"
-                />
-                {layoutLabels[l]}
-              </label>
-            ))}
-          </div>
+            <div className="mt-3 space-y-2">
+              {(Object.keys(layoutLabels) as Layout[]).map((l) => (
+                <label
+                  key={l}
+                  className={`flex cursor-pointer items-center gap-2 rounded-2xl border px-3 py-2.5 text-sm ${
+                    layout === l ? "border-primary bg-primary/10" : "border-border"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="pdf-layout"
+                    checked={layout === l}
+                    onChange={() => setLayout(l)}
+                    className="size-4 accent-[var(--primary)]"
+                  />
+                  {layoutLabels[l]}
+                </label>
+              ))}
+            </div>
 
-          <label className="mt-3 flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={withBudget}
-              onChange={(ev) => setWithBudget(ev.target.checked)}
-              className="size-4 accent-[var(--primary)]"
-            />
-            Mit Budget & Ausgaben drucken
-          </label>
+            <label className="mt-3 flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={withBudget}
+                onChange={(ev) => setWithBudget(ev.target.checked)}
+                className="size-4 accent-[var(--primary)]"
+              />
+              Mit Budget & Ausgaben drucken
+            </label>
 
-          <PrimaryButton onClick={() => window.print()} className="mt-3">
-            <Printer className="size-4" /> Als PDF speichern
-          </PrimaryButton>
-        </Card>
+            <PrimaryButton onClick={() => window.print()} className="mt-3">
+              <Printer className="size-4" /> Als PDF speichern
+            </PrimaryButton>
+          </Card>
+        )}
       </div>
 
       {/* @page kennt keine Klassen, also wird die Regel zum Layout erzeugt.

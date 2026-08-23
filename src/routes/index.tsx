@@ -256,7 +256,7 @@ function HomeTab() {
             diese eine Reise — sonst weiss niemand, worauf sich ein Budget
             oder ein Tagebucheintrag bezieht. */}
         <Card>
-          <CardTitle>{trips.length === 1 ? "Deine Reise" : "Deine Reisen"}</CardTitle>
+          <CardTitle>{trips.length === 1 ? "Reise wechseln" : "Reisen wechseln"}</CardTitle>
           <div className="mt-3 space-y-2">
             {trips.map((t) => {
               const active = t.id === activeId;
@@ -661,14 +661,27 @@ function HomeTab() {
                 onClick={async () => {
                   setSharePrep("busy");
                   const r = await syncTrips();
-                  setSharePrep(r.ok ? "idle" : (r.error ?? "Abgleich fehlgeschlagen"));
+                  if (!r.ok) {
+                    setSharePrep(r.error ?? "Abgleich fehlgeschlagen");
+                    return;
+                  }
+                  // Nach Erfolg erscheint der Code direkt darueber. Ohne diesen
+                  // Hinweis sah es aus, als sei nichts passiert: der Knopf ging
+                  // in den Ruhezustand zurueck und die Karte blieb sonst
+                  // gleich, bis man neu lud.
+                  setSharePrep("fertig");
                 }}
                 disabled={sharePrep === "busy"}
                 className="mt-3"
               >
                 {sharePrep === "busy" ? "Wird abgeglichen …" : "Jetzt zum Teilen freigeben"}
               </PrimaryButton>
-              {sharePrep !== "idle" && sharePrep !== "busy" && (
+              {sharePrep === "fertig" && (
+                <p role="status" className="mt-2 text-xs font-medium">
+                  Freigegeben — der Link steht jetzt hier.
+                </p>
+              )}
+              {sharePrep !== "idle" && sharePrep !== "busy" && sharePrep !== "fertig" && (
                 <p role="status" className="mt-2 text-xs text-destructive">
                   Das hat nicht geklappt: {sharePrep}. Ohne Netz geht es nicht — die Reise selbst
                   bleibt aber vollständig auf dem Gerät.

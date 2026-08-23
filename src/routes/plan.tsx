@@ -76,9 +76,26 @@ const modes = [
   { key: "Schiff", icon: Ship },
 ];
 
-const ACTIVITY_GROUPS: { kind: "restaurant" | "aktivitaet"; title: string }[] = [
-  { kind: "aktivitaet", title: "Aktivitäten" },
-  { kind: "restaurant", title: "Essen & Trinken" },
+const ACTIVITY_GROUPS: {
+  kind: "restaurant" | "aktivitaet";
+  title: string;
+  addLabel: string;
+  nameLabel: string;
+}[] = [
+  {
+    kind: "aktivitaet",
+    title: "Aktivitäten",
+    addLabel: "Aktivität hinzufügen",
+    nameLabel: "Name der Aktivität",
+  },
+  {
+    // Ueberschrift und Knopf hiessen frueher verschieden ("Essen & Trinken"
+    // gegen "Restaurant hinzufügen") — zwei Namen fuer dieselbe Sache.
+    kind: "restaurant",
+    title: "Essen & Trinken",
+    addLabel: "Essen & Trinken hinzufügen",
+    nameLabel: "Name des Lokals",
+  },
 ];
 
 /** Zwei Knoepfe statt eines Menues — es gibt nur zwei Antworten. */
@@ -589,7 +606,6 @@ function PlanTab() {
               if (!b) return -1;
               return a < b ? -1 : a > b ? 1 : 0;
             });
-          if (items.length === 0) return null;
           return (
             <Fragment key={group.kind}>
               <SectionTitle>{group.title}</SectionTitle>
@@ -636,7 +652,7 @@ function PlanTab() {
                     <div className="mt-3 border-t border-border pt-3">
                       <div className="flex items-start gap-2">
                         <div className="min-w-0 flex-1">
-                          <Field label="Name der Aktivität">
+                          <Field label={group.nameLabel}>
                             <input
                               value={a.name}
                               onChange={(e) => setActivity(a.id, { name: e.target.value })}
@@ -740,49 +756,40 @@ function PlanTab() {
                   )}
                 </Card>
               ))}
+              {items.length === 0 && (
+                <p className="px-1 text-sm text-muted-foreground">
+                  {group.kind === "restaurant"
+                    ? "Noch nichts fürs Essen notiert."
+                    : "Noch keine Aktivität geplant."}
+                </p>
+              )}
+              {/* Der Knopf steht IN der Gruppe, nicht darunter. Vorher hingen
+                  beide Knoepfe am Ende der letzten Gruppe — unter der
+                  Ueberschrift "Essen & Trinken" stand dann "Aktivität
+                  hinzufügen". */}
+              <AddButton
+                label={group.addLabel}
+                onClick={() =>
+                  update({
+                    activities: [
+                      ...trip.activities,
+                      {
+                        id: uid(),
+                        name: "",
+                        kind: group.kind,
+                        address: "",
+                        url: "",
+                        cost: 0,
+                        status: "offen",
+                        dueDate: "",
+                      },
+                    ],
+                  })
+                }
+              />
             </Fragment>
           );
         })}
-        <AddButton
-          label="Aktivität hinzufügen"
-          onClick={() =>
-            update({
-              activities: [
-                ...trip.activities,
-                {
-                  id: uid(),
-                  name: "",
-                  kind: "aktivitaet",
-                  address: "",
-                  url: "",
-                  cost: 0,
-                  status: "offen",
-                  dueDate: "",
-                },
-              ],
-            })
-          }
-        />
-        <AddButton
-          label="Restaurant hinzufügen"
-          onClick={() =>
-            update({
-              activities: [
-                ...trip.activities,
-                {
-                  id: uid(),
-                  name: "",
-                  kind: "restaurant",
-                  address: "",
-                  url: "",
-                  cost: 0,
-                  status: "offen",
-                  dueDate: "",
-                },
-              ],
-            })
-          }
-        />
 
         <SectionTitle>Gesamtkosten</SectionTitle>
         <Card>
@@ -802,6 +809,9 @@ function PlanTab() {
             </p>
             <p>
               Aktivitäten: <Money value={totals.activities} />
+            </p>
+            <p>
+              Restaurants: <Money value={totals.restaurants} />
             </p>
             <p className="pt-2 font-medium text-foreground">
               Bereits bezahlt: <Money value={totals.paid} /> · offen: <Money value={totals.open} />

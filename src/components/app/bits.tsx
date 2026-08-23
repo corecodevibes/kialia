@@ -13,7 +13,7 @@ import { inputClass } from "./AppShell";
 export function LinkList({
   links,
   onChange,
-  placeholder = "Link speichern (z. B. GetYourGuide, Restaurant …)",
+  placeholder = "Link einfügen",
 }: {
   links: LinkItem[];
   onChange: (links: LinkItem[]) => void;
@@ -56,28 +56,41 @@ export function LinkList({
           </button>
         </div>
       ))}
+      {/* Erst der Link, dann der Name.
+          Vorher stand das Namensfeld mit dem grossen Plus OBEN und die
+          eigentliche Adresse darunter — es sah aus, als fuege das Plus einen
+          Namen hinzu. Man hat aber den Link in der Zwischenablage, nicht den
+          Namen; der ist optional und wird sonst aus der Adresse abgeleitet. */}
       <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
-        <input
-          value={label}
-          onChange={(e) => setLabel(e.target.value)}
-          placeholder="Name"
-          className={inputClass}
-        />
-        <button
-          type="button"
-          onClick={add}
-          aria-label="Link hinzufügen"
-          className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground"
-        >
-          <Plus className="size-4" />
-        </button>
         <input
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && add()}
           placeholder={placeholder}
+          inputMode="url"
+          autoCapitalize="off"
+          autoCorrect="off"
           className={`${inputClass} col-span-2`}
         />
+        <input
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && add()}
+          placeholder="Name (optional)"
+          className={inputClass}
+        />
+        <button
+          type="button"
+          onClick={add}
+          disabled={!url.trim()}
+          aria-label="Link hinzufügen"
+          // Kupfer statt Violett: das hier TUT etwas (Link anlegen). Violett ist in
+          // dieser App der ausgewaehlte Zustand — Chips, Radios, aktive Tabs.
+          // Ein Knopf, der handelt, gehoert auf die Handlungsfarbe.
+          className="acrylic-warm grid size-11 shrink-0 place-items-center rounded-xl text-background disabled:opacity-40"
+        >
+          <Plus className="size-4" />
+        </button>
       </div>
     </div>
   );
