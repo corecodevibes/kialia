@@ -183,7 +183,20 @@ function PlanTab() {
                   className={inputClass}
                 />
               </Field>
-              <Attachments ownerId={t.id} label="Buchung / Ticket" />
+              <Attachments
+                ownerId={t.id}
+                label="Buchung / Ticket"
+                currency={trip.currency || "EUR"}
+                onExtract={(f) =>
+                  setTransport(t.id, {
+                    ...(f.title ? { label: f.title } : {}),
+                    ...(f.startDate ? { date: f.startDate } : {}),
+                    ...(f.amount != null ? { cost: f.amount } : {}),
+                    ...(f.currency ? { currency: f.currency } : {}),
+                    ...(f.bookingRef ? { note: `Buchung ${f.bookingRef}` } : {}),
+                  })
+                }
+              />
               {t.url && (
                 <a
                   href={safeHref(t.url)}
@@ -246,7 +259,21 @@ function PlanTab() {
                 destination={trip.destination}
                 onChange={(v) => setStay(s.id, { address: v })}
               />
-              <Attachments ownerId={s.id} label="Buchung / Bestätigung" />
+              <Attachments
+                ownerId={s.id}
+                label="Buchung / Bestätigung"
+                currency={trip.currency || "EUR"}
+                onExtract={(f) =>
+                  setStay(s.id, {
+                    ...(f.title ? { name: f.title } : {}),
+                    ...(f.address ? { address: f.address } : {}),
+                    ...(f.startDate ? { from: f.startDate } : {}),
+                    ...(f.endDate ? { to: f.endDate } : {}),
+                    ...(f.amount != null ? { cost: f.amount } : {}),
+                    ...(f.currency ? { currency: f.currency } : {}),
+                  })
+                }
+              />
               <FieldRow>
                 <Field label="Von">
                   <input
@@ -453,7 +480,19 @@ function PlanTab() {
                     destination={trip.destination}
                     onChange={(v) => setActivity(a.id, { address: v })}
                   />
-                  <Attachments ownerId={a.id} label="Ticket / Bestätigung" />
+                  <Attachments
+                    ownerId={a.id}
+                    label="Ticket / Bestätigung"
+                    currency={trip.currency || "EUR"}
+                    onExtract={(f) =>
+                      setActivity(a.id, {
+                        ...(f.title ? { name: f.title } : {}),
+                        ...(f.address ? { address: f.address } : {}),
+                        ...(f.amount != null ? { cost: f.amount } : {}),
+                        ...(f.currency ? { currency: f.currency } : {}),
+                      })
+                    }
+                  />
                 </div>
               </div>
               <div className="pt-5">

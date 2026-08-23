@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { FileText, Image as ImageIcon, Paperclip, Trash2 } from "lucide-react";
+import { scanReceipt, type ScannedFields } from "@/lib/scan";
+import { ScanSheet } from "@/components/app/scan-sheet";
 import {
   addAttachment,
   deleteAttachment,
@@ -17,7 +19,21 @@ import {
  * über eine Objekt-URL, die danach wieder freigegeben wird — sonst hält der
  * Browser jede angesehene Datei im Speicher.
  */
-export function Attachments({ ownerId, label }: { ownerId: string; label: string }) {
+export function Attachments({
+  ownerId,
+  label,
+  currency = "EUR",
+  onExtract,
+}: {
+  ownerId: string;
+  label: string;
+  currency?: string;
+  /** Uebernimmt die bestaetigten Felder. Ohne Handler kein Scan-Knopf. */
+  onExtract?: ((fields: Partial<ScannedFields>) => void) | undefined;
+}) {
+  const [scanning, setScanning] = useState<string | null>(null);
+  const [scanned, setScanned] = useState<ScannedFields | null>(null);
+  const [scanError, setScanError] = useState<string | null>(null);
   const [items, setItems] = useState<AttachmentInfo[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -57,6 +73,21 @@ export function Attachments({ ownerId, label }: { ownerId: string; label: string
     setTimeout(() => URL.revokeObjectURL(url), 60_000);
   }
 
+  async function scan(a: AttachmentInfo) {
+    setScanError(null);
+    setScanned(null);
+    setScanning(a.id);
+    const blob = await getAttachmentBlob(a.id);
+    if (!blob) {
+      setScanning(null);
+      return;
+    }
+    const res = await scanReceipt(blob, a.type);
+    setScanning(null);
+    if (res.ok) setScanned(res.fields);
+    else setScanError(res.error);
+  }
+
   async function remove(id: string) {
     await deleteAttachment(id);
     setItems(await listAttachments(ownerId));
@@ -85,6 +116,16 @@ export function Attachments({ ownerId, label }: { ownerId: string; label: string
               <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
                 {formatBytes(a.size)}
               </span>
+              {onExtract && a.type.startsWith("image/") && (
+                <button
+                  type="button"
+                  onClick={() => scan(a)}
+                  disabled={scanning === a.id}
+                  className="shrink-0 rounded-lg bg-card px-2 py-1 text-[10px] font-semibold disabled:opacity-60"
+                >
+                  {scanning === a.id ? "liest …" : "auslesen"}
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => remove(a.id)}
@@ -118,6 +159,19 @@ export function Attachments({ ownerId, label }: { ownerId: string; label: string
       />
 
       {error && <p className="mt-1.5 text-xs text-destructive">{error}</p>}
+      {scanError && <p className="mt-1.5 text-xs text-destructive">{scanError}</p>}
+
+      {scanned && onExtract && (
+        <ScanSheet
+          fields={scanned}
+          currency={currency}
+          onApply={(accepted) => {
+            onExtract(accepted);
+            setScanned(null);
+          }}
+          onDismiss={() => setScanned(null)}
+        />
+      )}
     </div>
   );
 }
