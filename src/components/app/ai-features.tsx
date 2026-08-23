@@ -25,6 +25,11 @@ const FEATURES: { title: string; where: string; note: string }[] = [
     note: "Richten sich nach eurem Reiseprofil aus den Einstellungen. Ungeprüfte Anregungen, keine Empfehlungen.",
   },
   {
+    title: "Inventar für den Schadensfall",
+    where: "Packliste",
+    note: "Fotos pro Gegenstand, exportierbar als eine Datei, die ohne App und ohne Netz lesbar bleibt. Kein KI-Einsatz — reines Festhalten.",
+  },
+  {
     title: "Kosten schätzen",
     where: "Plan · Essen pro Tag",
     note: "Größenordnung als Spanne, nie als exakter Betrag.",

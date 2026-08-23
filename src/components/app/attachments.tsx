@@ -24,12 +24,15 @@ export function Attachments({
   label,
   currency = "EUR",
   onExtract,
+  onCountChange,
 }: {
   ownerId: string;
   label: string;
   currency?: string;
   /** Uebernimmt die bestaetigten Felder. Ohne Handler kein Scan-Knopf. */
   onExtract?: ((fields: Partial<ScannedFields>) => void) | undefined;
+  /** Meldet die Anzahl nach oben, damit eine Liste sie anzeigen kann. */
+  onCountChange?: ((count: number) => void) | undefined;
 }) {
   const [scanning, setScanning] = useState<string | null>(null);
   const [scanned, setScanned] = useState<ScannedFields | null>(null);
@@ -48,6 +51,19 @@ export function Attachments({
       cancelled = true;
     };
   }, [ownerId]);
+
+  // Die Zahl geht als Effekt nach oben, nicht aus den Handlern heraus: so
+  // stimmt sie auch nach dem ersten Laden und nach dem Loeschen, ohne dass
+  // jeder Aufrufer daran denken muss.
+  //
+  // Der Rueckruf liegt in einem Ref, weil Aufrufer ihn als Pfeilfunktion
+  // schreiben — die ist bei jedem Rendern neu. Haenge der Effekt daran,
+  // liefe er bei jedem Rendern mit, statt nur wenn sich die Zahl aendert.
+  const countCb = useRef(onCountChange);
+  countCb.current = onCountChange;
+  useEffect(() => {
+    countCb.current?.(items.length);
+  }, [items.length]);
 
   async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);

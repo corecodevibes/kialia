@@ -97,3 +97,52 @@ export function formatBytes(bytes: number): string {
   if (kb < 1024) return `${Math.round(kb)} KB`;
   return `${(kb / 1024).toFixed(1).replace(".", ",")} MB`;
 }
+
+/**
+ * Anzahl der Anhaenge fuer viele Posten auf einmal.
+ *
+ * Die Packliste hat schnell 60 Eintraege. Pro Eintrag einzeln zu fragen
+ * hiesse 60 Transaktionen beim Oeffnen der Seite; einmal alles lesen und
+ * zaehlen ist eine.
+ */
+export async function countByOwners(ownerIds: string[]): Promise<Record<string, number>> {
+  if (ownerIds.length === 0) return {};
+  const wanted = new Set(ownerIds);
+  const all = await tx<Attachment[]>("readonly", (s) => s.getAll());
+  const out: Record<string, number> = {};
+  for (const a of all) {
+    if (wanted.has(a.ownerId)) out[a.ownerId] = (out[a.ownerId] ?? 0) + 1;
+  }
+  return out;
+}
+
+/** Alle Anhaenge mehrerer Posten samt Blob — fuer den Inventar-Export. */
+export async function loadForOwners(ownerIds: string[]): Promise<Attachment[]> {
+  if (ownerIds.length === 0) return [];
+  const wanted = new Set(ownerIds);
+  const all = await tx<Attachment[]>("readonly", (s) => s.getAll());
+  return all.filter((a) => wanted.has(a.ownerId)).sort((a, b) => (a.addedAt < b.addedAt ? -1 : 1));
+}
+
+/**
+ * Bittet den Browser, diesen Speicher nicht zu verdraengen.
+ *
+ * Ohne das gilt IndexedDB als "best effort": wird der Geraetespeicher knapp,
+ * loescht der Browser ihn ohne Rueckfrage. Fuer Belege waere das aergerlich,
+ * fuer eine Inventarliste, die im Schadensfall zaehlen soll, waere es fatal —
+ * und man merkte es genau dann, wenn man sie braucht.
+ *
+ * Die Antwort ist eine Bitte, keine Garantie. Safari knuepft sie an das
+ * Hinzufuegen zum Homescreen, Chrome an die bisherige Nutzung. Deshalb wird
+ * das Ergebnis zurueckgegeben statt verschluckt: die Oberflaeche kann sagen,
+ * woran man ist.
+ */
+export async function requestPersistence(): Promise<boolean> {
+  try {
+    if (!navigator.storage?.persist) return false;
+    if (await navigator.storage.persisted()) return true;
+    return await navigator.storage.persist();
+  } catch {
+    return false;
+  }
+}

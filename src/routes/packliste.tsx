@@ -1,11 +1,25 @@
 import { useMyName } from "@/lib/auth";
+import { Attachments } from "@/components/app/attachments";
+import { countByOwners, requestPersistence } from "@/lib/attachments";
+import { downloadInventory, formatBytes } from "@/lib/inventory";
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { Check, Plus, Trash2, Undo2, X, ChevronDown, ChevronRight } from "lucide-react";
+import { Fragment, useEffect, useState } from "react";
+import {
+  Camera,
+  Check,
+  ChevronDown,
+  ChevronRight,
+  Plus,
+  ShieldCheck,
+  Trash2,
+  Undo2,
+  X,
+} from "lucide-react";
 import {
   AppShell,
   Card,
   CardTitle,
+  PrimaryButton,
   Field,
   chipClass,
   inputClass,
@@ -62,11 +76,53 @@ function PackingTab() {
    * Die Position wird mitgesichert, damit der Eintrag genau dorthin
    * zurueckkommt, wo er stand — sonst landet er unten und man sucht ihn.
    */
+  const [openPhotos, setOpenPhotos] = useState<string | null>(null);
+  const [photoCounts, setPhotoCounts] = useState<Record<string, number>>({});
+  const [exporting, setExporting] = useState(false);
+  const [exportMsg, setExportMsg] = useState<string | null>(null);
   const [undoItem, setUndoItem] = useState<
     Record<string, { item: PackItem; index: number } | undefined>
   >({});
   const [undoCat, setUndoCat] = useState<{ cat: PackCategory; index: number } | null>(null);
   const done = categories.reduce((s, c) => s + c.items.filter((i) => i.done).length, 0);
+
+  const allItemIds = trip.packing.flatMap((c) => c.items.map((i) => i.id)).join(",");
+
+  // Einmal alles zaehlen statt pro Eintrag zu fragen — die Liste hat schnell
+  // sechzig Zeilen.
+  useEffect(() => {
+    let cancelled = false;
+    const ids = allItemIds ? allItemIds.split(",") : [];
+    countByOwners(ids)
+      .then((c) => !cancelled && setPhotoCounts(c))
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [allItemIds]);
+
+  async function exportInventory() {
+    setExporting(true);
+    setExportMsg(null);
+    try {
+      // Erst jetzt fragen, nicht beim Start: die Bitte ergibt nur Sinn, wenn
+      // gerade etwas entsteht, das bleiben soll.
+      const persistent = await requestPersistence();
+      const r = await downloadInventory(trip);
+      setExportMsg(
+        r.items === 0
+          ? "Noch kein Foto hinterlegt — tippe das Kamerasymbol neben einem Eintrag."
+          : `${r.items} Gegenstände mit ${r.photos} Fotos, ${formatBytes(r.bytes)}.` +
+              (persistent
+                ? ""
+                : " Hinweis: Der Browser sichert den lokalen Speicher nicht dauerhaft zu — bewahre die Datei auf."),
+      );
+    } catch {
+      setExportMsg("Der Export hat nicht geklappt.");
+    } finally {
+      setExporting(false);
+    }
+  }
 
   function setCats(fn: (cats: PackCategory[]) => PackCategory[]) {
     update((t) => ({ packing: fn(t.packing) }));
@@ -196,106 +252,145 @@ function PackingTab() {
                       Die Reihenfolge innerhalb der Gruppen bleibt erhalten. */}
                   {[...c.items.filter((i) => !i.done), ...c.items.filter((i) => i.done)].map(
                     (item) => (
-                      <div
-                        key={item.id}
-                        className={`flex items-center gap-2 rounded-xl px-1.5 py-0.5 transition ${
-                          item.done ? "bg-primary/8" : ""
-                        }`}
-                      >
-                        <button
-                          type="button"
-                          aria-label={item.done ? "Als offen markieren" : "Als gepackt markieren"}
-                          onClick={() =>
-                            setCats((cats) =>
-                              cats.map((x) =>
-                                x.id === c.id
-                                  ? {
-                                      ...x,
-                                      items: x.items.map((i) =>
-                                        i.id === item.id ? { ...i, done: !i.done } : i,
-                                      ),
-                                    }
-                                  : x,
-                              ),
-                            )
-                          }
-                          className={`flex size-6 shrink-0 items-center justify-center rounded-lg border transition ${
-                            item.done
-                              ? "border-primary bg-primary text-primary-foreground"
-                              : "border-border"
+                      <Fragment key={item.id}>
+                        <div
+                          className={`flex items-center gap-2 rounded-xl px-1.5 py-0.5 transition ${
+                            item.done ? "bg-primary/8" : ""
                           }`}
                         >
-                          {item.done && <Check className="size-3.5" />}
-                        </button>
-                        <input
-                          value={item.text}
-                          onChange={(e) =>
-                            setCats((cats) =>
-                              cats.map((x) =>
-                                x.id === c.id
-                                  ? {
-                                      ...x,
-                                      items: x.items.map((i) =>
-                                        i.id === item.id ? { ...i, text: e.target.value } : i,
-                                      ),
-                                    }
-                                  : x,
-                              ),
-                            )
-                          }
-                          className={`${rowInput} min-w-0 flex-1 text-foreground/90 ${
-                            item.done ? "text-muted-foreground" : ""
-                          }`}
-                        />
-                        {/* Auswahl statt Freitext: die Mitreisenden stehen im
+                          <button
+                            type="button"
+                            aria-label={item.done ? "Als offen markieren" : "Als gepackt markieren"}
+                            onClick={() =>
+                              setCats((cats) =>
+                                cats.map((x) =>
+                                  x.id === c.id
+                                    ? {
+                                        ...x,
+                                        items: x.items.map((i) =>
+                                          i.id === item.id ? { ...i, done: !i.done } : i,
+                                        ),
+                                      }
+                                    : x,
+                                ),
+                              )
+                            }
+                            className={`flex size-6 shrink-0 items-center justify-center rounded-lg border transition ${
+                              item.done
+                                ? "border-primary bg-primary text-primary-foreground"
+                                : "border-border"
+                            }`}
+                          >
+                            {item.done && <Check className="size-3.5" />}
+                          </button>
+                          <input
+                            value={item.text}
+                            onChange={(e) =>
+                              setCats((cats) =>
+                                cats.map((x) =>
+                                  x.id === c.id
+                                    ? {
+                                        ...x,
+                                        items: x.items.map((i) =>
+                                          i.id === item.id ? { ...i, text: e.target.value } : i,
+                                        ),
+                                      }
+                                    : x,
+                                ),
+                              )
+                            }
+                            className={`${rowInput} min-w-0 flex-1 text-foreground/90 ${
+                              item.done ? "text-muted-foreground" : ""
+                            }`}
+                          />
+                          {/* Auswahl statt Freitext: die Mitreisenden stehen im
                           Feld "Mit wem?" der Reise, niemand soll sie hier
                           erneut tippen. */}
-                        <select
-                          value={item.who}
-                          aria-label="Wer packt das ein?"
-                          onChange={(e) =>
-                            setCats((cats) =>
-                              cats.map((x) =>
-                                x.id === c.id
-                                  ? {
-                                      ...x,
-                                      items: x.items.map((i) =>
-                                        i.id === item.id ? { ...i, who: e.target.value } : i,
-                                      ),
-                                    }
-                                  : x,
-                              ),
-                            )
-                          }
-                          className={`${rowInput} w-[4.75rem] shrink-0 appearance-none px-2 text-center text-xs font-semibold text-[#2F2A3E]`}
-                          style={item.who ? { background: personColor(trip, item.who) } : undefined}
-                        >
-                          <option value="">Alle</option>
-                          {people.map((n) => (
-                            <option key={n} value={n}>
-                              {n}
-                            </option>
-                          ))}
-                        </select>
-                        <button
-                          type="button"
-                          aria-label="Eintrag löschen"
-                          onClick={() => {
-                            const idx = c.items.findIndex((i) => i.id === item.id);
-                            setUndoItem((u) => ({ ...u, [c.id]: { item, index: idx } }));
-                            setCats((cats) =>
-                              cats.map((x) =>
-                                x.id === c.id
-                                  ? { ...x, items: x.items.filter((i) => i.id !== item.id) }
-                                  : x,
-                              ),
-                            );
-                          }}
-                          className="text-muted-foreground transition hover:text-destructive"
-                        >
-                          <X className="size-4" />
-                        </button>
-                      </div>
+                          <select
+                            value={item.who}
+                            aria-label="Wer packt das ein?"
+                            onChange={(e) =>
+                              setCats((cats) =>
+                                cats.map((x) =>
+                                  x.id === c.id
+                                    ? {
+                                        ...x,
+                                        items: x.items.map((i) =>
+                                          i.id === item.id ? { ...i, who: e.target.value } : i,
+                                        ),
+                                      }
+                                    : x,
+                                ),
+                              )
+                            }
+                            className={`${rowInput} w-[4.75rem] shrink-0 appearance-none px-2 text-center text-xs font-semibold text-[#2F2A3E]`}
+                            style={
+                              item.who ? { background: personColor(trip, item.who) } : undefined
+                            }
+                          >
+                            <option value="">Alle</option>
+                            {people.map((n) => (
+                              <option key={n} value={n}>
+                                {n}
+                              </option>
+                            ))}
+                          </select>
+                          {/* Foto-Knopf, nicht Foto-Streifen: 60 Eintraege mit
+                            offenen Bildleisten waeren unbenutzbar. Die Zahl
+                            am Symbol sagt, ob etwas dahinterliegt. */}
+                          <button
+                            type="button"
+                            aria-label={
+                              photoCounts[item.id]
+                                ? `${photoCounts[item.id]} Fotos – öffnen`
+                                : "Foto hinzufügen"
+                            }
+                            aria-expanded={openPhotos === item.id}
+                            onClick={() => setOpenPhotos((v) => (v === item.id ? null : item.id))}
+                            className={`flex shrink-0 items-center gap-0.5 transition ${
+                              photoCounts[item.id] ? "text-primary" : "text-muted-foreground"
+                            } hover:text-primary`}
+                          >
+                            <Camera className="size-4" />
+                            {photoCounts[item.id] ? (
+                              <span className="text-[10px] font-bold tabular-nums">
+                                {photoCounts[item.id]}
+                              </span>
+                            ) : null}
+                          </button>
+                          <button
+                            type="button"
+                            aria-label="Eintrag löschen"
+                            onClick={() => {
+                              const idx = c.items.findIndex((i) => i.id === item.id);
+                              setUndoItem((u) => ({ ...u, [c.id]: { item, index: idx } }));
+                              setCats((cats) =>
+                                cats.map((x) =>
+                                  x.id === c.id
+                                    ? { ...x, items: x.items.filter((i) => i.id !== item.id) }
+                                    : x,
+                                ),
+                              );
+                            }}
+                            className="text-muted-foreground transition hover:text-destructive"
+                          >
+                            <X className="size-4" />
+                          </button>
+                        </div>
+                        {openPhotos === item.id && (
+                          <div className="mt-1 pl-8">
+                            <Attachments
+                              ownerId={item.id}
+                              label="Fotos für den Schadensfall"
+                              onCountChange={(n) =>
+                                setPhotoCounts((c) =>
+                                  c[item.id] === n ? c : { ...c, [item.id]: n },
+                                )
+                              }
+                            />
+                          </div>
+                        )}
+                      </Fragment>
                     ),
                   )}
 
@@ -378,6 +473,30 @@ function PackingTab() {
               </button>
             </div>
           </Field>
+        </Card>
+
+        {/* Der Export ist der eigentliche Zweck der Fotos. Ohne ihn laegen sie
+            genau auf dem Geraet, dessen Verlust der Grund fuer die Meldung
+            waere — ein Beweis, der mit dem Beweisstueck verschwindet. */}
+        <Card>
+          <div className="flex items-start gap-2">
+            <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />
+            <div className="min-w-0 flex-1">
+              <CardTitle>Inventar sichern</CardTitle>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Eine Datei mit allen Fotos und Bezeichnungen — lesbar ohne App und ohne Netz.
+                Speichere sie irgendwo, wo sie den Verlust des Handys übersteht.
+              </p>
+            </div>
+          </div>
+          <PrimaryButton onClick={exportInventory} disabled={exporting} className="mt-3">
+            {exporting ? "Wird erstellt …" : "Inventar herunterladen"}
+          </PrimaryButton>
+          {exportMsg && (
+            <p role="status" className="mt-2 text-xs text-muted-foreground">
+              {exportMsg}
+            </p>
+          )}
         </Card>
       </div>
     </AppShell>
