@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Check, Plus, Trash2, ChevronDown, ChevronRight } from "lucide-react";
+import { Check, Plus, Trash2, X, ChevronDown, ChevronRight } from "lucide-react";
 import {
   AppShell,
   Card,
@@ -10,7 +10,14 @@ import {
   inputClass,
   NoTripYet,
 } from "@/components/app/AppShell";
-import { kidsPacking, petsPacking, uid, useTrip, type PackCategory } from "@/lib/trip-store";
+import {
+  kidsPacking,
+  petsPacking,
+  uid,
+  useTrip,
+  type PackCategory,
+  travellerNames,
+} from "@/lib/trip-store";
 
 export const Route = createFileRoute("/packliste")({
   head: () => ({
@@ -43,6 +50,7 @@ function PackingTab() {
 
   const categories = trip.packing;
   const total = categories.reduce((s, c) => s + c.items.length, 0);
+  const people = travellerNames(trip);
   const done = categories.reduce((s, c) => s + c.items.filter((i) => i.done).length, 0);
 
   function setCats(fn: (cats: PackCategory[]) => PackCategory[]) {
@@ -144,88 +152,110 @@ function PackingTab() {
 
               {isOpen && (
                 <div className="mt-3 space-y-2">
-                  {c.items.map((item) => (
-                    <div key={item.id} className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        aria-label={item.done ? "Als offen markieren" : "Als gepackt markieren"}
-                        onClick={() =>
-                          setCats((cats) =>
-                            cats.map((x) =>
-                              x.id === c.id
-                                ? {
-                                    ...x,
-                                    items: x.items.map((i) =>
-                                      i.id === item.id ? { ...i, done: !i.done } : i,
-                                    ),
-                                  }
-                                : x,
-                            ),
-                          )
-                        }
-                        className={`flex size-6 shrink-0 items-center justify-center rounded-lg border transition ${
-                          item.done
-                            ? "border-primary bg-primary text-primary-foreground"
-                            : "border-border"
+                  {/* Erledigtes wandert nach unten wie auf einer
+                      Einkaufsliste — was noch fehlt, steht oben und im Blick.
+                      Die Reihenfolge innerhalb der Gruppen bleibt erhalten. */}
+                  {[...c.items.filter((i) => !i.done), ...c.items.filter((i) => i.done)].map(
+                    (item) => (
+                      <div
+                        key={item.id}
+                        className={`flex items-center gap-2 rounded-xl px-1.5 py-0.5 transition ${
+                          item.done ? "bg-primary/8" : ""
                         }`}
                       >
-                        {item.done && <Check className="size-3.5" />}
-                      </button>
-                      <input
-                        value={item.text}
-                        onChange={(e) =>
-                          setCats((cats) =>
-                            cats.map((x) =>
-                              x.id === c.id
-                                ? {
-                                    ...x,
-                                    items: x.items.map((i) =>
-                                      i.id === item.id ? { ...i, text: e.target.value } : i,
-                                    ),
-                                  }
-                                : x,
-                            ),
-                          )
-                        }
-                        className={`${rowInput} min-w-0 flex-1 ${item.done ? "text-muted-foreground line-through" : ""}`}
-                      />
-                      <input
-                        value={item.who}
-                        onChange={(e) =>
-                          setCats((cats) =>
-                            cats.map((x) =>
-                              x.id === c.id
-                                ? {
-                                    ...x,
-                                    items: x.items.map((i) =>
-                                      i.id === item.id ? { ...i, who: e.target.value } : i,
-                                    ),
-                                  }
-                                : x,
-                            ),
-                          )
-                        }
-                        placeholder="Wer?"
-                        className={`${rowInput} w-14 shrink-0 px-2 text-xs`}
-                      />
-                      <button
-                        type="button"
-                        aria-label="Eintrag löschen"
-                        onClick={() =>
-                          setCats((cats) =>
-                            cats.map((x) =>
-                              x.id === c.id
-                                ? { ...x, items: x.items.filter((i) => i.id !== item.id) }
-                                : x,
-                            ),
-                          )
-                        }
-                        className="text-muted-foreground transition hover:text-destructive"
-                      >
-                        <Trash2 className="size-4" />
-                      </button>
-                    </div>
-                  ))}
+                        <button
+                          type="button"
+                          aria-label={item.done ? "Als offen markieren" : "Als gepackt markieren"}
+                          onClick={() =>
+                            setCats((cats) =>
+                              cats.map((x) =>
+                                x.id === c.id
+                                  ? {
+                                      ...x,
+                                      items: x.items.map((i) =>
+                                        i.id === item.id ? { ...i, done: !i.done } : i,
+                                      ),
+                                    }
+                                  : x,
+                              ),
+                            )
+                          }
+                          className={`flex size-6 shrink-0 items-center justify-center rounded-lg border transition ${
+                            item.done
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "border-border"
+                          }`}
+                        >
+                          {item.done && <Check className="size-3.5" />}
+                        </button>
+                        <input
+                          value={item.text}
+                          onChange={(e) =>
+                            setCats((cats) =>
+                              cats.map((x) =>
+                                x.id === c.id
+                                  ? {
+                                      ...x,
+                                      items: x.items.map((i) =>
+                                        i.id === item.id ? { ...i, text: e.target.value } : i,
+                                      ),
+                                    }
+                                  : x,
+                              ),
+                            )
+                          }
+                          className={`${rowInput} min-w-0 flex-1 ${
+                            item.done ? "text-muted-foreground" : ""
+                          }`}
+                        />
+                        {/* Auswahl statt Freitext: die Mitreisenden stehen im
+                          Feld "Mit wem?" der Reise, niemand soll sie hier
+                          erneut tippen. */}
+                        <select
+                          value={item.who}
+                          aria-label="Wer packt das ein?"
+                          onChange={(e) =>
+                            setCats((cats) =>
+                              cats.map((x) =>
+                                x.id === c.id
+                                  ? {
+                                      ...x,
+                                      items: x.items.map((i) =>
+                                        i.id === item.id ? { ...i, who: e.target.value } : i,
+                                      ),
+                                    }
+                                  : x,
+                              ),
+                            )
+                          }
+                          className={`${rowInput} w-[4.75rem] shrink-0 appearance-none px-2 text-xs`}
+                        >
+                          <option value="">Wer?</option>
+                          {people.map((n) => (
+                            <option key={n} value={n}>
+                              {n}
+                            </option>
+                          ))}
+                        </select>
+                        <button
+                          type="button"
+                          aria-label="Eintrag löschen"
+                          onClick={() =>
+                            setCats((cats) =>
+                              cats.map((x) =>
+                                x.id === c.id
+                                  ? { ...x, items: x.items.filter((i) => i.id !== item.id) }
+                                  : x,
+                              ),
+                            )
+                          }
+                          className="text-muted-foreground transition hover:text-destructive"
+                        >
+                          <X className="size-4" />
+                        </button>
+                      </div>
+                    ),
+                  )}
 
                   <button
                     type="button"

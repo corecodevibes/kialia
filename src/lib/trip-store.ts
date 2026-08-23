@@ -834,3 +834,23 @@ export function missingDiaryDays(trip: Trip): { day: number; date: string }[] {
   }
   return out;
 }
+
+/**
+ * Wer auf dieser Reise dabei ist.
+ *
+ * Aus dem Feld "Mit wem?" gelesen — es steht dort ohnehin schon, nur als
+ * freier Text. Getrennt wird an Komma, Schraegstrich, "und" und "&", weil
+ * Menschen genau so schreiben ("Annalina und Steffen").
+ *
+ * "Ich" steht immer vorn: die eigene Person ist der haeufigste Fall und soll
+ * nicht erst getippt werden muessen.
+ */
+export function travellerNames(trip: Trip): string[] {
+  const raw = (trip.companions ?? "")
+    .split(/,|\/|&|\bund\b/gi)
+    .map((v) => v.trim())
+    .filter(Boolean)
+    .filter((v) => v.toLowerCase() !== "ich");
+  return ["Ich", ...Array.from(new Set(raw))];
+}
+

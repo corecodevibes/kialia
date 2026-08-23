@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
   formatDateLong,
+  travellerNames,
   tripItinerary,
   mealsPerDay,
   missingDiaryDays,
@@ -421,5 +422,33 @@ describe("missingDiaryDays", () => {
 
   test("ohne Zeitraum wird nichts geraten", () => {
     expect(missingDiaryDays(tripWith({}))).toEqual([]);
+  });
+});
+
+describe("travellerNames", () => {
+  test("liest die Mitreisenden aus dem Freitext", () => {
+    expect(travellerNames(tripWith({ companions: "Annalina" }))).toEqual(["Ich", "Annalina"]);
+    expect(travellerNames(tripWith({ companions: "Annalina und Lena" }))).toEqual([
+      "Ich",
+      "Annalina",
+      "Lena",
+    ]);
+  });
+
+  test("trennt auch an Komma und Schrägstrich", () => {
+    expect(travellerNames(tripWith({ companions: "Ana, Ben / Cem" }))).toEqual([
+      "Ich",
+      "Ana",
+      "Ben",
+      "Cem",
+    ]);
+  });
+
+  test("führt 'Ich' nur einmal, egal wie es eingetippt wurde", () => {
+    expect(travellerNames(tripWith({ companions: "ich, Ana" }))).toEqual(["Ich", "Ana"]);
+  });
+
+  test("ohne Angabe bleibt nur 'Ich'", () => {
+    expect(travellerNames(tripWith({ companions: "" }))).toEqual(["Ich"]);
   });
 });
