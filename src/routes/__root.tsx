@@ -138,6 +138,22 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        {/* Streifen hinter der Statusleiste — an der Wurzel, nicht in der
+            Bildschirmhuelle.
+            `viewport-fit=cover` laesst Inhalt bis an den oberen Rand laufen,
+            damit der Verlauf bis zum Rand geht. Zurueckgeben muss man den
+            Abstand selbst. Er stand zuerst in AppShell und fehlte damit auf
+            Datenschutz und Impressum — im iOS-Simulator lief die Ueberschrift
+            dort unter die Uhrzeit. Es ist eine Eigenschaft des Geraets, nicht
+            eines Bildschirms, also gehoert er hierhin. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none fixed inset-x-0 top-0 z-[60] backdrop-blur-md print:hidden"
+          style={{
+            height: "env(safe-area-inset-top)",
+            background: "color-mix(in oklab, var(--background) 70%, transparent)",
+          }}
+        />
         <SplashScreen />
         {children}
         <Scripts />

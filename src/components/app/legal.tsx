@@ -12,7 +12,10 @@ import { ANBIETER, anbieterVollstaendig } from "@/lib/anbieter";
  */
 export function LegalPage({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-background px-5 py-8">
+    <div
+      className="min-h-screen bg-background px-5 py-8"
+      style={{ paddingTop: "calc(env(safe-area-inset-top) + 2rem)" }}
+    >
       <div className="mx-auto w-full max-w-2xl">
         <Link to="/" className="inline-flex items-center gap-2">
           <img src={logo} alt="" className="size-8 rounded-xl" />
