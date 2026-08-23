@@ -110,6 +110,8 @@ export type PackCategory = {
 
 export type Trip = {
   id: string;
+  /** Farbe je mitreisender Person, damit Zuordnungen ablesbar werden. */
+  personColors?: Record<string, string>;
   /** Die uuid in Supabase, sobald die Reise dort liegt. Leer = nur lokal. */
   remoteId?: string;
   /** Einladungscode der geteilten Reise. */
@@ -906,4 +908,39 @@ export function safeHref(url: string): string | undefined {
   } catch {
     return undefined;
   }
+}
+
+/* ---------------------------------------------------------------------------
+ * Farben der Mitreisenden
+ *
+ * Aus den Motivfarben der Marke. Bewusst NICHT alle sieben: Malve (#9986AB)
+ * und Lagune (#A57990) erreichen weder mit Tinte noch mit Papier die 4.5:1,
+ * die kleiner Text braucht — gemessen, nicht geschaetzt. Die sechs hier
+ * liegen zwischen 4.85:1 und 9.40:1 mit Tinte.
+ * ------------------------------------------------------------------------ */
+
+export const PERSON_COLORS = [
+  { key: "periwinkle", hex: "#8596DB", label: "Blau" },
+  { key: "rose", hex: "#C39FBB", label: "Rosé" },
+  { key: "apricot", hex: "#F59D55", label: "Apricot" },
+  { key: "amber", hex: "#F7C06D", label: "Bernstein" },
+  { key: "gold", hex: "#F6D176", label: "Gold" },
+  { key: "mist", hex: "#D1C8D0", label: "Nebel" },
+] as const;
+
+/**
+ * Die Farbe einer Person.
+ *
+ * Ohne Zuweisung entsteht sie aus der Position in der Reisegruppe — so hat
+ * jede Person von Anfang an eine Farbe, ohne dass jemand etwas einstellen
+ * muss. Wer will, aendert sie.
+ */
+export function personColor(trip: Trip, name: string): string {
+  const assigned = trip.personColors?.[name];
+  if (assigned) {
+    const hit = PERSON_COLORS.find((c) => c.key === assigned);
+    if (hit) return hit.hex;
+  }
+  const idx = travellerNames(trip).indexOf(name);
+  return PERSON_COLORS[(idx < 0 ? 0 : idx) % PERSON_COLORS.length]!.hex;
 }

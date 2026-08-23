@@ -13,6 +13,7 @@ import {
   inputClass,
   Money,
   NumberField,
+  PersonColors,
 } from "@/components/app/AppShell";
 import { flagFor } from "@/lib/country";
 import { countMembers, joinTrip } from "@/lib/trip-sync";
@@ -67,6 +68,7 @@ function HomeTab() {
   const [joinCode, setJoinCode] = useState("");
   const [joinMsg, setJoinMsg] = useState<string | null>(null);
   const [members, setMembers] = useState<number | null>(null);
+  const [draftColors, setDraftColors] = useState<Record<string, string>>({});
 
   // Bestaetigt sichtbar, dass das Teilen wirkt — sonst weiss niemand, ob der
   // Code angekommen ist.
@@ -106,8 +108,10 @@ function HomeTab() {
       endDate: draft.endDate,
       companions: draft.companions.trim(),
       travellers: draft.people || 1,
+      personColors: draftColors,
     });
     setDraft({ destination: "", startDate: "", endDate: "", companions: "", people: 2 });
+    setDraftColors({});
   }
   const days = tripDays(trip);
   const totals = tripTotals(trip);
@@ -206,7 +210,20 @@ function HomeTab() {
                     />
                   </Field>
                 </FieldRow>
+
+                <div className="mt-3">
+                  <PersonColors trip={trip} onChange={(c) => update({ personColors: c })} />
+                </div>
               </div>
+
+              {draft.companions.trim() && (
+                <div className="mt-3">
+                  <PersonColors
+                    trip={{ ...trip, companions: draft.companions, personColors: draftColors }}
+                    onChange={setDraftColors}
+                  />
+                </div>
+              )}
             </Card>
 
             <PrimaryButton type="submit" disabled={!draft.destination.trim()}>

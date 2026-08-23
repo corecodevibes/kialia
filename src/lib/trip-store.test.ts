@@ -7,7 +7,9 @@ import {
   missingDiaryDays,
   monthsUntil,
   nextDiaryDay,
+  PERSON_COLORS,
   parseLocalDate,
+  personColor,
   safeHref,
   savingsPlan,
   todayLocalISO,
@@ -489,5 +491,31 @@ describe("safeHref", () => {
   test("leer bleibt leer statt zu einem toten Link zu werden", () => {
     expect(safeHref("")).toBeUndefined();
     expect(safeHref("   ")).toBeUndefined();
+  });
+});
+
+describe("personColor", () => {
+  test("vergibt ohne Zuweisung Farben nach Position — jeder hat sofort eine", () => {
+    const t = tripWith({ companions: "Ana und Ben" });
+    const [ich, ana, ben] = travellerNames(t);
+    expect(personColor(t, ich!)).toBe(PERSON_COLORS[0]!.hex);
+    expect(personColor(t, ana!)).toBe(PERSON_COLORS[1]!.hex);
+    expect(personColor(t, ben!)).toBe(PERSON_COLORS[2]!.hex);
+  });
+
+  test("eine ausdrückliche Zuweisung gewinnt", () => {
+    const t = tripWith({ companions: "Ana", personColors: { Ana: "gold" } });
+    expect(personColor(t, "Ana")).toBe("#F6D176");
+  });
+
+  test("eine unbekannte Zuweisung fällt auf die Position zurück statt zu leeren", () => {
+    const t = tripWith({ companions: "Ana", personColors: { Ana: "quietschgruen" } });
+    expect(personColor(t, "Ana")).toBe(PERSON_COLORS[1]!.hex);
+  });
+
+  test("mehr Personen als Farben laufen sauber um", () => {
+    const t = tripWith({ companions: "A, B, C, D, E, F, G" });
+    const names = travellerNames(t);
+    expect(personColor(t, names[6]!)).toBe(PERSON_COLORS[0]!.hex);
   });
 });

@@ -1,5 +1,12 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { eur, useTrip } from "@/lib/trip-store";
+import {
+  eur,
+  personColor,
+  travellerNames,
+  useTrip,
+  PERSON_COLORS,
+  type Trip,
+} from "@/lib/trip-store";
 import { flagFor } from "@/lib/country";
 import { mapsQuery, mapsUrl } from "@/lib/maps";
 import { startAutoSync, syncTrips, watchRemote } from "@/lib/trip-sync";
@@ -355,6 +362,69 @@ export function PlaceField({
         </a>
       </div>
     </Field>
+  );
+}
+
+/**
+ * Farben der Mitreisenden.
+ *
+ * Jede Person bekommt sofort eine Farbe aus der Position in der Gruppe —
+ * niemand muss etwas einstellen, damit es funktioniert. Wer will, tippt einen
+ * Namen an und waehlt eine andere.
+ *
+ * Der Sinn liegt nicht in der Kosmetik: in Packliste und Tagebuch steht sonst
+ * nur ein Name in grauer Schrift, und man muss ihn lesen. Eine Farbe erkennt
+ * man im Vorbeiscrollen.
+ */
+export function PersonColors({
+  trip,
+  onChange,
+}: {
+  trip: Trip;
+  onChange: (colors: Record<string, string>) => void;
+}) {
+  const [editing, setEditing] = useState<string | null>(null);
+  const people = travellerNames(trip);
+
+  if (people.length <= 1) return null;
+
+  return (
+    <div>
+      <span className="text-xs font-medium text-muted-foreground">Farben der Mitreisenden</span>
+      <div className="mt-1.5 flex flex-wrap gap-1.5">
+        {people.map((name) => (
+          <button
+            key={name}
+            type="button"
+            aria-expanded={editing === name}
+            onClick={() => setEditing(editing === name ? null : name)}
+            className="rounded-full px-3 py-1.5 text-xs font-semibold text-[#2F2A3E]"
+            style={{ background: personColor(trip, name) }}
+          >
+            {name}
+          </button>
+        ))}
+      </div>
+
+      {editing && (
+        <div className="mt-2 flex flex-wrap items-center gap-2 rounded-xl bg-secondary/50 p-2">
+          <span className="text-xs text-muted-foreground">Farbe für {editing}:</span>
+          {PERSON_COLORS.map((c) => (
+            <button
+              key={c.key}
+              type="button"
+              aria-label={c.label}
+              onClick={() => {
+                onChange({ ...(trip.personColors ?? {}), [editing]: c.key });
+                setEditing(null);
+              }}
+              className="size-6 rounded-full ring-1 ring-foreground/15"
+              style={{ background: c.hex }}
+            />
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 

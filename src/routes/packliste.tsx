@@ -17,6 +17,7 @@ import {
   useTrip,
   type PackCategory,
   travellerNames,
+  personColor,
 } from "@/lib/trip-store";
 
 export const Route = createFileRoute("/packliste")({
@@ -228,7 +229,10 @@ function PackingTab() {
                               ),
                             )
                           }
-                          className={`${rowInput} w-[4.75rem] shrink-0 appearance-none px-2 text-xs`}
+                          className={`${rowInput} w-[4.75rem] shrink-0 appearance-none px-2 text-xs ${
+                            item.who ? "font-semibold text-[#2F2A3E]" : ""
+                          }`}
+                          style={item.who ? { background: personColor(trip, item.who) } : undefined}
                         >
                           <option value="">Wer?</option>
                           {people.map((n) => (
