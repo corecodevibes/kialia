@@ -382,6 +382,7 @@ function PackingTab() {
                             <Attachments
                               ownerId={item.id}
                               label="Fotos für den Schadensfall"
+                              variant="gallery"
                               onCountChange={(n) =>
                                 setPhotoCounts((c) =>
                                   c[item.id] === n ? c : { ...c, [item.id]: n },

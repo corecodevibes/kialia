@@ -92,8 +92,10 @@ export async function downloadInventory(trip: Trip): Promise<InventoryResult> {
   h2{font-size:1.05rem;margin:0}
   .meta{color:#6C6480;font-size:.85rem;margin:.15rem 0 .75rem}
   .shots{display:flex;flex-wrap:wrap;gap:.75rem}
-  figure{margin:0;max-width:15rem}
-  img{width:100%;border-radius:.6rem;display:block}
+  figure{margin:0;width:13rem}
+  /* Feste Kachel mit object-fit: sonst springt jede Zeile in einer anderen
+     Hoehe und die Liste wirkt zusammengewuerfelt statt wie ein Dokument. */
+  img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:.6rem;display:block;background:#F0EAE4}
   figcaption{font-size:.72rem;color:#6C6480;margin-top:.25rem}
   footer{margin-top:2.5rem;border-top:1px solid #EFE8E2;padding-top:1rem;
          font-size:.78rem;color:#6C6480}

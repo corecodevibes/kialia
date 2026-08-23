@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { FileText, Image as ImageIcon, Paperclip, Trash2 } from "lucide-react";
+import { prepareImage } from "@/lib/image-prep";
 import { scanReceipt, type ScannedFields } from "@/lib/scan";
 import { ScanSheet } from "@/components/app/scan-sheet";
 import {
@@ -25,10 +26,18 @@ export function Attachments({
   currency = "EUR",
   onExtract,
   onCountChange,
+  variant = "list",
 }: {
   ownerId: string;
   label: string;
   currency?: string;
+  /**
+   * "list" zeigt Dateinamen — richtig bei Belegen, wo "Buchung_Aegean.pdf"
+   * die eigentliche Information ist. "gallery" zeigt quadratische Kacheln —
+   * richtig bei Gegenstaenden, wo man das Ding sehen will und der Dateiname
+   * "IMG_4471.jpg" nichts sagt.
+   */
+  variant?: "list" | "gallery";
   /** Uebernimmt die bestaetigten Felder. Ohne Handler kein Scan-Knopf. */
   onExtract?: ((fields: Partial<ScannedFields>) => void) | undefined;
   /** Meldet die Anzahl nach oben, damit eine Liste sie anzeigen kann. */
@@ -59,6 +68,35 @@ export function Attachments({
   // Der Rueckruf liegt in einem Ref, weil Aufrufer ihn als Pfeilfunktion
   // schreiben — die ist bei jedem Rendern neu. Haenge der Effekt daran,
   // liefe er bei jedem Rendern mit, statt nur wenn sich die Zahl aendert.
+  // Vorschauen nur in der Kachelansicht laden — in der Listenansicht braucht
+  // sie niemand, und jede Adresse haelt ihren Blob im Speicher fest.
+  const [thumbs, setThumbs] = useState<Record<string, string>>({});
+  useEffect(() => {
+    if (variant !== "gallery") return;
+    let cancelled = false;
+    const urls: string[] = [];
+    (async () => {
+      const next: Record<string, string> = {};
+      for (const a of items) {
+        if (!a.type.startsWith("image/")) continue;
+        const blob = await getAttachmentBlob(a.id);
+        if (!blob) continue;
+        const url = URL.createObjectURL(blob);
+        urls.push(url);
+        next[a.id] = url;
+      }
+      if (cancelled) {
+        urls.forEach((u) => URL.revokeObjectURL(u));
+        return;
+      }
+      setThumbs(next);
+    })();
+    return () => {
+      cancelled = true;
+      urls.forEach((u) => URL.revokeObjectURL(u));
+    };
+  }, [items, variant]);
+
   const countCb = useRef(onCountChange);
   countCb.current = onCountChange;
   useEffect(() => {
@@ -72,7 +110,10 @@ export function Attachments({
     setBusy(true);
     setError(null);
     try {
-      for (const f of files) await addAttachment(ownerId, f);
+      // Verkleinern passiert hier, nicht beim Export: dann liegt auch im
+      // Geraetespeicher nicht das Vielfache herum, und der Export bleibt
+      // schnell, weil er nichts mehr umrechnen muss.
+      for (const f of files) await addAttachment(ownerId, await prepareImage(f));
       setItems(await listAttachments(ownerId));
     } catch {
       setError("Speichern hat nicht geklappt. Ist der Gerätespeicher voll?");
@@ -113,7 +154,40 @@ export function Attachments({
     <div>
       <span className="text-xs font-medium text-muted-foreground">{label}</span>
 
-      {items.length > 0 && (
+      {variant === "gallery" && items.length > 0 && (
+        <ul className="mt-1.5 flex flex-wrap gap-1.5">
+          {items.map((a) => (
+            <li key={a.id} className="relative">
+              <button
+                type="button"
+                onClick={() => open(a)}
+                aria-label={`${a.name} öffnen`}
+                className="block size-20 overflow-hidden rounded-xl bg-secondary"
+              >
+                {thumbs[a.id] ? (
+                  // object-cover statt contain: das Ding fuellt die Kachel,
+                  // statt klein in einem grauen Rahmen zu schwimmen.
+                  <img src={thumbs[a.id]} alt="" className="size-full object-cover" />
+                ) : (
+                  <span className="grid size-full place-items-center">
+                    <ImageIcon className="size-5 text-muted-foreground" />
+                  </span>
+                )}
+              </button>
+              <button
+                type="button"
+                aria-label={`${a.name} entfernen`}
+                onClick={() => remove(a.id)}
+                className="absolute -right-1 -top-1 grid size-5 place-items-center rounded-full bg-card text-muted-foreground shadow-sm transition hover:text-destructive"
+              >
+                <Trash2 className="size-3" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {variant === "list" && items.length > 0 && (
         <ul className="mt-1.5 space-y-1.5">
           {items.map((a) => (
             <li key={a.id} className="flex items-center gap-2 rounded-xl bg-secondary/50 px-3 py-2">
