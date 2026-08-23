@@ -1,9 +1,16 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { personColor, travellerNames, useTrip, PERSON_COLORS, type Trip } from "@/lib/trip-store";
 import { flagFor } from "@/lib/country";
+import { takeInvite } from "@/lib/pending-invite";
 import { money } from "@/lib/currency";
 import { mapsQuery, mapsUrl } from "@/lib/maps";
-import { startAutoSync, syncTrips, syncTripsThrottled, watchRemote } from "@/lib/trip-sync";
+import {
+  joinTrip,
+  startAutoSync,
+  syncTrips,
+  syncTripsThrottled,
+  watchRemote,
+} from "@/lib/trip-sync";
 import { Home, Lightbulb, Wallet, BookOpen, Backpack, MapPin, Settings } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import logo from "@/assets/kialia-logo.png";
@@ -36,6 +43,27 @@ export function AppShell({
   // Abgleich läuft für alle Bildschirme an einer Stelle: einmal holen, danach
   // bei eigenen Änderungen hochladen und auf fremde horchen.
   const [syncError, setSyncError] = useState<string | null>(null);
+  const [joined, setJoined] = useState<string | null>(null);
+
+  // Einen ueber den Link mitgebrachten Code einloesen, sobald eine Anmeldung
+  // besteht. Genau hier — nicht auf der Anmeldeseite — weil zwischen Klick und
+  // fertigem Konto eine Bestaetigungsmail liegen kann.
+  useEffect(() => {
+    if (!session) return;
+    const code = takeInvite();
+    if (!code) return;
+    void (async () => {
+      const r = await joinTrip(code);
+      if (r.ok) {
+        setJoined(code);
+        await syncTrips();
+      } else {
+        // Der Code wird bewusst nicht zurueckgelegt: ein ungueltiger Code
+        // wuerde sonst bei jedem Start erneut scheitern.
+        setSyncError(r.error ?? "Beitreten hat nicht geklappt.");
+      }
+    })();
+  }, [session]);
 
   useEffect(() => {
     if (!session) return;
@@ -111,7 +139,18 @@ export function AppShell({
 
   return (
     <div className="acrylic-page min-h-screen">
-      <header className="relative z-30 px-5 pb-6 pt-6 print:hidden">
+      {/* Der obere Sicherheitsabstand fehlte.
+          `viewport-fit=cover` im Meta-Tag laesst den Inhalt bewusst unter die
+          Statusleiste laufen — damit der Verlauf bis zum Rand geht. Dann muss
+          man den Abstand aber selbst zurueckgeben, sonst liegen Uhrzeit, WLAN
+          und Akku ueber der ersten Zeile. Unten am Tab-Balken war das schon
+          beruecksichtigt, oben nicht; im Browser faellt es nicht auf, weil
+          dort die Adressleiste den Platz einnimmt — nur in der installierten
+          App. */}
+      <header
+        className="relative z-30 px-5 pb-6 pt-6 print:hidden"
+        style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.5rem)" }}
+      >
         <div className="mx-auto flex max-w-lg items-center gap-3">
           {/* Die Landesflagge ist auf jedem Bildschirm der Anker: sie sagt in
               einem Zeichen, um welche Reise es hier geht. Ohne erkanntes Land
@@ -169,6 +208,17 @@ export function AppShell({
       </header>
 
       <main className="relative z-10 mx-auto max-w-lg px-4 pb-28 pt-1 print:pb-0 print:pt-0">
+        {joined && (
+          <div
+            role="status"
+            className="mx-auto mb-3 max-w-md rounded-2xl bg-secondary px-4 py-2.5 text-xs"
+          >
+            <p className="font-semibold">Reise übernommen</p>
+            <p className="mt-0.5 text-muted-foreground">
+              Ihr plant jetzt gemeinsam — Plan, Budget, Packliste und Tagebuch.
+            </p>
+          </div>
+        )}
         {syncError && (
           <div
             role="status"

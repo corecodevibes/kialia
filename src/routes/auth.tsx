@@ -6,6 +6,7 @@ import { useSession } from "@/lib/auth";
 import { Field, inputClass } from "@/components/app/AppShell";
 import { authErrorMessage, type AuthMessage } from "@/lib/auth-errors";
 import logo from "@/assets/kialia-logo.png";
+import { peekInvite } from "@/lib/pending-invite";
 import { LegalFooter } from "@/components/app/legal";
 
 export const Route = createFileRoute("/auth")({
@@ -292,6 +293,12 @@ function AuthPage() {
 
 /** Logo, Wortmarke und Verlaufshintergrund — in jedem Zustand gleich. */
 function AuthFrame({ children }: { children: React.ReactNode }) {
+  // Der Code liegt schon im Speicher — abgelegt von der Wurzelroute, bevor
+  // hierher umgeleitet wurde. Nur nachsehen, nicht verbrauchen: eingeloest
+  // wird er erst, wenn eine Anmeldung besteht.
+  const [hasInvite, setHasInvite] = useState(false);
+  useEffect(() => setHasInvite(peekInvite() !== null), []);
+
   return (
     <div className="acrylic-page flex min-h-screen items-center justify-center px-5 py-10">
       <div className="relative z-10 w-full max-w-sm">
@@ -308,6 +315,17 @@ function AuthFrame({ children }: { children: React.ReactNode }) {
           </h1>
           <p className="mt-1 text-sm font-medium text-foreground/70">See more. travel further.</p>
         </div>
+        {/* Wer ueber einen Einladungslink kommt, wollte eine Reise sehen und
+            landet auf einer Anmeldemaske. Ohne diesen Satz wirkt der Link
+            kaputt und der Abbruch ist wahrscheinlicher als die Anmeldung. */}
+        {hasInvite && (
+          <div className="mb-4 rounded-2xl bg-card/80 px-4 py-3 text-center text-sm">
+            <p className="font-semibold">Du wurdest zu einer Reise eingeladen</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Leg kurz ein Konto an — danach ist die Reise sofort da.
+            </p>
+          </div>
+        )}
         {children}
         {/* Muss vor der Anmeldung erreichbar sein: wer wissen will, was mit
             seinen Daten passiert, soll dafuer kein Konto anlegen muessen —

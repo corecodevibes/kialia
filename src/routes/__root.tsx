@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SplashScreen } from "@/components/app/splash-screen";
+import { codeFromUrl, rememberInvite } from "@/lib/pending-invite";
 import {
   Outlet,
   Link,
@@ -147,6 +148,19 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  // Einen Code aus dem Link sofort sichern — noch bevor irgendeine Route auf
+  // die Anmeldung umleitet. Danach ist die Adresse weg, und mit ihr der Code.
+  useEffect(() => {
+    const code = codeFromUrl(window.location.search);
+    if (!code) return;
+    rememberInvite(code);
+    // Aus der Adresszeile nehmen, damit ein Code nicht in Verlaeufen,
+    // Lesezeichen oder geteilten Bildschirmfotos liegen bleibt.
+    const url = new URL(window.location.href);
+    url.searchParams.delete("reise");
+    window.history.replaceState({}, "", url.pathname + url.search + url.hash);
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

@@ -16,6 +16,8 @@ import {
   PersonColors,
 } from "@/components/app/AppShell";
 import { AiFeatures } from "@/components/app/ai-features";
+import { inviteUrl } from "@/lib/pending-invite";
+import { syncTrips } from "@/lib/trip-sync";
 import { flagFor } from "@/lib/country";
 import { countMembers, joinTrip } from "@/lib/trip-sync";
 import { COMMON_CURRENCIES, fetchRate } from "@/lib/currency";
@@ -66,6 +68,7 @@ function HomeTab() {
   } = useTrip();
   const fileInput = useRef<HTMLInputElement>(null);
   const [ioMsg, setIoMsg] = useState<string | null>(null);
+  const [sharePrep, setSharePrep] = useState<string>("idle");
   const [copied, setCopied] = useState(false);
   const [joinCode, setJoinCode] = useState("");
   const [joinMsg, setJoinMsg] = useState<string | null>(null);
@@ -510,7 +513,14 @@ function HomeTab() {
               <button
                 type="button"
                 onClick={async () => {
-                  const text = `Plane mit mir die Reise nach ${trip.destination} in kialia.\nCode: ${trip.inviteCode}\nhttps://kialia.app`;
+                  // Der Link traegt den Code. Vorher stand die Adresse und
+                  // der Code getrennt darin — der Empfaenger musste ihn
+                  // abtippen, und wer die App noch nicht hat, wusste nicht
+                  // wohin damit. Jetzt genuegt Antippen: wer schon angemeldet
+                  // ist, landet direkt in der Reise; wer nicht, legt ein Konto
+                  // an und die Reise ist danach da.
+                  const link = inviteUrl(trip.inviteCode ?? "", window.location.origin);
+                  const text = `Plane mit mir die Reise nach ${trip.destination} in kialia:\n${link}\n\nFalls du den Code von Hand brauchst: ${trip.inviteCode}`;
                   if (navigator.share) {
                     try {
                       await navigator.share({ title: "kialia", text });
@@ -534,10 +544,32 @@ function HomeTab() {
               )}
             </>
           ) : (
-            <p className="mt-1 text-xs text-muted-foreground">
-              Diese Reise liegt noch nur auf diesem Gerät. Sobald sie abgeglichen ist, erscheint
-              hier ein Code zum Teilen.
-            </p>
+            <>
+              {/* Vorher stand hier nur, dass man warten soll — ohne zu sagen,
+                  worauf, und ohne etwas tun zu koennen. Wer teilen will, will
+                  jetzt teilen. */}
+              <p className="mt-1 text-xs text-muted-foreground">
+                Diese Reise liegt noch nur auf diesem Gerät. Zum Teilen muss sie einmal auf den
+                Server — danach steht hier ein Link.
+              </p>
+              <PrimaryButton
+                onClick={async () => {
+                  setSharePrep("busy");
+                  const r = await syncTrips();
+                  setSharePrep(r.ok ? "idle" : (r.error ?? "Abgleich fehlgeschlagen"));
+                }}
+                disabled={sharePrep === "busy"}
+                className="mt-3"
+              >
+                {sharePrep === "busy" ? "Wird abgeglichen …" : "Jetzt zum Teilen freigeben"}
+              </PrimaryButton>
+              {sharePrep !== "idle" && sharePrep !== "busy" && (
+                <p role="status" className="mt-2 text-xs text-destructive">
+                  Das hat nicht geklappt: {sharePrep}. Ohne Netz geht es nicht — die Reise selbst
+                  bleibt aber vollständig auf dem Gerät.
+                </p>
+              )}
+            </>
           )}
         </Card>
 
