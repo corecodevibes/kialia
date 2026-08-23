@@ -363,68 +363,6 @@ function HomeTab() {
           </details>
         </Card>
 
-        <Card>
-          <CardTitle>Eure Reise</CardTitle>
-          <div className="mt-3 space-y-3">
-            <Field label="Wohin geht die Reise?">
-              <input
-                value={trip.destination}
-                onChange={(e) => update({ destination: e.target.value })}
-                placeholder="z. B. Portugal, Vietnam, Norwegen …"
-                className={inputClass}
-              />
-            </Field>
-            <FieldRow>
-              <Field label="Von">
-                <input
-                  type="date"
-                  value={trip.startDate}
-                  onChange={(e) => update({ startDate: e.target.value })}
-                  className={dateInputClass}
-                />
-              </Field>
-              <Field label="Bis">
-                <input
-                  type="date"
-                  value={trip.endDate}
-                  onChange={(e) => update({ endDate: e.target.value })}
-                  className={dateInputClass}
-                />
-              </Field>
-            </FieldRow>
-            <FieldRow>
-              <Field label="Mit wem?">
-                <input
-                  value={trip.companions}
-                  onChange={(e) => update({ companions: e.target.value })}
-                  placeholder="Partner, Familie …"
-                  className={inputClass}
-                />
-              </Field>
-              <Field label="Personen">
-                <NumberField
-                  value={trip.travellers}
-                  onChange={(n) => update({ travellers: n })}
-                  className={inputClass}
-                />
-              </Field>
-            </FieldRow>
-          </div>
-        </Card>
-
-        <Card>
-          <Stat
-            label="Reisedauer"
-            value={days > 0 ? `${days} Tage` : "–"}
-            hint={
-              <>
-                <Users className="mr-1 inline size-4" />
-                {trip.travellers} Personen · bisher geplant <Money value={totals.total} />
-              </>
-            }
-          />
-        </Card>
-
         {/* Teilen nach dem Muster eines Haushalts: ein Code, den man
             vorliest. Kein Konto-Suchen, keine E-Mail-Einladung — beides
             scheitert unterwegs an fehlendem Netz oder Tippfehlern. */}
@@ -490,6 +428,68 @@ function HomeTab() {
               hier ein Code zum Teilen.
             </p>
           )}
+        </Card>
+
+        <Card>
+          <CardTitle>Eure Reise</CardTitle>
+          <div className="mt-3 space-y-3">
+            <Field label="Wohin geht die Reise?">
+              <input
+                value={trip.destination}
+                onChange={(e) => update({ destination: e.target.value })}
+                placeholder="z. B. Portugal, Vietnam, Norwegen …"
+                className={inputClass}
+              />
+            </Field>
+            <FieldRow>
+              <Field label="Von">
+                <input
+                  type="date"
+                  value={trip.startDate}
+                  onChange={(e) => update({ startDate: e.target.value })}
+                  className={dateInputClass}
+                />
+              </Field>
+              <Field label="Bis">
+                <input
+                  type="date"
+                  value={trip.endDate}
+                  onChange={(e) => update({ endDate: e.target.value })}
+                  className={dateInputClass}
+                />
+              </Field>
+            </FieldRow>
+            <FieldRow>
+              <Field label="Mit wem?">
+                <input
+                  value={trip.companions}
+                  onChange={(e) => update({ companions: e.target.value })}
+                  placeholder="Partner, Familie …"
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="Personen">
+                <NumberField
+                  value={trip.travellers}
+                  onChange={(n) => update({ travellers: n })}
+                  className={inputClass}
+                />
+              </Field>
+            </FieldRow>
+          </div>
+        </Card>
+
+        <Card>
+          <Stat
+            label="Reisedauer"
+            value={days > 0 ? `${days} Tage` : "–"}
+            hint={
+              <>
+                <Users className="mr-1 inline size-4" />
+                {trip.travellers} Personen · bisher geplant <Money value={totals.total} />
+              </>
+            }
+          />
         </Card>
 
         <Card>

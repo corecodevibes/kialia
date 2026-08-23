@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Check, Plus, Trash2, X, ChevronDown, ChevronRight } from "lucide-react";
+import { Check, Plus, Trash2, Undo2, X, ChevronDown, ChevronRight } from "lucide-react";
 import {
   AppShell,
   Card,
@@ -18,6 +18,7 @@ import {
   type PackCategory,
   travellerNames,
   personColor,
+  type PackItem,
 } from "@/lib/trip-store";
 
 export const Route = createFileRoute("/packliste")({
@@ -52,6 +53,17 @@ function PackingTab() {
   const categories = trip.packing;
   const total = categories.reduce((s, c) => s + c.items.length, 0);
   const people = travellerNames(trip);
+
+  /**
+   * Zuletzt Geloeschtes, je Kategorie eines.
+   *
+   * Die Position wird mitgesichert, damit der Eintrag genau dorthin
+   * zurueckkommt, wo er stand — sonst landet er unten und man sucht ihn.
+   */
+  const [undoItem, setUndoItem] = useState<
+    Record<string, { item: PackItem; index: number } | undefined>
+  >({});
+  const [undoCat, setUndoCat] = useState<{ cat: PackCategory; index: number } | null>(null);
   const done = categories.reduce((s, c) => s + c.items.filter((i) => i.done).length, 0);
 
   function setCats(fn: (cats: PackCategory[]) => PackCategory[]) {
@@ -120,6 +132,25 @@ function PackingTab() {
           </div>
         </Card>
 
+        {undoCat && (
+          <button
+            type="button"
+            onClick={() => {
+              const saved = undoCat;
+              setCats((cats) => [
+                ...cats.slice(0, saved.index),
+                saved.cat,
+                ...cats.slice(saved.index),
+              ]);
+              setUndoCat(null);
+            }}
+            className="flex w-full items-center justify-center gap-1.5 rounded-2xl bg-secondary px-4 py-3 text-sm font-semibold transition hover:bg-secondary/70"
+          >
+            <Undo2 className="size-4" />„{undoCat.cat.name}“ mit {undoCat.cat.items.length}{" "}
+            Einträgen zurückholen
+          </button>
+        )}
+
         {categories.map((c) => {
           const isOpen = open[c.id] ?? true;
           const catDone = c.items.filter((i) => i.done).length;
@@ -136,7 +167,9 @@ function PackingTab() {
                   ) : (
                     <ChevronRight className="size-4" />
                   )}
-                  <span className="text-sm font-semibold">{c.name}</span>
+                  <span className="text-[0.95rem] font-semibold leading-snug tracking-[-0.01em]">
+                    {c.name}
+                  </span>
                   <span className="text-xs text-muted-foreground">
                     {catDone}/{c.items.length}
                   </span>
@@ -144,7 +177,10 @@ function PackingTab() {
                 <button
                   type="button"
                   aria-label={`${c.name} löschen`}
-                  onClick={() => setCats((cats) => cats.filter((x) => x.id !== c.id))}
+                  onClick={() => {
+                    setUndoCat({ cat: c, index: categories.findIndex((x) => x.id === c.id) });
+                    setCats((cats) => cats.filter((x) => x.id !== c.id));
+                  }}
                   className="text-muted-foreground transition hover:text-destructive"
                 >
                   <Trash2 className="size-4" />
@@ -205,7 +241,7 @@ function PackingTab() {
                               ),
                             )
                           }
-                          className={`${rowInput} min-w-0 flex-1 ${
+                          className={`${rowInput} min-w-0 flex-1 text-foreground/90 ${
                             item.done ? "text-muted-foreground" : ""
                           }`}
                         />
@@ -229,12 +265,10 @@ function PackingTab() {
                               ),
                             )
                           }
-                          className={`${rowInput} w-[4.75rem] shrink-0 appearance-none px-2 text-xs ${
-                            item.who ? "font-semibold text-[#2F2A3E]" : ""
-                          }`}
+                          className={`${rowInput} w-[4.75rem] shrink-0 appearance-none px-2 text-center text-xs font-semibold text-[#2F2A3E]`}
                           style={item.who ? { background: personColor(trip, item.who) } : undefined}
                         >
-                          <option value="">Wer?</option>
+                          <option value="">Alle</option>
                           {people.map((n) => (
                             <option key={n} value={n}>
                               {n}
@@ -244,21 +278,51 @@ function PackingTab() {
                         <button
                           type="button"
                           aria-label="Eintrag löschen"
-                          onClick={() =>
+                          onClick={() => {
+                            const idx = c.items.findIndex((i) => i.id === item.id);
+                            setUndoItem((u) => ({ ...u, [c.id]: { item, index: idx } }));
                             setCats((cats) =>
                               cats.map((x) =>
                                 x.id === c.id
                                   ? { ...x, items: x.items.filter((i) => i.id !== item.id) }
                                   : x,
                               ),
-                            )
-                          }
+                            );
+                          }}
                           className="text-muted-foreground transition hover:text-destructive"
                         >
                           <X className="size-4" />
                         </button>
                       </div>
                     ),
+                  )}
+
+                  {undoItem[c.id] && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const saved = undoItem[c.id]!;
+                        setCats((cats) =>
+                          cats.map((x) =>
+                            x.id === c.id
+                              ? {
+                                  ...x,
+                                  items: [
+                                    ...x.items.slice(0, saved.index),
+                                    saved.item,
+                                    ...x.items.slice(saved.index),
+                                  ],
+                                }
+                              : x,
+                          ),
+                        );
+                        setUndoItem((u) => ({ ...u, [c.id]: undefined }));
+                      }}
+                      className="flex items-center gap-1.5 rounded-xl px-2 py-1.5 text-xs font-medium text-muted-foreground transition hover:text-foreground"
+                    >
+                      <Undo2 className="size-3.5" />„{undoItem[c.id]!.item.text || "Eintrag"}“
+                      zurückholen
+                    </button>
                   )}
 
                   <button

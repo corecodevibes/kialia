@@ -290,7 +290,7 @@ function DiaryTab() {
                     onChange={(ev) => set(e.id, { assignedTo: ev.target.value })}
                     className={`${inputClass} appearance-none px-2 py-1.5 text-xs`}
                   >
-                    <option value="">Wer?</option>
+                    <option value="">Offen</option>
                     {people.map((n) => (
                       <option key={n} value={n}>
                         {n}
