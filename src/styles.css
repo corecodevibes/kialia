@@ -441,7 +441,43 @@
   filter: drop-shadow(0 6px 14px rgb(47 42 62 / 0.28));
 }
 
+/* Startanimation — siehe splash-screen.tsx.
+   Die Kurve ist vorne schnell und hinten weich: eine Drehung, die gleichmaessig
+   auslaeuft, sieht mechanisch aus; eine, die abbremst, sieht gewollt aus. */
+@keyframes splash-coin {
+  0% {
+    transform: rotateY(0deg) scale(0.88);
+  }
+  100% {
+    transform: rotateY(360deg) scale(1);
+  }
+}
+
+@keyframes splash-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.splash-mark {
+  transform-style: preserve-3d;
+  animation: splash-coin 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* Der Schriftzug startet leicht versetzt, nicht gleichzeitig: zwei Dinge, die
+   exakt zusammen anfangen, wirken wie ein Ruck. */
+.splash-word {
+  animation: splash-rise 0.55s ease-out 0.15s both;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .splash-mark,
+  .splash-word,
   .acrylic,
   .acrylic-warm,
   .acrylic-page {

@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { SplashScreen } from "@/components/app/splash-screen";
 import {
   Outlet,
   Link,
@@ -136,6 +137,7 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        <SplashScreen />
         {children}
         <Scripts />
       </body>
