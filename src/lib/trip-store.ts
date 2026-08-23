@@ -13,6 +13,15 @@ export type Idea = {
 
 export type Transport = {
   id: string;
+  /**
+   * Mehrere benannte Links, wie bei einer Idee.
+   *
+   * Vorher gab es nur ein einzelnes `url`-Feld — beim Uebernehmen einer Idee
+   * ging alles ausser dem ersten Link verloren, samt Beschriftung. Ein
+   * gespeicherter Link, der beim Verschieben verschwindet, kostet Vertrauen,
+   * das man mit keinem Feature zurueckgewinnt.
+   */
+  links?: LinkItem[] | undefined;
   /** Waehrung dieses Betrags. Leer = Hauptwaehrung der Reise. */
   currency?: string | undefined;
   mode: string;
@@ -32,6 +41,15 @@ export type Board = "nichts" | "fruehstueck" | "halbpension" | "vollpension" | "
 
 export type Stay = {
   id: string;
+  /**
+   * Mehrere benannte Links, wie bei einer Idee.
+   *
+   * Vorher gab es nur ein einzelnes `url`-Feld — beim Uebernehmen einer Idee
+   * ging alles ausser dem ersten Link verloren, samt Beschriftung. Ein
+   * gespeicherter Link, der beim Verschieben verschwindet, kostet Vertrauen,
+   * das man mit keinem Feature zurueckgewinnt.
+   */
+  links?: LinkItem[] | undefined;
   /** Waehrung dieses Betrags. Leer = Hauptwaehrung der Reise. */
   currency?: string | undefined;
   name: string;
@@ -48,6 +66,15 @@ export type Stay = {
 
 export type Activity = {
   id: string;
+  /**
+   * Mehrere benannte Links, wie bei einer Idee.
+   *
+   * Vorher gab es nur ein einzelnes `url`-Feld — beim Uebernehmen einer Idee
+   * ging alles ausser dem ersten Link verloren, samt Beschriftung. Ein
+   * gespeicherter Link, der beim Verschieben verschwindet, kostet Vertrauen,
+   * das man mit keinem Feature zurueckgewinnt.
+   */
+  links?: LinkItem[] | undefined;
   /** Waehrung dieses Betrags. Leer = Hauptwaehrung der Reise. */
   currency?: string | undefined;
   name: string;
@@ -275,9 +302,14 @@ function normalize(t: Partial<Trip>): Trip {
       date: x.date ?? "",
       note: x.note ?? "",
       url: x.url ?? "",
+      links: x.links ?? [],
     })),
-    stays: (t.stays ?? []).map((x) => ({ ...x, address: x.address ?? "" })),
-    activities: (t.activities ?? []).map((x) => ({ ...x, address: x.address ?? "" })),
+    stays: (t.stays ?? []).map((x) => ({ ...x, address: x.address ?? "", links: x.links ?? [] })),
+    activities: (t.activities ?? []).map((x) => ({
+      ...x,
+      address: x.address ?? "",
+      links: x.links ?? [],
+    })),
     diary: (t.diary ?? []).map((x) => ({
       ...x,
       mood: x.mood ?? "",

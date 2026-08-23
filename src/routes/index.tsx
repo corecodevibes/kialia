@@ -15,6 +15,7 @@ import {
   NumberField,
   PersonColors,
 } from "@/components/app/AppShell";
+import { AiFeatures } from "@/components/app/ai-features";
 import { flagFor } from "@/lib/country";
 import { countMembers, joinTrip } from "@/lib/trip-sync";
 import { COMMON_CURRENCIES, fetchRate } from "@/lib/currency";
@@ -364,6 +365,8 @@ function HomeTab() {
             </form>
           </details>
         </Card>
+
+        <AiFeatures />
 
         <Card>
           <CardTitle>Währungen</CardTitle>

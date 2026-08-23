@@ -83,6 +83,31 @@ Regeln:
   (Reisestil, Saison), damit klar ist, was sie NICHT abdeckt.
 - Antworte auf Deutsch.`;
 
+/**
+ * Zielangabe säubern, bevor sie in einen Prompt geht.
+ *
+ * Das Ziel ist das EINZIGE, was der Nutzer hier frei eintippt — und damit der
+ * einzige Weg, über den jemand Anweisungen an das Modell schmuggeln könnte
+ * ("ignoriere alles davor und …"). Deshalb: harte Längengrenze, keine
+ * Zeilenumbrüche, keine Steuerzeichen, keine Klammern oder Backticks, mit
+ * denen sich Struktur vortäuschen ließe.
+ *
+ * Ein Reiseziel braucht nichts davon. "Kreta", "Rundreise Nordnorwegen" —
+ * mehr steht da nie.
+ */
+function cleanDestination(v: unknown): string {
+  return String(v ?? "")
+    .replace(/[\r\n\t]+/g, " ")
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\u0000-\u001f\u007f]/g, "")
+    .replace(/[<>{}[\]`|\\]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 60);
+}
+
+const TIMEOUT_MS = 20_000;
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
 
@@ -96,7 +121,7 @@ Deno.serve(async (req: Request) => {
 
   try {
     const { kind, destination, tripKind, travellers, days } = await req.json();
-    const dest = String(destination ?? "").trim();
+    const dest = cleanDestination(destination);
     if (!dest) {
       return new Response(JSON.stringify({ error: "Kein Reiseziel angegeben." }), {
         status: 400,
@@ -104,14 +129,23 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    // Auch Zahlen begrenzen: sie landen ebenfalls im Prompt.
+    const nDays = Math.min(Math.max(Number(days) || 0, 0), 365) || undefined;
+    const nTrav = Math.min(Math.max(Number(travellers) || 0, 0), 20) || undefined;
+    const kindClean = cleanDestination(tripKind).slice(0, 30) || undefined;
+
     const wantIdeas = kind !== "kosten";
     const prompt = wantIdeas
-      ? `Reiseziel: ${dest}${tripKind ? `, Art: ${tripKind}` : ""}${days ? `, ${days} Tage` : ""}.`
-      : `Reiseziel: ${dest}${tripKind ? `, Art: ${tripKind}` : ""}${
-          travellers ? `, ${travellers} Personen` : ""
+      ? `Reiseziel: ${dest}${kindClean ? `, Art: ${kindClean}` : ""}${nDays ? `, ${nDays} Tage` : ""}.`
+      : `Reiseziel: ${dest}${kindClean ? `, Art: ${kindClean}` : ""}${
+          nTrav ? `, ${nTrav} Personen` : ""
         }. Schätze die Kosten pro Person und Tag.`;
 
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      signal: controller.signal,
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -144,6 +178,8 @@ Deno.serve(async (req: Request) => {
         headers: { ...CORS, "Content-Type": "application/json" },
       });
     }
+
+    clearTimeout(timer);
 
     const json = await res.json();
     const raw = json?.choices?.[0]?.message?.content;

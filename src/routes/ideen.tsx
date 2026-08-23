@@ -72,6 +72,8 @@ function IdeasTab() {
           name: idea.text.trim().slice(0, 120),
           address: "",
           url: normalizeUrl(idea.links[0]?.url ?? ""),
+          // ALLE Links wandern mit, nicht nur der erste — und mit ihren Namen.
+          links: idea.links,
           cost: 0,
           status: "offen",
           dueDate: "",

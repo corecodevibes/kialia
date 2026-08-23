@@ -2,6 +2,7 @@ import { useState } from "react";
 import { money } from "@/lib/currency";
 import { COST_CATEGORY_LABELS, fetchCosts, midpoint, type Costs } from "@/lib/suggestions";
 import { Attachments } from "@/components/app/attachments";
+import { LinkList } from "@/components/app/bits";
 import { createFileRoute } from "@tanstack/react-router";
 import { Bike, Bus, Car, Plane, Ship, Train } from "lucide-react";
 import {
@@ -188,6 +189,7 @@ function PlanTab() {
                   className={inputClass}
                 />
               </Field>
+              <LinkList links={t.links ?? []} onChange={(l) => setTransport(t.id, { links: l })} />
               <Attachments
                 ownerId={t.id}
                 label="Buchung / Ticket"
@@ -264,6 +266,7 @@ function PlanTab() {
                 destination={trip.destination}
                 onChange={(v) => setStay(s.id, { address: v })}
               />
+              <LinkList links={s.links ?? []} onChange={(l) => setStay(s.id, { links: l })} />
               <Attachments
                 ownerId={s.id}
                 label="Buchung / Bestätigung"
@@ -553,6 +556,10 @@ function PlanTab() {
                     address={a.address}
                     destination={trip.destination}
                     onChange={(v) => setActivity(a.id, { address: v })}
+                  />
+                  <LinkList
+                    links={a.links ?? []}
+                    onChange={(l) => setActivity(a.id, { links: l })}
                   />
                   <Attachments
                     ownerId={a.id}

@@ -28,7 +28,7 @@ import {
   type DiaryEntry,
 } from "@/lib/trip-store";
 import { useVoiceMemo } from "@/lib/use-voice-memo";
-import { transcribeMemo } from "@/lib/transcribe.functions";
+import { transcribe } from "@/lib/transcribe";
 
 export const Route = createFileRoute("/tagebuch")({
   head: () => ({
@@ -213,16 +213,22 @@ function DiaryTab() {
       if (!audio) return;
       setBusyKey(key);
       try {
-        const res = await transcribeMemo({ data: { audio, mimeType: "audio/wav" } });
-        const text = res.text.trim();
-        if (text) {
+        const res = await transcribe(audio, "audio/wav");
+        if (res.ok) {
           const prev = entry[field];
-          set(entry.id, { [field]: prev ? `${prev}\n${text}` : text } as Partial<DiaryEntry>);
+          set(entry.id, {
+            [field]: prev ? `${prev}\n${res.text}` : res.text,
+          } as Partial<DiaryEntry>);
         } else {
-          voice.setError("Es wurde nichts erkannt – bitte nochmal sprechen.");
+          // Nichts verstanden ist kein Fehler des Nutzers — laute Umgebung,
+          // Dialekt, fremde Orts- und Speisenamen. Deshalb wird schriftlich
+          // nachgefragt statt eine Fehlermeldung hingestellt.
+          voice.setError(
+            res.askInstead ? `${res.error} Schreib es kurz auf — das Feld ist offen.` : res.error,
+          );
         }
-      } catch (err) {
-        voice.setError(err instanceof Error ? err.message : "Transkription fehlgeschlagen.");
+      } catch {
+        voice.setError("Das Verschriftlichen hat nicht geklappt. Schreib es kurz auf.");
       } finally {
         setBusyKey(null);
       }

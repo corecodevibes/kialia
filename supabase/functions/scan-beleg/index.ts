@@ -66,24 +66,33 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { imageBase64, mimeType, text } = await req.json();
+    const { imageBase64, mimeType } = await req.json();
 
-    if (!imageBase64 && !text) {
+    // Der Text-Weg ist bewusst geschlossen: er war der einzige Pfad, über den
+    // ein Nutzer frei formulierte Anweisungen an das Modell hätte schicken
+    // können. Ein Beleg ist ein Bild — mehr braucht es nicht.
+    if (!imageBase64) {
       return new Response(JSON.stringify({ error: "Kein Beleg mitgeschickt." }), {
         status: 400,
         headers: { ...CORS, "Content-Type": "application/json" },
       });
     }
 
-    const content = imageBase64
-      ? [
-          { type: "text", text: "Lies diesen Reisebeleg aus." },
-          {
-            type: "image_url",
-            image_url: { url: `data:${mimeType ?? "image/jpeg"};base64,${imageBase64}` },
-          },
-        ]
-      : [{ type: "text", text: `Lies diesen Reisebeleg aus:\n\n${text}` }];
+    const bytes = Math.ceil((imageBase64.length * 3) / 4);
+    if (bytes > 6 * 1024 * 1024) {
+      return new Response(JSON.stringify({ error: "Der Beleg ist zu groß." }), {
+        status: 413,
+        headers: { ...CORS, "Content-Type": "application/json" },
+      });
+    }
+
+    const content = [
+      { type: "text", text: "Lies diesen Reisebeleg aus." },
+      {
+        type: "image_url",
+        image_url: { url: `data:${mimeType ?? "image/jpeg"};base64,${imageBase64}` },
+      },
+    ];
 
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -98,7 +107,7 @@ Deno.serve(async (req: Request) => {
           type: "json_schema",
           json_schema: { name: "beleg", strict: true, schema: SCHEMA },
         },
-        max_tokens: 500,
+        max_tokens: 400,
       }),
     });
 
