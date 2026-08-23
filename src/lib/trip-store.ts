@@ -92,6 +92,22 @@ export type Activity = {
   kind?: IdeaKind | undefined;
   /** Freie Ortsangabe fuer die Karten-App. */
   address: string;
+  /**
+   * Wann ihr das machen wollt — nicht zu verwechseln mit `dueDate`, das den
+   * Zahlungstermin meint. Ohne dieses Feld liess sich eine Aktivitaet zwar
+   * planen, aber nicht terminieren, und "wann eigentlich?" blieb im Kopf.
+   */
+  date?: string | undefined;
+  /** Uhrzeit, wenn es eine gibt — Tischreservierung, Bootsabfahrt. */
+  time?: string | undefined;
+  /**
+   * Alles, was sonst nirgends hinpasst.
+   *
+   * Beim Uebernehmen einer Idee landet hier ihr vollstaendiger Text. Vorher
+   * wurde er auf 120 Zeichen fuer das Namensfeld gekuerzt und der Rest
+   * verschwand — derselbe stille Verlust wie frueher bei den Links.
+   */
+  note?: string | undefined;
   url: string;
   cost: number;
   status: PayStatus;
@@ -330,6 +346,9 @@ function normalize(t: Partial<Trip>): Trip {
       ...x,
       address: x.address ?? "",
       links: x.links ?? [],
+      date: x.date ?? "",
+      time: x.time ?? "",
+      note: x.note ?? "",
     })),
     diary: (t.diary ?? []).map((x) => ({
       ...x,

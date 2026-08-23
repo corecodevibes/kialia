@@ -60,6 +60,15 @@ function IdeasTab() {
     setText("");
   }
 
+  /** Der Name ist die erste Zeile, notfalls am letzten Wort vor 80 gekappt. */
+  const firstLine = (text: string) => {
+    const line = (text.split("\n")[0] ?? "").trim();
+    if (line.length <= 80) return line;
+    const cut = line.slice(0, 80);
+    const space = cut.lastIndexOf(" ");
+    return (space > 40 ? cut.slice(0, space) : cut) + " …";
+  };
+
   const setKind = (id: string, kind: IdeaKind) =>
     update({ ideas: trip.ideas.map((i) => (i.id === id ? { ...i, kind } : i)) });
 
@@ -83,7 +92,12 @@ function IdeasTab() {
         ...trip.activities,
         {
           id: uid(),
-          name: idea.text.trim().slice(0, 120),
+          // Die erste Zeile wird der Name, der vollstaendige Text bleibt als
+          // Notiz erhalten. Vorher wurde bei 120 Zeichen abgeschnitten und der
+          // Rest verschwand wortlos — bei einer eingesprochenen Idee ist das
+          // schnell der halbe Gedanke.
+          name: firstLine(idea.text),
+          note: idea.text.trim(),
           // Die Einordnung wandert mit — sonst muesste man sie im Plan erneut treffen.
           kind:
             idea.kind ??

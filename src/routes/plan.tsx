@@ -4,7 +4,7 @@ import { COST_CATEGORY_LABELS, fetchCosts, midpoint, type Costs } from "@/lib/su
 import { Attachments } from "@/components/app/attachments";
 import { LinkList } from "@/components/app/bits";
 import { createFileRoute } from "@tanstack/react-router";
-import { Bike, Bus, Car, Plane, Ship, Train } from "lucide-react";
+import { Bike, Bus, Car, ChevronDown, Plane, Ship, Train } from "lucide-react";
 import {
   AddButton,
   AppShell,
@@ -128,6 +128,7 @@ function PlanTab() {
   // Bewusst bei jedem Rendern neu berechnet statt gespeichert: die Rate muss
   // mitziehen, wenn sich Datum, Kosten oder Erspartes aendern.
   const plan = savingsPlan(trip, totals);
+  const [openAct, setOpenAct] = useState<string | null>(null);
   const [costs, setCosts] = useState<Costs | null>(null);
   const [costBusy, setCostBusy] = useState(false);
   const [costError, setCostError] = useState<string | null>(null);
@@ -574,105 +575,187 @@ function PlanTab() {
             das eine buchst du Wochen vorher, das andere entscheidest du
             mittags. In einer Liste gehen beide unter. */}
         {ACTIVITY_GROUPS.map((group) => {
-          const items = trip.activities.filter(
-            (a) => (a.kind === "restaurant" ? "restaurant" : "aktivitaet") === group.kind,
-          );
+          // Nach Termin sortiert, Unterminiertes ans Ende. Ein Datumsfeld,
+          // das die Reihenfolge nicht beeinflusst, beantwortet die Frage
+          // "was steht als Naechstes an?" nicht.
+          const items = trip.activities
+            .filter((a) => (a.kind === "restaurant" ? "restaurant" : "aktivitaet") === group.kind)
+            .slice()
+            .sort((x, y) => {
+              const a = x.date || "";
+              const b = y.date || "";
+              if (!a && !b) return 0;
+              if (!a) return 1;
+              if (!b) return -1;
+              return a < b ? -1 : a > b ? 1 : 0;
+            });
           if (items.length === 0) return null;
           return (
             <Fragment key={group.kind}>
               <SectionTitle>{group.title}</SectionTitle>
               {items.map((a) => (
                 <Card key={a.id}>
-                  <div className="flex items-start gap-2">
+                  {/* Zugeklappt steht da, was man beim Durchblättern wissen
+                      will: was, wann, was es kostet. Alles Weitere erst auf
+                      Antippen — sechs Eingabefelder sind zum Lesen ungeeignet. */}
+                  <button
+                    type="button"
+                    onClick={() => setOpenAct((v) => (v === a.id ? null : a.id))}
+                    aria-expanded={openAct === a.id}
+                    className="flex w-full items-start gap-2 text-left"
+                  >
                     <div className="min-w-0 flex-1">
-                      <Field label="Name der Aktivität">
-                        <input
-                          value={a.name}
-                          onChange={(e) => setActivity(a.id, { name: e.target.value })}
-                          placeholder="z. B. Bootstour bei Sonnenuntergang"
-                          className={inputClass}
-                        />
-                      </Field>
-                      <KindPicker
-                        value={a.kind === "restaurant" ? "restaurant" : "aktivitaet"}
-                        onChange={(kind) => setActivity(a.id, { kind })}
-                      />
-                      <div className="mt-3">
-                        <PlaceField
-                          name={a.name}
-                          address={a.address}
-                          destination={trip.destination}
-                          onChange={(v) => setActivity(a.id, { address: v })}
-                        />
-                        <LinkList
-                          links={a.links ?? []}
-                          onChange={(l) => setActivity(a.id, { links: l })}
-                        />
-                        <Attachments
-                          ownerId={a.id}
-                          label="Ticket / Bestätigung"
-                          currency={trip.currency || "EUR"}
-                          onExtract={(f) =>
-                            setActivity(a.id, {
-                              ...(f.title ? { name: f.title } : {}),
-                              ...(f.address ? { address: f.address } : {}),
-                              ...(f.amount != null ? { cost: f.amount } : {}),
-                              ...(f.currency ? { currency: f.currency } : {}),
-                            })
-                          }
+                      <p className="truncate text-[0.95rem] font-semibold leading-snug">
+                        {a.name || "Ohne Namen"}
+                      </p>
+                      <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                        {[a.date ? formatDateLong(a.date) : "Noch kein Termin", a.time, a.address]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </p>
+                    </div>
+                    {a.cost > 0 && (
+                      <span className="shrink-0 pt-0.5 text-sm font-semibold tabular-nums">
+                        {money(a.cost, a.currency || trip.currency || "EUR")}
+                      </span>
+                    )}
+                    <ChevronDown
+                      className={`mt-0.5 size-4 shrink-0 text-muted-foreground transition ${
+                        openAct === a.id ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+
+                  {a.note && a.note.trim() !== a.name.trim() && (
+                    <p className="mt-2 whitespace-pre-wrap break-words rounded-2xl bg-secondary/40 px-3 py-2 text-xs leading-snug text-muted-foreground">
+                      {a.note}
+                    </p>
+                  )}
+
+                  {openAct !== a.id ? null : (
+                    <div className="mt-3 border-t border-border pt-3">
+                      <div className="flex items-start gap-2">
+                        <div className="min-w-0 flex-1">
+                          <Field label="Name der Aktivität">
+                            <input
+                              value={a.name}
+                              onChange={(e) => setActivity(a.id, { name: e.target.value })}
+                              placeholder="z. B. Bootstour bei Sonnenuntergang"
+                              className={inputClass}
+                            />
+                          </Field>
+                          <KindPicker
+                            value={a.kind === "restaurant" ? "restaurant" : "aktivitaet"}
+                            onChange={(kind) => setActivity(a.id, { kind })}
+                          />
+                          <div className="mt-3">
+                            <PlaceField
+                              name={a.name}
+                              address={a.address}
+                              destination={trip.destination}
+                              onChange={(v) => setActivity(a.id, { address: v })}
+                            />
+                            <LinkList
+                              links={a.links ?? []}
+                              onChange={(l) => setActivity(a.id, { links: l })}
+                            />
+                            <Attachments
+                              ownerId={a.id}
+                              label="Ticket / Bestätigung"
+                              currency={trip.currency || "EUR"}
+                              onExtract={(f) =>
+                                setActivity(a.id, {
+                                  ...(f.title ? { name: f.title } : {}),
+                                  ...(f.address ? { address: f.address } : {}),
+                                  ...(f.amount != null ? { cost: f.amount } : {}),
+                                  ...(f.currency ? { currency: f.currency } : {}),
+                                })
+                              }
+                            />
+                          </div>
+                        </div>
+                        <div className="pt-5">
+                          <DeleteButton
+                            onClick={() =>
+                              update({ activities: trip.activities.filter((x) => x.id !== a.id) })
+                            }
+                          />
+                        </div>
+                      </div>
+                      <div className="mt-3 space-y-3">
+                        <Field label="Link (z. B. GetYourGuide)">
+                          <input
+                            value={a.url}
+                            onChange={(e) => setActivity(a.id, { url: e.target.value })}
+                            onBlur={(e) => setActivity(a.id, { url: normalizeUrl(e.target.value) })}
+                            className={inputClass}
+                          />
+                        </Field>
+                        {a.url && (
+                          <a
+                            href={safeHref(a.url)}
+                            target="_blank"
+                            rel="noreferrer noopener"
+                            className="block truncate text-xs font-medium text-primary underline"
+                          >
+                            Website öffnen
+                          </a>
+                        )}
+                        <FieldRow>
+                          <Field label="Kosten">
+                            <AmountField
+                              value={a.cost}
+                              currency={a.currency}
+                              onChange={(n) => setActivity(a.id, { cost: n })}
+                              onCurrencyChange={(c) => setActivity(a.id, { currency: c })}
+                            />
+                          </Field>
+                          <Field label="Zahlen bis">
+                            <input
+                              type="date"
+                              value={a.dueDate}
+                              onChange={(e) => setActivity(a.id, { dueDate: e.target.value })}
+                              className={dateInputClass}
+                            />
+                          </Field>
+                        </FieldRow>
+                        {/* "Wann" ist bewusst getrennt von "Zahlen bis": das
+                            eine ist der Termin, das andere die Frist. Beides
+                            in ein Feld zu legen hiesse, eines zu verlieren. */}
+                        <FieldRow>
+                          <Field label="Wann">
+                            <input
+                              type="date"
+                              value={a.date ?? ""}
+                              onChange={(e) => setActivity(a.id, { date: e.target.value })}
+                              className={dateInputClass}
+                            />
+                          </Field>
+                          <Field label="Uhrzeit">
+                            <input
+                              type="time"
+                              value={a.time ?? ""}
+                              onChange={(e) => setActivity(a.id, { time: e.target.value })}
+                              className={dateInputClass}
+                            />
+                          </Field>
+                        </FieldRow>
+                        <Field label="Notizen">
+                          <textarea
+                            value={a.note ?? ""}
+                            onChange={(e) => setActivity(a.id, { note: e.target.value })}
+                            rows={3}
+                            placeholder="Alles, was sonst nirgends hinpasst"
+                            className={`${inputClass} resize-y`}
+                          />
+                        </Field>
+                        <StatusPicker
+                          value={a.status}
+                          onChange={(status) => setActivity(a.id, { status })}
                         />
                       </div>
                     </div>
-                    <div className="pt-5">
-                      <DeleteButton
-                        onClick={() =>
-                          update({ activities: trip.activities.filter((x) => x.id !== a.id) })
-                        }
-                      />
-                    </div>
-                  </div>
-                  <div className="mt-3 space-y-3">
-                    <Field label="Link (z. B. GetYourGuide)">
-                      <input
-                        value={a.url}
-                        onChange={(e) => setActivity(a.id, { url: e.target.value })}
-                        onBlur={(e) => setActivity(a.id, { url: normalizeUrl(e.target.value) })}
-                        className={inputClass}
-                      />
-                    </Field>
-                    {a.url && (
-                      <a
-                        href={safeHref(a.url)}
-                        target="_blank"
-                        rel="noreferrer noopener"
-                        className="block truncate text-xs font-medium text-primary underline"
-                      >
-                        Website öffnen
-                      </a>
-                    )}
-                    <FieldRow>
-                      <Field label="Kosten">
-                        <AmountField
-                          value={a.cost}
-                          currency={a.currency}
-                          onChange={(n) => setActivity(a.id, { cost: n })}
-                          onCurrencyChange={(c) => setActivity(a.id, { currency: c })}
-                        />
-                      </Field>
-                      <Field label="Zahlen bis">
-                        <input
-                          type="date"
-                          value={a.dueDate}
-                          onChange={(e) => setActivity(a.id, { dueDate: e.target.value })}
-                          className={dateInputClass}
-                        />
-                      </Field>
-                    </FieldRow>
-                    <StatusPicker
-                      value={a.status}
-                      onChange={(status) => setActivity(a.id, { status })}
-                    />
-                  </div>
+                  )}
                 </Card>
               ))}
             </Fragment>
