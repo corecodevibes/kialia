@@ -403,8 +403,16 @@ describe("missingDiaryDays", () => {
       endDate: "2026-06-03",
       diary: [
         {
-          id: "a", day: 2, date: "2026-06-02", text: "war schön",
-          highlight: "", notes: "", expenses: "", spent: 0, food: "", mood: "",
+          id: "a",
+          day: 2,
+          date: "2026-06-02",
+          text: "war schön",
+          highlight: "",
+          notes: "",
+          expenses: "",
+          spent: 0,
+          food: "",
+          mood: "",
         },
       ],
     });

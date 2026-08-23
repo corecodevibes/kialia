@@ -828,4 +828,3 @@ export function missingDiaryDays(trip: Trip): { day: number; date: string }[] {
   }
   return out;
 }
-
