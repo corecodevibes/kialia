@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as EinstellungenRouteImport } from './routes/einstellungen'
 import { Route as IdeenRouteImport } from './routes/ideen'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as PacklisteRouteImport } from './routes/packliste'
@@ -26,6 +27,11 @@ const IndexRoute = IndexRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EinstellungenRoute = EinstellungenRouteImport.update({
+  id: '/einstellungen',
+  path: '/einstellungen',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IdeenRoute = IdeenRouteImport.update({
@@ -62,6 +68,7 @@ const TagebuchRoute = TagebuchRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/einstellungen': typeof EinstellungenRoute
   '/ideen': typeof IdeenRoute
   '/onboarding': typeof OnboardingRoute
   '/packliste': typeof PacklisteRoute
@@ -72,6 +79,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/einstellungen': typeof EinstellungenRoute
   '/ideen': typeof IdeenRoute
   '/onboarding': typeof OnboardingRoute
   '/packliste': typeof PacklisteRoute
@@ -83,6 +91,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/einstellungen': typeof EinstellungenRoute
   '/ideen': typeof IdeenRoute
   '/onboarding': typeof OnboardingRoute
   '/packliste': typeof PacklisteRoute
@@ -95,6 +104,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/einstellungen'
     | '/ideen'
     | '/onboarding'
     | '/packliste'
@@ -105,6 +115,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/einstellungen'
     | '/ideen'
     | '/onboarding'
     | '/packliste'
@@ -115,6 +126,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/auth'
+    | '/einstellungen'
     | '/ideen'
     | '/onboarding'
     | '/packliste'
@@ -126,6 +138,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  EinstellungenRoute: typeof EinstellungenRoute
   IdeenRoute: typeof IdeenRoute
   OnboardingRoute: typeof OnboardingRoute
   PacklisteRoute: typeof PacklisteRoute
@@ -148,6 +161,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/einstellungen': {
+      id: '/einstellungen'
+      path: '/einstellungen'
+      fullPath: '/einstellungen'
+      preLoaderRoute: typeof EinstellungenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ideen': {
@@ -198,6 +218,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  EinstellungenRoute: EinstellungenRoute,
   IdeenRoute: IdeenRoute,
   OnboardingRoute: OnboardingRoute,
   PacklisteRoute: PacklisteRoute,

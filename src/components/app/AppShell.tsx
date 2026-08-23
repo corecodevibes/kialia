@@ -10,10 +10,10 @@ import {
 import { flagFor } from "@/lib/country";
 import { mapsQuery, mapsUrl } from "@/lib/maps";
 import { startAutoSync, syncTrips, watchRemote } from "@/lib/trip-sync";
-import { Home, Lightbulb, Wallet, BookOpen, Backpack, LogOut, MapPin } from "lucide-react";
+import { Home, Lightbulb, Wallet, BookOpen, Backpack, MapPin, Settings } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import logo from "@/assets/travelivibes-logo.png";
-import { signOut, useProfile, useSession } from "@/lib/auth";
+import { useProfile, useSession } from "@/lib/auth";
 import { onboardingGate, readOnboardedCache } from "@/lib/onboarding-gate";
 
 const tabs = [
@@ -107,11 +107,6 @@ export function AppShell({
     return <div className="acrylic-page min-h-screen" />;
   }
 
-  async function handleSignOut() {
-    await signOut();
-    navigate({ to: "/auth", replace: true });
-  }
-
   return (
     <div className="acrylic-page min-h-screen">
       <header className="relative z-30 px-5 pb-6 pt-6 print:hidden">
@@ -153,14 +148,16 @@ export function AppShell({
               {trip.destination || "kialia"}
             </h1>
           </div>
-          <button
-            type="button"
-            onClick={handleSignOut}
-            aria-label="Abmelden"
+          {/* Zahnrad statt Abmelden: ein versehentlicher Klick soll nicht
+              mitten in der Planung die Sitzung beenden. Abmelden liegt jetzt
+              in den Einstellungen, zusammen mit der Kontoverwaltung. */}
+          <Link
+            to="/einstellungen"
+            aria-label="Einstellungen"
             className="shrink-0 rounded-xl p-2 text-foreground/70 transition hover:bg-foreground/10"
           >
-            <LogOut className="size-5" />
-          </button>
+            <Settings className="size-5" />
+          </Link>
         </div>
         {subtitle && (
           <p className="mx-auto mt-2 max-w-lg text-sm leading-snug text-foreground/75">
