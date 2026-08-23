@@ -498,6 +498,32 @@
   }
 }
 
+/* Eingabefelder auf Touch-Geraeten mindestens 16px.
+   Das ist keine Geschmacksfrage, sondern eine Regel von iOS: ist die Schrift
+   in einem Feld kleiner als 16px, zoomt Safari beim Antippen hinein. In einer
+   zum Homescreen hinzugefuegten App bleibt dieser Zoom danach stehen — es gibt
+   keine Adressleiste, ueber die man ihn zuruecksetzt. Der ganze Bildschirm ist
+   dann vergroessert und beidseitig abgeschnitten, und zwar dauerhaft.
+
+   Genau das war im Simulator zu sehen: aus "Let's" wurde "t's", das Logo halb
+   weg. Ich hatte es zuerst fuer waagerechtes Verrutschen gehalten und am
+   Fokusring gesucht — falsch. Der Inhalt war nicht verschoben, sondern
+   vergroessert.
+
+   Unsere Felder standen auf 14px, Datumsfelder sogar auf 13px, 45 Stueck.
+   Eine Regel hier statt 45 Aenderungen an den Aufrufstellen.
+
+   Bewusst ohne :where() und ohne @layer: Utility-Klassen wie `text-sm` haben
+   Klassen-Spezifitaet und wuerden sonst gewinnen. Auf Zeigergeraeten bleibt
+   die kompaktere Groesse, dort gibt es das Verhalten nicht. */
+@media (hover: none) and (pointer: coarse) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
 /* Tastaturfokus. Das Design-System verlangt einen sichtbaren Ring in
    Sonnenkupfer statt des Browser-Standards — ohne den ist die App per
    Tastatur praktisch unbedienbar, weil die eigenen Knoepfe keinen eigenen
