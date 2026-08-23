@@ -36,6 +36,9 @@ Das steht jetzt als Kommentar im Code, damit es niemand später "aufräumt".
    Datenflüsse. Offen sind nur Name, Anschrift und eine Kontaktadresse — auf den
    Seiten rot markiert. Bei einer Firma zusätzlich Rechtsform, Register und
    gegebenenfalls die USt-IdNr.
+3. **Bundle-ID.** Vor dem ersten nativen Build festlegen (z. B. `app.kialia.app`)
+   und die Build-Nummer daran koppeln. Kein Aufwand, aber später nicht mehr
+   änderbar, ohne die App im Store neu anzulegen.
 
 ## Vorbereitet
 
