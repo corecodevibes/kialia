@@ -519,3 +519,65 @@ describe("personColor", () => {
     expect(personColor(t, names[6]!)).toBe(PERSON_COLORS[0]!.hex);
   });
 });
+
+describe("tripTotals — mehrere Währungen", () => {
+  const stay = (cost: number, currency?: string) => ({
+    id: `s${cost}${currency ?? ""}`,
+    name: "",
+    address: "",
+    url: "",
+    from: "",
+    to: "",
+    cost,
+    status: "offen" as const,
+    dueDate: "",
+    board: "nichts" as const,
+    ...(currency ? { currency } : {}),
+  });
+
+  test("summiert in der Hauptwährung, wenn ein Kurs vorliegt", () => {
+    const t = tripWith({
+      currency: "CHF",
+      secondCurrency: "EUR",
+      rate: { value: 0.95, at: "2026-08-23", source: "ecb" as const },
+      stays: [stay(100), stay(200, "EUR")],
+    });
+    const totals = tripTotals(t);
+    expect(totals.stays).toBeCloseTo(100 + 190, 5);
+    expect(Object.keys(totals.pending)).toHaveLength(0);
+  });
+
+  test("OHNE Kurs wird nicht geraten — der Betrag bleibt offen ausgewiesen", () => {
+    const t = tripWith({
+      currency: "CHF",
+      secondCurrency: "EUR",
+      stays: [stay(100), stay(200, "EUR")],
+    });
+    const totals = tripTotals(t);
+    // Die 200 EUR fließen NICHT als 200 CHF ein.
+    expect(totals.stays).toBe(100);
+    expect(totals.pending.EUR).toBe(200);
+  });
+
+  test("führt immer mit, was tatsächlich eingegeben wurde", () => {
+    const t = tripWith({
+      currency: "CHF",
+      secondCurrency: "EUR",
+      rate: { value: 0.95, at: "2026-08-23", source: "ecb" as const },
+      stays: [stay(100), stay(200, "EUR")],
+    });
+    const { byCurrency } = tripTotals(t);
+    expect(byCurrency.CHF).toBe(100);
+    expect(byCurrency.EUR).toBe(200);
+  });
+
+  test("eine dritte Währung ohne Kurs verschwindet nicht stillschweigend", () => {
+    const t = tripWith({
+      currency: "CHF",
+      secondCurrency: "EUR",
+      rate: { value: 0.95, at: "2026-08-23", source: "ecb" as const },
+      stays: [stay(50, "THB")],
+    });
+    expect(tripTotals(t).pending.THB).toBe(50);
+  });
+});

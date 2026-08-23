@@ -17,6 +17,7 @@ import {
 } from "@/components/app/AppShell";
 import { flagFor } from "@/lib/country";
 import { countMembers, joinTrip } from "@/lib/trip-sync";
+import { COMMON_CURRENCIES, fetchRate } from "@/lib/currency";
 import {
   downloadAllTrips,
   downloadTrip,
@@ -69,6 +70,7 @@ function HomeTab() {
   const [joinMsg, setJoinMsg] = useState<string | null>(null);
   const [members, setMembers] = useState<number | null>(null);
   const [draftColors, setDraftColors] = useState<Record<string, string>>({});
+  const [rateMsg, setRateMsg] = useState<string | null>(null);
 
   // Bestaetigt sichtbar, dass das Teilen wirkt — sonst weiss niemand, ob der
   // Code angekommen ist.
@@ -361,6 +363,98 @@ function HomeTab() {
               {joinMsg && <p className="mt-2 text-xs font-medium">{joinMsg}</p>}
             </form>
           </details>
+        </Card>
+
+        <Card>
+          <CardTitle>Währungen</CardTitle>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Beträge werden nie umgerechnet gespeichert — was du in Euro einträgst, bleibt Euro.
+            Umgerechnet wird nur die Anzeige.
+          </p>
+
+          <div className="mt-3">
+            <FieldRow>
+              <Field label="Hauptwährung">
+                <select
+                  value={trip.currency || "EUR"}
+                  onChange={(e) => update({ currency: e.target.value })}
+                  className={`${inputClass} appearance-none`}
+                >
+                  {COMMON_CURRENCIES.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.code} — {c.label}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="Zweitwährung">
+                <select
+                  value={trip.secondCurrency || ""}
+                  onChange={(e) => update({ secondCurrency: e.target.value })}
+                  className={`${inputClass} appearance-none`}
+                >
+                  <option value="">keine</option>
+                  {COMMON_CURRENCIES.filter((c) => c.code !== (trip.currency || "EUR")).map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.code}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            </FieldRow>
+          </div>
+
+          {trip.secondCurrency && (
+            <div className="mt-3 rounded-2xl bg-secondary/50 p-3">
+              <Field label={`1 ${trip.secondCurrency} entspricht … ${trip.currency || "EUR"}`}>
+                <input
+                  inputMode="decimal"
+                  value={trip.rate?.value ?? ""}
+                  placeholder="z. B. 0,95"
+                  onChange={(e) => {
+                    const v = Number(e.target.value.replace(",", "."));
+                    update({
+                      rate:
+                        Number.isFinite(v) && v > 0
+                          ? {
+                              value: v,
+                              at: new Date().toISOString().slice(0, 10),
+                              source: "manual",
+                            }
+                          : undefined,
+                    });
+                  }}
+                  className={inputClass}
+                />
+              </Field>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  setRateMsg("Wird geholt …");
+                  const r = await fetchRate(trip.secondCurrency!, trip.currency || "EUR");
+                  if (r) {
+                    update({ rate: r });
+                    setRateMsg(null);
+                  } else {
+                    setRateMsg("Kurs nicht erreichbar — trag ihn von Hand ein.");
+                  }
+                }}
+                className="mt-2 w-full rounded-xl bg-card px-3 py-2.5 text-xs font-semibold"
+              >
+                Tageskurs holen
+              </button>
+
+              {trip.rate && (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Kurs vom {formatDateLong(trip.rate.at) || trip.rate.at}
+                  {trip.rate.source === "manual" ? " · von dir eingetragen" : " · EZB-Referenzkurs"}
+                  . Eine Umrechnung ist immer eine Schätzung.
+                </p>
+              )}
+              {rateMsg && <p className="mt-2 text-xs font-medium">{rateMsg}</p>}
+            </div>
+          )}
         </Card>
 
         {/* Teilen nach dem Muster eines Haushalts: ein Code, den man

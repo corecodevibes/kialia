@@ -1,13 +1,7 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import {
-  eur,
-  personColor,
-  travellerNames,
-  useTrip,
-  PERSON_COLORS,
-  type Trip,
-} from "@/lib/trip-store";
+import { personColor, travellerNames, useTrip, PERSON_COLORS, type Trip } from "@/lib/trip-store";
 import { flagFor } from "@/lib/country";
+import { money } from "@/lib/currency";
 import { mapsQuery, mapsUrl } from "@/lib/maps";
 import { startAutoSync, syncTrips, watchRemote } from "@/lib/trip-sync";
 import { Home, Lightbulb, Wallet, BookOpen, Backpack, MapPin, Settings } from "lucide-react";
@@ -228,8 +222,73 @@ export function FieldRow({ children }: { children: ReactNode }) {
  * Bewusst als Komponente statt als Klasse an jeder Fundstelle — so ist auch
  * jeder künftige Betrag richtig gesetzt, ohne dass jemand daran denken muss.
  */
-export function Money({ value, className = "" }: { value: number; className?: string }) {
-  return <span className={`tabular-nums ${className}`.trim()}>{eur(value)}</span>;
+export function Money({
+  value,
+  currency,
+  className = "",
+}: {
+  value: number;
+  /** Ohne Angabe die Hauptwaehrung der aktiven Reise. */
+  currency?: string | undefined;
+  className?: string;
+}) {
+  const { trip } = useTrip();
+  return (
+    <span className={`tabular-nums ${className}`.trim()}>
+      {money(value, currency || trip.currency || "EUR")}
+    </span>
+  );
+}
+
+/**
+ * Betrag mit Waehrungswahl.
+ *
+ * Die Waehrung steht direkt am Betrag, nicht in einer Einstellung weit weg:
+ * beim Eintragen eines Hotels weiss man, in welcher Waehrung die Rechnung
+ * kam — zehn Minuten spaeter nicht mehr.
+ */
+export function AmountField({
+  value,
+  currency,
+  onChange,
+  onCurrencyChange,
+}: {
+  value: number;
+  currency?: string | undefined;
+  onChange: (n: number) => void;
+  onCurrencyChange: (c: string) => void;
+}) {
+  const { trip } = useTrip();
+  const main = trip.currency || "EUR";
+  const options = [
+    main,
+    ...(trip.secondCurrency && trip.secondCurrency !== main ? [trip.secondCurrency] : []),
+  ];
+  const active = currency || main;
+
+  return (
+    <div className="flex items-center gap-2">
+      <NumberField value={value} onChange={onChange} className={inputClass} />
+      {options.length > 1 ? (
+        <select
+          value={active}
+          aria-label="Währung"
+          onChange={(e) => onCurrencyChange(e.target.value)}
+          className={`${inputClass} w-[4.5rem] shrink-0 appearance-none px-2 text-center text-xs font-semibold`}
+        >
+          {options.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
+      ) : (
+        <span className="w-[4.5rem] shrink-0 text-center text-xs font-semibold text-muted-foreground">
+          {main}
+        </span>
+      )}
+    </div>
+  );
 }
 
 /**

@@ -1,4 +1,5 @@
 import { useCallback, useSyncExternalStore } from "react";
+import { convert, type Rate } from "@/lib/currency";
 
 export type PayStatus = "offen" | "reserviert" | "bezahlt";
 
@@ -12,6 +13,8 @@ export type Idea = {
 
 export type Transport = {
   id: string;
+  /** Waehrung dieses Betrags. Leer = Hauptwaehrung der Reise. */
+  currency?: string | undefined;
   mode: string;
   label: string;
   cost: number;
@@ -29,6 +32,8 @@ export type Board = "nichts" | "fruehstueck" | "halbpension" | "vollpension" | "
 
 export type Stay = {
   id: string;
+  /** Waehrung dieses Betrags. Leer = Hauptwaehrung der Reise. */
+  currency?: string | undefined;
   name: string;
   /** Freie Ortsangabe fuer die Karten-App. */
   address: string;
@@ -43,6 +48,8 @@ export type Stay = {
 
 export type Activity = {
   id: string;
+  /** Waehrung dieses Betrags. Leer = Hauptwaehrung der Reise. */
+  currency?: string | undefined;
   name: string;
   /** Freie Ortsangabe fuer die Karten-App. */
   address: string;
@@ -110,6 +117,12 @@ export type PackCategory = {
 
 export type Trip = {
   id: string;
+  /** Hauptwaehrung der Reise — in ihr wird zusammengerechnet. */
+  currency?: string | undefined;
+  /** Zweitwaehrung, meist die des Ziels. */
+  secondCurrency?: string | undefined;
+  /** Kurs: wie viel Hauptwaehrung ein Stueck Zweitwaehrung kostet. */
+  rate?: Rate | undefined;
   /** Farbe je mitreisender Person, damit Zuordnungen ablesbar werden. */
   personColors?: Record<string, string>;
   /** Die uuid in Supabase, sobald die Reise dort liegt. Leer = nur lokal. */
@@ -454,15 +467,44 @@ export function mealsPerDay(m: Meals) {
 }
 
 export function tripTotals(trip: Trip) {
+  const main = trip.currency || "EUR";
+  const second = trip.secondCurrency;
+
+  // Umgerechnet wird nur, was sich umrechnen laesst. Was ohne Kurs bleibt,
+  // wandert nach `pending` und wird gesondert ausgewiesen — es als 0 zu
+  // behandeln waere still falsch, und genau das faellt niemandem auf.
+  const pending: Record<string, number> = {};
+  const byCurrency: Record<string, number> = {};
+
+  const toMain = (amount: number, cur?: string): number => {
+    const c = cur || main;
+    byCurrency[c] = (byCurrency[c] ?? 0) + amount;
+    if (c === main) return amount;
+    if (second && c === second) {
+      const converted = convert(amount, trip.rate);
+      if (converted !== null) return converted;
+    }
+    pending[c] = (pending[c] ?? 0) + amount;
+    return 0;
+  };
+
   const days = tripDays(trip);
-  const transport = trip.transports.reduce((s, t) => s + (t.cost || 0), 0);
-  const stays = trip.stays.reduce((s, t) => s + (t.cost || 0), 0);
-  const activities = trip.activities.reduce((s, t) => s + (t.cost || 0), 0);
+  const transport = trip.transports.reduce((s, t) => s + toMain(t.cost || 0, t.currency), 0);
+  const stays = trip.stays.reduce((s, t) => s + toMain(t.cost || 0, t.currency), 0);
+  const activities = trip.activities.reduce((s, t) => s + toMain(t.cost || 0, t.currency), 0);
   const food = mealsPerDay(trip.meals) * days;
   const total = transport + stays + activities + food;
   const paid = [...trip.transports, ...trip.stays, ...trip.activities]
     .filter((i) => i.status === "bezahlt")
-    .reduce((s, i) => s + (i.cost || 0), 0);
+    .reduce((s, i) => {
+      const c = i.currency || main;
+      if (c === main) return s + (i.cost || 0);
+      if (second && c === second) {
+        const v = convert(i.cost || 0, trip.rate);
+        if (v !== null) return s + v;
+      }
+      return s;
+    }, 0);
 
   // Tatsaechlich ausgegeben kommt AUSSCHLIESSLICH aus dem Tagebuch — eine
   // Quelle, eine Richtung. Es wird bewusst nicht in `total` gemischt: `total`
@@ -482,6 +524,11 @@ export function tripTotals(trip: Trip) {
     open: Math.max(0, total - paid),
     actual,
     actualDays,
+    currency: main,
+    /** Was mangels Kurs nicht umgerechnet werden konnte. */
+    pending,
+    /** Alle Summen, wie eingegeben — die Wahrheit vor jeder Umrechnung. */
+    byCurrency,
   };
 }
 

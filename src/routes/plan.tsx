@@ -1,3 +1,4 @@
+import { money } from "@/lib/currency";
 import { Attachments } from "@/components/app/attachments";
 import { createFileRoute } from "@tanstack/react-router";
 import { Bike, Bus, Car, Plane, Ship, Train } from "lucide-react";
@@ -18,6 +19,7 @@ import {
   NoTripYet,
   NumberField,
   PlaceField,
+  AmountField,
 } from "@/components/app/AppShell";
 import { StatusPicker } from "@/components/app/bits";
 
@@ -144,11 +146,12 @@ function PlanTab() {
                 />
               </Field>
               <FieldRow>
-                <Field label="Kosten (€)">
-                  <NumberField
+                <Field label="Kosten">
+                  <AmountField
                     value={t.cost}
+                    currency={t.currency}
                     onChange={(n) => setTransport(t.id, { cost: n })}
-                    className={inputClass}
+                    onCurrencyChange={(c) => setTransport(t.id, { currency: c })}
                   />
                 </Field>
                 <Field label="Zahlen bis / Rate bis">
@@ -294,11 +297,12 @@ function PlanTab() {
                 </select>
               </Field>
               <FieldRow>
-                <Field label="Kosten (€)">
-                  <NumberField
+                <Field label="Kosten">
+                  <AmountField
                     value={s.cost}
+                    currency={s.currency}
                     onChange={(n) => setStay(s.id, { cost: n })}
-                    className={inputClass}
+                    onCurrencyChange={(c) => setStay(s.id, { currency: c })}
                   />
                 </Field>
                 <Field label="Zahlen bis">
@@ -480,11 +484,12 @@ function PlanTab() {
                 </a>
               )}
               <FieldRow>
-                <Field label="Kosten (€)">
-                  <NumberField
+                <Field label="Kosten">
+                  <AmountField
                     value={a.cost}
+                    currency={a.currency}
                     onChange={(n) => setActivity(a.id, { cost: n })}
-                    className={inputClass}
+                    onCurrencyChange={(c) => setActivity(a.id, { currency: c })}
                   />
                 </Field>
                 <Field label="Zahlen bis">
@@ -543,6 +548,33 @@ function PlanTab() {
               Bereits bezahlt: <Money value={totals.paid} /> · offen: <Money value={totals.open} />
             </p>
           </div>
+
+          {/* Was ohne Kurs nicht umgerechnet werden konnte, wird ausgewiesen
+              statt als 0 in die Summe zu fallen — genau das fiele niemandem
+              auf und die Gesamtsumme waere still zu niedrig. */}
+          {Object.keys(totals.pending).length > 0 && (
+            <div className="mt-3 rounded-2xl bg-destructive/10 px-3 py-2.5 text-xs text-destructive">
+              <p className="font-semibold">Noch nicht eingerechnet</p>
+              <p className="mt-0.5">
+                {Object.entries(totals.pending)
+                  .map(([c, v]) => money(v, c))
+                  .join(" · ")}{" "}
+                — dafür fehlt ein Kurs. Trag ihn auf der Startseite ein.
+              </p>
+            </div>
+          )}
+
+          {/* Die Wahrheit vor jeder Umrechnung: was tatsaechlich in welcher
+              Waehrung eingegeben wurde. */}
+          {Object.keys(totals.byCurrency).length > 1 && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              Eingegeben:{" "}
+              {Object.entries(totals.byCurrency)
+                .filter(([, v]) => v > 0)
+                .map(([c, v]) => money(v, c))
+                .join(" · ")}
+            </p>
+          )}
 
           {/* Geplant und tatsaechlich bleiben getrennt: `total` ist die
               Schaetzung aus diesem Bildschirm, `actual` kommt ausschliesslich
