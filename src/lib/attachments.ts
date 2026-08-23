@@ -60,6 +60,17 @@ function tx<T>(mode: IDBTransactionMode, fn: (store: IDBObjectStore) => IDBReque
 }
 
 export async function addAttachment(ownerId: string, file: File): Promise<AttachmentInfo> {
+  // Beim ERSTEN Anhang um dauerhaften Speicher bitten, nicht erst beim Export.
+  //
+  // Ohne die Zusage gilt IndexedDB als "best effort": wird der Geraetespeicher
+  // knapp, loescht der Browser ihn wortlos. Auf einer Reise entstehen die
+  // Fotos ueber Tage, der Export kommt — wenn ueberhaupt — am Ende. Wer erst
+  // dann fragt, hat die Fotos moeglicherweise schon verloren.
+  //
+  // Die Bitte laeuft nebenher: sie darf das Speichern weder verzoegern noch
+  // scheitern lassen.
+  void requestPersistence();
+
   const item: Attachment = {
     id: `${Date.now()}-${Math.round(Math.random() * 1e6)}`,
     ownerId,
