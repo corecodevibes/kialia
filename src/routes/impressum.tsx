@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { H2, LegalPage, Todo } from "@/components/app/legal";
+import { AnbieterBlock, H2, LegalPage } from "@/components/app/legal";
 
 export const Route = createFileRoute("/impressum")({
   head: () => ({ meta: [{ title: "Impressum – kialia" }] }),
@@ -10,14 +10,10 @@ function ImprintPage() {
   return (
     <LegalPage title="Impressum">
       <H2>Angaben zum Anbieter</H2>
-      <Todo>
-        Name, Anschrift und E-Mail-Adresse des Betreibers. Bei einer Firma zusätzlich Rechtsform,
-        Registereintrag und Vertretungsberechtigte, bei Umsatzsteuerpflicht die
-        Umsatzsteuer-Identifikationsnummer.
-      </Todo>
+      <AnbieterBlock mitFirma />
 
       <H2>Verantwortlich für den Inhalt</H2>
-      <Todo>Name und Anschrift — in der Regel dieselben Angaben wie oben.</Todo>
+      <AnbieterBlock />
 
       <H2>Haftung für Inhalte und Links</H2>
       <p>

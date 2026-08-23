@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { H2, LegalPage, Todo } from "@/components/app/legal";
+import { AnbieterBlock, H2, LegalPage } from "@/components/app/legal";
 
 export const Route = createFileRoute("/datenschutz")({
   head: () => ({ meta: [{ title: "Datenschutz – kialia" }] }),
@@ -20,7 +20,7 @@ function PrivacyPage() {
       <p className="text-xs">Stand: 23. August 2026</p>
 
       <H2>Verantwortlicher</H2>
-      <Todo>Name und Anschrift des Betreibers, dazu eine Kontaktadresse.</Todo>
+      <AnbieterBlock />
 
       <H2>Was gespeichert wird — und wo</H2>
       <p>

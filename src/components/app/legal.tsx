@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import logo from "@/assets/kialia-logo.png";
+import { ANBIETER, anbieterVollstaendig } from "@/lib/anbieter";
 
 /**
  * Gemeinsame Huelle fuer Datenschutz und Impressum.
@@ -60,5 +61,50 @@ export function LegalFooter() {
         Impressum
       </Link>
     </div>
+  );
+}
+
+/**
+ * Die Anbieterangaben — oder der Hinweis, dass sie fehlen.
+ *
+ * Beide Seiten brauchen denselben Block. Ihn zweimal zu schreiben hiesse,
+ * dass eine der beiden Fassungen irgendwann veraltet.
+ */
+export function AnbieterBlock({ mitFirma = false }: { mitFirma?: boolean }) {
+  if (!anbieterVollstaendig()) {
+    return (
+      <Todo>
+        Name, Anschrift und E-Mail-Adresse des Betreibers. Einzutragen in{" "}
+        <code>src/lib/anbieter.ts</code> — Impressum und Datenschutz lesen beide von dort.
+      </Todo>
+    );
+  }
+  return (
+    <address className="not-italic">
+      {ANBIETER.name}
+      <br />
+      {ANBIETER.strasse}
+      <br />
+      {ANBIETER.ort}
+      <br />
+      {ANBIETER.land}
+      <br />
+      <a href={`mailto:${ANBIETER.email}`} className="underline underline-offset-2">
+        {ANBIETER.email}
+      </a>
+      {mitFirma && ANBIETER.firmenangaben ? (
+        <>
+          <br />
+          <br />
+          {ANBIETER.firmenangaben}
+        </>
+      ) : null}
+      {mitFirma && ANBIETER.ustId ? (
+        <>
+          <br />
+          USt-IdNr.: {ANBIETER.ustId}
+        </>
+      ) : null}
+    </address>
   );
 }
