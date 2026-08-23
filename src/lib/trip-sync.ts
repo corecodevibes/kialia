@@ -69,11 +69,13 @@ let lastSync = 0;
  * Abgleich. Das kostet nicht nur Netz: jeder Abgleich schreibt den lokalen
  * Speicher neu und koennte eine gerade laufende Eingabe ueberholen.
  */
-export async function syncTripsThrottled(): Promise<void> {
+export async function syncTripsThrottled(): Promise<{ ok: boolean; error?: string }> {
   const now = Date.now();
-  if (now - lastSync < 20_000) return;
+  // Uebersprungen ist kein Fehler — sonst blinkte bei jedem Bildschirmwechsel
+  // innerhalb der Sperrfrist eine Warnung auf.
+  if (now - lastSync < 20_000) return { ok: true };
   lastSync = now;
-  await syncTrips();
+  return syncTrips();
 }
 
 export async function syncTrips(): Promise<{ ok: boolean; error?: string }> {
@@ -154,14 +156,25 @@ export async function syncTrips(): Promise<{ ok: boolean; error?: string }> {
 
     const row = byRemoteId.get(trip.remoteId);
     if (!row) {
-      // Auf dem Server nicht mehr vorhanden: jemand hat sie gelöscht oder uns
-      // entfernt. Wir behalten sie NICHT — sonst taucht sie beim nächsten
-      // Abgleich immer wieder auf.
+      // Auf dem Server nicht auffindbar. Frueher wurde die Reise hier lokal
+      // verworfen, um zu verhindern, dass eine geloeschte Reise immer wieder
+      // auftaucht. Das war die falsche Abwaegung: die Antwort kann auch leer
+      // sein, weil eine Mitgliedschaft fehlt oder eine Regel gerade nicht
+      // greift — und dann loescht ein Abgleich wortlos eine ganze Reise vom
+      // Geraet. Genau dieses Bild ("war da, ist weg") hat Annalina gesehen.
+      //
+      // Jetzt bleibt sie liegen und wird nur abgekoppelt: sie wird nicht mehr
+      // hochgeschoben, taucht also auch nicht als Kopie wieder auf, und die
+      // Oberflaeche kann sagen, dass sie nicht mehr geteilt ist.
+      merged.push({ ...trip, orphan: true });
+      seen.add(trip.remoteId);
       continue;
     }
     seen.add(row.id);
     const localNewer = (trip.updatedAt ?? "") > row.updated_at;
-    merged.push(localNewer ? trip : fromRow(row));
+    // Taucht sie wieder auf, ist die Abkopplung aufgehoben.
+    const next = localNewer ? trip : fromRow(row);
+    merged.push({ ...next, orphan: false });
   }
 
   // 2. Reisen, die es nur auf dem Server gibt — etwa nach einem Beitritt.
@@ -178,7 +191,9 @@ export async function syncTrips(): Promise<{ ok: boolean; error?: string }> {
 
 /** Schiebt eine einzelne Reise hoch. Ohne remoteId passiert nichts. */
 export async function pushTrip(trip: Trip): Promise<void> {
-  if (!trip.remoteId) return;
+  // Abgekoppelte Reisen nicht hochschieben — sonst legt der naechste Abgleich
+  // eine zweite Fassung an und das Problem kehrt als Dublette zurueck.
+  if (!trip.remoteId || trip.orphan) return;
   await db
     .from("trips")
     .update({ data: payload(trip) as never })

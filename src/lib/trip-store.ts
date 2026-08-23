@@ -184,6 +184,14 @@ export type Trip = {
   personColors?: Record<string, string>;
   /** Die uuid in Supabase, sobald die Reise dort liegt. Leer = nur lokal. */
   remoteId?: string;
+  /**
+   * Der Server kennt diese Reise nicht mehr.
+   *
+   * Sie bleibt auf dem Geraet lesbar, wird aber nicht mehr hochgeschoben.
+   * Loeschen waere die schlechtere Wahl: eine leere Antwort kann auch von
+   * einer fehlenden Mitgliedschaft kommen, und dann waere die Reise weg.
+   */
+  orphan?: boolean;
   /** Einladungscode der geteilten Reise. */
   inviteCode?: string;
   /** Stand der zuletzt geladenen Fassung — entscheidet, wer gewinnt. */

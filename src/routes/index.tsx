@@ -366,6 +366,20 @@ function HomeTab() {
           </details>
         </Card>
 
+        {trip.orphan && (
+          <div
+            role="status"
+            className="rounded-2xl bg-destructive/10 px-4 py-3 text-xs text-destructive"
+          >
+            <p className="font-semibold">Diese Reise ist nicht mehr geteilt</p>
+            <p className="mt-0.5">
+              Der Server kennt sie nicht mehr — vielleicht wurde sie gelöscht oder deine
+              Mitgliedschaft ist weg. Sie bleibt auf diesem Gerät vollständig lesbar, wird aber
+              nicht mehr abgeglichen. Über den Einladungscode könnt ihr sie neu verbinden.
+            </p>
+          </div>
+        )}
+
         <AiFeatures />
 
         <Card>

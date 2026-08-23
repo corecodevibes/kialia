@@ -35,12 +35,20 @@ export function AppShell({
 
   // Abgleich läuft für alle Bildschirme an einer Stelle: einmal holen, danach
   // bei eigenen Änderungen hochladen und auf fremde horchen.
+  const [syncError, setSyncError] = useState<string | null>(null);
+
   useEffect(() => {
     if (!session) return;
-    void syncTripsThrottled();
+    // Das Ergebnis wurde frueher verworfen. Schlug der Abgleich fehl, sah das
+    // exakt aus wie "es gibt keine Reise" — kein Hinweis, kein Unterschied.
+    // Wer nicht weiss, dass etwas schiefging, sucht den Fehler bei sich.
+    const report = (r: { ok: boolean; error?: string }) =>
+      setSyncError(r.ok ? null : (r.error ?? "unbekannt"));
+
+    void syncTripsThrottled().then(report);
     const stopPush = startAutoSync();
     const stopWatch = watchRemote(() => {
-      void syncTrips();
+      void syncTrips().then(report);
     });
     return () => {
       stopPush();
@@ -161,6 +169,18 @@ export function AppShell({
       </header>
 
       <main className="relative z-10 mx-auto max-w-lg px-4 pb-28 pt-1 print:pb-0 print:pt-0">
+        {syncError && (
+          <div
+            role="status"
+            className="mx-auto mb-3 max-w-md rounded-2xl bg-destructive/10 px-4 py-2.5 text-xs text-destructive"
+          >
+            <p className="font-semibold">Abgleich fehlgeschlagen</p>
+            <p className="mt-0.5">
+              Was du hier siehst, kann veraltet sein — und eine geteilte Reise kann fehlen. Deine
+              Eingaben bleiben auf dem Gerät.
+            </p>
+          </div>
+        )}
         {children}
       </main>
 
