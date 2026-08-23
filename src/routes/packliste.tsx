@@ -1,3 +1,4 @@
+import { useMyName } from "@/lib/auth";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Check, Plus, Trash2, Undo2, X, ChevronDown, ChevronRight } from "lucide-react";
@@ -52,7 +53,8 @@ function PackingTab() {
 
   const categories = trip.packing;
   const total = categories.reduce((s, c) => s + c.items.length, 0);
-  const people = travellerNames(trip);
+  const myName = useMyName();
+  const people = travellerNames(trip, myName);
 
   /**
    * Zuletzt Geloeschtes, je Kategorie eines.

@@ -926,13 +926,17 @@ export function missingDiaryDays(trip: Trip): { day: number; date: string }[] {
  * "Ich" steht immer vorn: die eigene Person ist der haeufigste Fall und soll
  * nicht erst getippt werden muessen.
  */
-export function travellerNames(trip: Trip): string[] {
+export function travellerNames(trip: Trip, myName?: string): string[] {
   const raw = (trip.companions ?? "")
     .split(/,|\/|&|\bund\b/gi)
     .map((v) => v.trim())
     .filter(Boolean)
     .filter((v) => v.toLowerCase() !== "ich");
-  return ["Ich", ...Array.from(new Set(raw))];
+  // Der eigene Name statt "Ich": die Reise ist geteilt, und "Ich" bedeutet auf
+  // jedem Geraet jemand anderes. Steht in der Packliste "Ich", weiss der
+  // Partner nicht, wer gemeint ist — er liest sein eigenes "Ich".
+  const me = (myName ?? "").trim() || "Ich";
+  return [me, ...Array.from(new Set(raw)).filter((v) => v.toLowerCase() !== me.toLowerCase())];
 }
 
 /**

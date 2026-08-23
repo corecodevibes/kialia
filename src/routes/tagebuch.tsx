@@ -1,3 +1,4 @@
+import { useMyName } from "@/lib/auth";
 import { ExpenseField } from "@/components/app/expense-field";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -109,7 +110,8 @@ function DiaryTab() {
   const set = (id: string, patch: Partial<DiaryEntry>) =>
     update({ diary: trip.diary.map((e) => (e.id === id ? { ...e, ...patch } : e)) });
 
-  const people = travellerNames(trip);
+  const myName = useMyName();
+  const people = travellerNames(trip, myName);
   const missing = missingDiaryDays(trip);
   const today = todayLocalISO();
 

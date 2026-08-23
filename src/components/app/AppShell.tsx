@@ -7,7 +7,7 @@ import { startAutoSync, syncTrips, watchRemote } from "@/lib/trip-sync";
 import { Home, Lightbulb, Wallet, BookOpen, Backpack, MapPin, Settings } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import logo from "@/assets/travelivibes-logo.png";
-import { useProfile, useSession } from "@/lib/auth";
+import { useProfile, useSession, useMyName } from "@/lib/auth";
 import { onboardingGate, readOnboardedCache } from "@/lib/onboarding-gate";
 
 const tabs = [
@@ -440,7 +440,8 @@ export function PersonColors({
   onChange: (colors: Record<string, string>) => void;
 }) {
   const [editing, setEditing] = useState<string | null>(null);
-  const people = travellerNames(trip);
+  const myName = useMyName();
+  const people = travellerNames(trip, myName);
 
   if (people.length <= 1) return null;
 

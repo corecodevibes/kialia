@@ -77,3 +77,16 @@ export function useProfile(userId: string | undefined) {
 export async function signOut() {
   await supabase.auth.signOut();
 }
+
+/**
+ * Der eigene Anzeigename.
+ *
+ * Faellt auf "Ich" zurueck, solange kein Profilname gesetzt ist — aber nur
+ * dann. In einer geteilten Reise ist "Ich" mehrdeutig, deshalb soll ueberall
+ * der echte Name stehen.
+ */
+export function useMyName(): string {
+  const { session } = useSession();
+  const { profile } = useProfile(session?.user.id);
+  return (profile?.name ?? "").trim() || "Ich";
+}

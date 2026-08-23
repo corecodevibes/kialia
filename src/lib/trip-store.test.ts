@@ -581,3 +581,19 @@ describe("tripTotals — mehrere Währungen", () => {
     expect(tripTotals(t).pending.THB).toBe(50);
   });
 });
+
+describe("travellerNames — der eigene Name statt 'Ich'", () => {
+  test("nimmt den Profilnamen, damit er auf beiden Geräten dasselbe bedeutet", () => {
+    const t = tripWith({ companions: "Annalina" });
+    expect(travellerNames(t, "Steffen")).toEqual(["Steffen", "Annalina"]);
+  });
+
+  test("ohne Profilnamen bleibt es bei 'Ich'", () => {
+    expect(travellerNames(tripWith({ companions: "Annalina" }))).toEqual(["Ich", "Annalina"]);
+  });
+
+  test("der eigene Name taucht nicht doppelt auf, wenn er auch unter Mitreisenden steht", () => {
+    const t = tripWith({ companions: "Steffen, Annalina" });
+    expect(travellerNames(t, "Steffen")).toEqual(["Steffen", "Annalina"]);
+  });
+});
