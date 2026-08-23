@@ -29,6 +29,7 @@ import {
 } from "@/lib/trip-store";
 import { useVoiceMemo } from "@/lib/use-voice-memo";
 import { transcribe } from "@/lib/transcribe";
+import { extractDay, filledEntries, type DayFields } from "@/lib/day-extract";
 
 export const Route = createFileRoute("/tagebuch")({
   head: () => ({
@@ -112,6 +113,14 @@ function DiaryTab() {
 
   const set = (id: string, patch: Partial<DiaryEntry>) =>
     update({ diary: trip.diary.map((e) => (e.id === id ? { ...e, ...patch } : e)) });
+
+  // Das Ergebnis des Sortierens wartet auf Bestaetigung — uebernommen wird
+  // nichts von selbst. `take` merkt sich, was abgehakt wurde.
+  const [sorted, setSorted] = useState<{
+    id: string;
+    fields: DayFields;
+    take: Partial<Record<keyof DayFields, boolean>>;
+  } | null>(null);
 
   const myName = useMyName();
   const people = travellerNames(trip, myName);
@@ -206,6 +215,54 @@ function DiaryTab() {
         },
       ],
     });
+  }
+
+  /**
+   * Den ganzen Tag einsprechen statt Feld fuer Feld.
+   *
+   * Zwei Schritte: verschriftlichen, dann sortieren. Scheitert der zweite,
+   * ist der Text NICHT verloren — er landet dann im Textfeld, so wie bisher.
+   * Ein Zusatzschritt darf nie das Ergebnis des ersten vernichten.
+   */
+  async function toggleWholeDay(entry: DiaryEntry) {
+    const key = `${entry.id}:ganz`;
+    if (voice.recording && activeKey === key) {
+      setActiveKey(null);
+      const audio = await voice.stop();
+      if (!audio) return;
+      setBusyKey(key);
+      setSorted(null);
+      try {
+        const res = await transcribe(audio, "audio/wav");
+        if (!res.ok) {
+          voice.setError(
+            res.askInstead
+              ? `${res.error} Schreib es kurz auf — die Felder sind offen.`
+              : res.error,
+          );
+          return;
+        }
+        const aus = await extractDay(res.text);
+        if (aus.ok) {
+          setSorted({ id: entry.id, fields: aus.fields, take: {} });
+        } else {
+          // Sortieren ging nicht — dann wenigstens der Text.
+          const prev = entry.text;
+          set(entry.id, { text: prev ? `${prev}\n${res.text}` : res.text });
+          voice.setError(`${aus.error} Der Text steht im Feld „Was hast du heute erlebt".`);
+        }
+      } catch {
+        voice.setError("Das hat nicht geklappt. Schreib es kurz auf.");
+      } finally {
+        setBusyKey(null);
+      }
+      return;
+    }
+    if (voice.recording) voice.cancel();
+    setActiveKey(key);
+    voice.setError(null);
+    setSorted(null);
+    await voice.start();
   }
 
   async function toggleRecording(entry: DiaryEntry, field: FieldKey) {
@@ -332,6 +389,26 @@ function DiaryTab() {
                 <h2 className="min-w-0 flex-1 truncate text-base font-semibold">
                   {e.day}. Reisetag
                 </h2>
+                {/* Einmal sprechen, alles fuellen. Die Knoepfe an den
+                    einzelnen Feldern bleiben — fuer den Nachtrag, wenn nur
+                    eine Kleinigkeit fehlt. */}
+                <button
+                  type="button"
+                  onClick={() => void toggleWholeDay(e)}
+                  disabled={busyKey === `${e.id}:ganz`}
+                  aria-label="Ganzen Tag einsprechen"
+                  className={`grid size-9 shrink-0 place-items-center rounded-xl transition ${
+                    voice.recording && activeKey === `${e.id}:ganz`
+                      ? "bg-destructive text-background"
+                      : "acrylic-warm text-background"
+                  } disabled:opacity-50`}
+                >
+                  {busyKey === `${e.id}:ganz` ? (
+                    <span className="text-[10px] font-bold">…</span>
+                  ) : (
+                    <Mic className="size-4" />
+                  )}
+                </button>
                 <div className="w-[7.75rem] shrink-0">
                   <input
                     type="date"
@@ -360,6 +437,74 @@ function DiaryTab() {
                   onClick={() => update({ diary: trip.diary.filter((x) => x.id !== e.id) })}
                 />
               </div>
+
+              {sorted && sorted.id === e.id && (
+                <div className="mt-3 rounded-2xl bg-secondary/50 p-3">
+                  <p className="text-sm font-semibold">Das habe ich verstanden</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    Hak ab, was stimmen soll. Was du weglässt, bleibt wie es war.
+                  </p>
+                  <ul className="mt-2 space-y-1.5">
+                    {filledEntries(sorted.fields).map(([k, label]) => (
+                      <li key={k}>
+                        <label className="flex items-start gap-2">
+                          <input
+                            type="checkbox"
+                            checked={sorted.take[k] ?? true}
+                            onChange={(ev) =>
+                              setSorted({
+                                ...sorted,
+                                take: { ...sorted.take, [k]: ev.target.checked },
+                              })
+                            }
+                            className="mt-0.5 size-4 shrink-0 accent-[var(--primary)]"
+                          />
+                          <span className="min-w-0 flex-1 text-xs">
+                            <span className="font-semibold">{label}: </span>
+                            <span className="text-muted-foreground">
+                              {k === "spent"
+                                ? `${sorted.fields.spent} ${trip.currency || "EUR"}`
+                                : String(sorted.fields[k])}
+                            </span>
+                          </span>
+                        </label>
+                      </li>
+                    ))}
+                  </ul>
+                  {filledEntries(sorted.fields).length === 0 && (
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Nichts Verwertbares dabei — sprich nochmal oder schreib es auf.
+                    </p>
+                  )}
+                  <div className="mt-3 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSorted(null)}
+                      className="flex-1 rounded-xl bg-card py-2 text-xs font-semibold"
+                    >
+                      Verwerfen
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        // Nur Abgehaktes, und nur was auch Inhalt hat.
+                        const patch: Partial<DiaryEntry> = {};
+                        for (const [k] of filledEntries(sorted.fields)) {
+                          if (sorted.take[k] === false) continue;
+                          const v = sorted.fields[k];
+                          if (k === "spent") patch.spent = Number(v);
+                          else (patch as Record<string, unknown>)[k] = String(v);
+                        }
+                        set(e.id, patch);
+                        setSorted(null);
+                      }}
+                      className="acrylic-warm flex-1 rounded-xl py-2 text-xs font-semibold text-background"
+                    >
+                      Übernehmen
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Eine Frage, ein Feld. Vier gleich laute Felder sind ein
                   Formular — abends nach einem langen Reisetag fuellt das
