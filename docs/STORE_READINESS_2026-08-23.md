@@ -19,29 +19,23 @@ Rechner, ein Build-Server für die Store-Builds — hätte weiter Lovables
 Infrastruktur gebraucht. Prüfsummen waren identisch, am laufenden Code ändert
 sich nichts. Mit leerem Cache verifiziert.
 
-Bewusst **nicht** angefasst: der localStorage-Schlüssel `travelivibes.trips.v3`
-und der Dateiname `travelivibes-logo.png`. Beide stammen aus einem Vorprojekt,
-nicht aus Lovable. Der Schlüssel ist tragend — ihn umzubenennen würde alle
-bereits erfassten Reisen verwaisen lassen. Der Dateiname ist kosmetisch, taucht
-aber in den Netzwerkaufrufen auf; falls das stört, braucht es eine Umbenennung
-plus die vier Importe.
+Der Dateiname `travelivibes-logo.png` ist inzwischen `kialia-logo.png`. Bewusst
+**nicht** angefasst: der localStorage-Schlüssel `travelivibes.trips.v3`. Er ist
+tragend — ihn umzubenennen würde jede bereits erfasste Reise unsichtbar machen.
+Das steht jetzt als Kommentar im Code, damit es niemand später "aufräumt".
 
 ## Blocker vor einer Einreichung
 
 1. **SMTP nicht eingerichtet.** Niemand außer euch beiden kann sich registrieren —
    die Bestätigungsmail geht nicht raus. Blockiert jeden Tester und jeden Review,
    weil Apple und Google einen funktionierenden Demo-Zugang verlangen. Brevo-Daten
-   liegen bei dir.
-2. **Keine Datenschutzerklärung.** Pflicht in beiden Stores, unabhängig vom Preis.
-   Muss benennen: E-Mail und Name (Supabase, EU/Frankfurt), Reiseinhalte,
-   und — wichtig — dass Belegfotos, Sprachaufnahmen und das Reiseziel zur
-   Verarbeitung an OpenAI gehen. Braucht eine öffentliche URL und einen Link
-   in der App.
-3. **Impressum.** Für einen Anbieter in der DACH-Region Pflicht, sobald die App
-   öffentlich verfügbar ist.
-4. **App-Identität.** `package.json` heißt `tanstack_start_ts` und hat keine
-   Version. Vor dem ersten Build braucht es Bundle-ID (z. B. `app.kialia.app`),
-   Versions- und Build-Nummer.
+   liegen bei dir. **Das ist der einzige Punkt, der niemand anders erledigen kann.**
+2. **Verantwortlicher und Kontaktadresse.** Datenschutz und Impressum stehen als
+   Seiten unter `/datenschutz` und `/impressum`, aus Login und Einstellungen
+   verlinkt. Der Datenschutztext ist vollständig und beschreibt die tatsächlichen
+   Datenflüsse. Offen sind nur Name, Anschrift und eine Kontaktadresse — auf den
+   Seiten rot markiert. Bei einer Firma zusätzlich Rechtsform, Register und
+   gegebenenfalls die USt-IdNr.
 
 ## Vorbereitet
 
@@ -50,6 +44,8 @@ plus die vier Importe.
   **nicht** verpflichtend.
 - Icons: 180/192/512/maskable/**1024** liegen unter `public/icons/`.
 - Manifest vollständig (Name, Farben, Ausrichtung, maskable Icon).
+- App-Identität: `package.json` heißt `kialia`, Version 1.0.0.
+- Datenschutz und Impressum als eigene, anmeldefreie Seiten.
 - HTTPS, eigene Domain, EU-Datenhaltung.
 - Schrift mitgeliefert — die App rendert offline korrekt und ruft keinen
   Dritten auf.
