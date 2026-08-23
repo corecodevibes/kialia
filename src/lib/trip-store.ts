@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 
 export type PayStatus = "offen" | "reserviert" | "bezahlt";
 
@@ -281,21 +281,52 @@ function save(store: Store) {
 
 const fallback: Store = { trips: [], activeId: "" };
 
-export function useTrip() {
-  const [store, setStore] = useState<Store>(fallback);
-  const [ready, setReady] = useState(false);
+/* ---------------------------------------------------------------------------
+ * Ein geteilter Speicher fuer alle Komponenten
+ *
+ * Vorher hielt useTrip() den Zustand in useState — jeder Aufruf bekam also
+ * seine EIGENE Kopie. Die Kopfzeile und der Bildschirminhalt rufen beide
+ * useTrip() auf und wussten nichts voneinander: was man im Formular tippte,
+ * erreichte die Kopfzeile nie. Sichtbar wurde das an einer Flagge, die zu
+ * einem Ziel gehoerte, das gar nicht mehr eingetragen war.
+ * ------------------------------------------------------------------------ */
 
-  useEffect(() => {
-    setStore(loadStore());
-    setReady(true);
-  }, []);
+let current: Store = fallback;
+let loaded = false;
+const listeners = new Set<() => void>();
+
+function emit() {
+  for (const l of listeners) l();
+}
+
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+function ensureLoaded() {
+  if (loaded || typeof window === "undefined") return;
+  loaded = true;
+  current = loadStore();
+}
+
+export function useTrip() {
+  // Beim Rendern auf dem Server bleibt es beim leeren Fallback; im Browser wird
+  // einmalig geladen, bevor der erste Snapshot gezogen wird.
+  ensureLoaded();
+  const store = useSyncExternalStore(
+    subscribe,
+    () => current,
+    () => fallback,
+  );
+  const ready = loaded;
 
   const mutate = useCallback((fn: (s: Store) => Store) => {
-    setStore((prev) => {
-      const next = fn(prev);
-      save(next);
-      return next;
-    });
+    current = fn(current);
+    save(current);
+    emit();
   }, []);
 
   const update = useCallback(

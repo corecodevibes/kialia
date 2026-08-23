@@ -115,11 +115,14 @@ export function AppShell({
             />
           )}
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[11px] font-semibold uppercase tracking-[0.18em] text-foreground/55">
-              kialia · κιάλια
+            {/* Der Bildschirmname ist die Nebensache, die Reise die Identitaet.
+                Vorher stand im Plan-Tab "Plan" und auf Home "Kreta" — zwei
+                verschiedene Dinge an derselben Stelle. */}
+            <p className="truncate text-[10.5px] font-semibold uppercase tracking-[0.2em] text-foreground/55">
+              {title || "kialia · κιάλια"}
             </p>
-            <h1 className="truncate text-lg font-extrabold leading-tight tracking-tight text-foreground">
-              {title}
+            <h1 className="truncate text-[1.35rem] font-extrabold leading-tight tracking-[-0.02em] text-foreground">
+              {trip.destination || "kialia"}
             </h1>
           </div>
           <button
@@ -288,13 +291,13 @@ export const inputClass =
   "block w-full min-w-0 max-w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground transition focus:border-primary";
 
 /** Datums-Felder: gleiches Aussehen, aber kompakter, damit nichts abgeschnitten wird. */
-export const dateInputClass = `${inputClass} px-2.5 text-[13px] [&::-webkit-calendar-picker-indicator]:ml-0`;
+export const dateInputClass = `${inputClass} box-border appearance-none px-2.5 text-[13px] [&::-webkit-date-and-time-value]:text-left [&::-webkit-calendar-picker-indicator]:ml-0`;
 
 export const selectClass = `${inputClass} appearance-none bg-background pr-8`;
 
 export function SectionTitle({ children }: { children: ReactNode }) {
   return (
-    <h2 className="mb-2 mt-6 px-1 text-[11px] font-bold uppercase tracking-[0.16em] text-foreground/65">
+    <h2 className="mb-2 mt-7 px-1 text-[10.5px] font-semibold uppercase tracking-[0.2em] text-foreground/55">
       {children}
     </h2>
   );
@@ -303,7 +306,7 @@ export function SectionTitle({ children }: { children: ReactNode }) {
 /** Einheitliche Überschrift innerhalb einer Karte – überall gleich. */
 export function CardTitle({ children }: { children: ReactNode }) {
   return (
-    <h2 className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+    <h2 className="text-[0.95rem] font-semibold leading-snug tracking-[-0.01em] text-foreground">
       {children}
     </h2>
   );

@@ -80,7 +80,7 @@ function IdeasTab() {
   if (!hasTrip) return <NoTripYet what="Eine Ideensammlung" />;
 
   return (
-    <AppShell title="Ideensammlung" subtitle="Alles, was ihr sehen, essen und erleben wollt.">
+    <AppShell title="Ideen" subtitle="Alles, was ihr sehen, essen und erleben wollt.">
       <div className="space-y-4">
         {moved && (
           <p role="status" className="rounded-2xl bg-secondary px-4 py-3 text-sm">

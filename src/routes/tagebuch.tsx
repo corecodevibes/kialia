@@ -192,7 +192,7 @@ function DiaryTab() {
 
   return (
     <AppShell
-      title="Reisetagebuch"
+      title="Tagebuch"
       subtitle={
         voiceEnabled
           ? "Sprich deinen Tag ein – wir schreiben ihn auf."

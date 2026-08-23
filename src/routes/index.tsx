@@ -63,6 +63,33 @@ function HomeTab() {
   const fileInput = useRef<HTMLInputElement>(null);
   const [ioMsg, setIoMsg] = useState<string | null>(null);
   const [newDest, setNewDest] = useState("");
+  const [draft, setDraft] = useState({
+    destination: "",
+    startDate: "",
+    endDate: "",
+    companions: "",
+    people: 2,
+  });
+
+  /**
+   * Legt die erste Reise mit allem an, was schon bekannt ist.
+   *
+   * Bewusst erst beim Absenden: eine Reise entsteht, wenn jemand sie anlegt —
+   * nicht schon, weil die App gestartet wurde.
+   */
+  function createTrip(e: React.FormEvent) {
+    e.preventDefault();
+    const dest = draft.destination.trim();
+    if (!dest) return;
+    addTrip(dest);
+    update({
+      startDate: draft.startDate,
+      endDate: draft.endDate,
+      companions: draft.companions.trim(),
+      travellers: draft.people || 1,
+    });
+    setDraft({ destination: "", startDate: "", endDate: "", companions: "", people: 2 });
+  }
   const days = tripDays(trip);
   const totals = tripTotals(trip);
 
@@ -93,41 +120,82 @@ function HomeTab() {
 
   if (!ready) return <div className="min-h-screen bg-background" />;
 
-  // Noch keine Reise: eine Frage, ein Feld, sonst nichts. Vorher stand hier
-  // eine namenlose Platzhalter-Reise "ohne Datum" — die sieht aus wie ein
-  // Fehler und ist das Erste, was ein neuer Nutzer sieht.
+  // Noch keine Reise: eine Einladung und ein vollstaendiges Formular. Vorher
+  // stand hier eine namenlose Platzhalter-Reise "ohne Datum" — das Erste, was
+  // ein neuer Nutzer sah, sah aus wie ein Fehler.
   if (!hasTrip) {
     return (
-      <AppShell title="Neue Reise" subtitle="">
-        <div className="flex min-h-[55vh] flex-col justify-center">
-          <h2 className="text-2xl font-extrabold leading-tight tracking-tight">
-            Wohin geht die nächste Reise?
+      <AppShell title="" subtitle="">
+        <div className="pt-2">
+          <h2 className="text-[1.75rem] font-extrabold leading-[1.15] tracking-[-0.02em]">
+            Let&rsquo;s start a new adventure
           </h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Land oder Region genügt. Alles Weitere — Plan, Budget, Packliste, Tagebuch — gehört
-            danach zu dieser Reise.
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            Sag uns, wohin es geht. Plan, Budget, Packliste und Tagebuch gehören danach zu genau
+            dieser Reise.
           </p>
 
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              const v = newDest.trim();
-              if (!v) return;
-              addTrip(v);
-              setNewDest("");
-            }}
-            className="mt-6"
-          >
-            <input
-              value={newDest}
-              onChange={(e) => setNewDest(e.target.value)}
-              placeholder="z. B. Griechenland, Vietnam, Norwegen …"
-              autoFocus
-              className={`${inputClass} py-3.5 text-base`}
-            />
-            <PrimaryButton type="submit" disabled={!newDest.trim()} className="mt-3">
+          <form onSubmit={createTrip} className="mt-6 space-y-4">
+            <Card>
+              <Field label="Wohin geht die Reise?">
+                <input
+                  value={draft.destination}
+                  onChange={(e) => setDraft({ ...draft, destination: e.target.value })}
+                  placeholder="z. B. Griechenland, Vietnam, Norwegen …"
+                  autoFocus
+                  className={inputClass}
+                />
+              </Field>
+
+              <div className="mt-3">
+                <FieldRow>
+                  <Field label="Von">
+                    <input
+                      type="date"
+                      value={draft.startDate}
+                      onChange={(e) => setDraft({ ...draft, startDate: e.target.value })}
+                      className={dateInputClass}
+                    />
+                  </Field>
+                  <Field label="Bis">
+                    <input
+                      type="date"
+                      value={draft.endDate}
+                      min={draft.startDate || undefined}
+                      onChange={(e) => setDraft({ ...draft, endDate: e.target.value })}
+                      className={dateInputClass}
+                    />
+                  </Field>
+                </FieldRow>
+              </div>
+
+              <div className="mt-3">
+                <FieldRow>
+                  <Field label="Mit wem?">
+                    <input
+                      value={draft.companions}
+                      onChange={(e) => setDraft({ ...draft, companions: e.target.value })}
+                      placeholder="Partner, Familie …"
+                      className={inputClass}
+                    />
+                  </Field>
+                  <Field label="Personen">
+                    <NumberField
+                      value={draft.people}
+                      onChange={(n) => setDraft({ ...draft, people: n })}
+                      className={inputClass}
+                    />
+                  </Field>
+                </FieldRow>
+              </div>
+            </Card>
+
+            <PrimaryButton type="submit" disabled={!draft.destination.trim()}>
               <Plus className="size-4" /> Reise anlegen
             </PrimaryButton>
+            <p className="text-center text-xs text-muted-foreground">
+              Nur das Ziel ist nötig. Alles andere kannst du später ergänzen.
+            </p>
           </form>
         </div>
       </AppShell>
@@ -135,7 +203,7 @@ function HomeTab() {
   }
 
   return (
-    <AppShell title={trip.destination} subtitle={tripSubtitle(trip, days)}>
+    <AppShell title="Übersicht" subtitle={tripSubtitle(trip, days)}>
       <div className="space-y-4">
         {/* Der Reisewechsel lebt nur hier. In allen anderen Tabs gilt genau
             diese eine Reise — sonst weiss niemand, worauf sich ein Budget
@@ -190,8 +258,8 @@ function HomeTab() {
           </div>
 
           <details className="mt-3">
-            <summary className="cursor-pointer list-none text-xs font-semibold text-muted-foreground">
-              + Weitere Reise
+            <summary className="flex cursor-pointer list-none items-center justify-center gap-1.5 rounded-2xl border border-dashed border-foreground/25 bg-card/70 py-3 text-sm font-semibold text-foreground transition hover:bg-card">
+              <Plus className="size-4" /> Weitere Reise
             </summary>
             <form
               onSubmit={(e) => {
@@ -221,7 +289,7 @@ function HomeTab() {
         </Card>
 
         <Card>
-          <CardTitle>Eure Reise</CardTitle>
+          <CardTitle>Eckdaten</CardTitle>
           <div className="mt-3 space-y-3">
             <Field label="Wohin geht die Reise?">
               <input
