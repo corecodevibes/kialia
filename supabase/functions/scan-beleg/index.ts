@@ -94,7 +94,13 @@ Deno.serve(async (req: Request) => {
       },
     ];
 
+    // Zeitgrenze wie bei den anderen drei Funktionen. Ohne sie wartet ein
+    // haengender Aufruf unbegrenzt, und der Nutzer sieht einen Knopf, der
+    // nicht mehr zurueckkommt.
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 25_000);
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      signal: controller.signal,
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -111,6 +117,7 @@ Deno.serve(async (req: Request) => {
       }),
     });
 
+    clearTimeout(timer);
     if (!res.ok) {
       const body = await res.text().catch(() => "");
       console.error(`OpenAI ${res.status}: ${body.slice(0, 400)}`);
@@ -136,6 +143,14 @@ Deno.serve(async (req: Request) => {
       headers: { ...CORS, "Content-Type": "application/json" },
     });
   } catch (err) {
+    // Abbruch durch die Zeitgrenze bekommt eine eigene Meldung: "konnte nicht
+    // gelesen werden" klingt nach einem schlechten Foto, dabei war es das Netz.
+    if (err instanceof Error && err.name === "AbortError") {
+      return new Response(
+        JSON.stringify({ error: "Das hat zu lange gedauert. Versuch es nochmal." }),
+        { status: 504, headers: { ...CORS, "Content-Type": "application/json" } },
+      );
+    }
     console.error(err);
     return new Response(JSON.stringify({ error: "Der Beleg konnte nicht gelesen werden." }), {
       status: 500,

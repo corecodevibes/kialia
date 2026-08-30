@@ -211,14 +211,19 @@ export async function syncTrips(): Promise<{ ok: boolean; error?: string }> {
 }
 
 /** Schiebt eine einzelne Reise hoch. Ohne remoteId passiert nichts. */
-export async function pushTrip(trip: Trip): Promise<void> {
+export async function pushTrip(trip: Trip): Promise<{ ok: boolean; error?: string }> {
   // Abgekoppelte Reisen nicht hochschieben — sonst legt der naechste Abgleich
   // eine zweite Fassung an und das Problem kehrt als Dublette zurueck.
-  if (!trip.remoteId || trip.orphan) return;
-  await db
+  if (!trip.remoteId || trip.orphan) return { ok: true };
+  const { error } = await db
     .from("trips")
     .update({ data: payload(trip) as never })
     .eq("id", trip.remoteId);
+  // Frueher wurde die Antwort gar nicht angesehen und der Aufrufer warf das
+  // Ergebnis weg. Jede lokale Aenderung ging also blind hoch: bei schlechtem
+  // Empfang schreibt man einen ganzen Reisetag, und nichts sagt einem, dass er
+  // nie angekommen ist. Auf einer Reise ist genau das der Normalfall.
+  return error ? { ok: false, error: error.message } : { ok: true };
 }
 
 /** Einer geteilten Reise über den Code beitreten. */
@@ -252,7 +257,7 @@ let stopAuto: (() => void) | null = null;
  * belastet die Verbindung, verbraucht Akku und produziert Konflikte, wo keine
  * sind.
  */
-export function startAutoSync(): () => void {
+export function startAutoSync(onError?: (msg: string | null) => void): () => void {
   if (stopAuto) return stopAuto;
 
   let timer: ReturnType<typeof setTimeout> | null = null;
@@ -261,7 +266,16 @@ export function startAutoSync(): () => void {
     if (timer) clearTimeout(timer);
     timer = setTimeout(() => {
       const store = currentStore();
-      for (const trip of store.trips) void pushTrip(trip);
+      void (async () => {
+        for (const trip of store.trips) {
+          const r = await pushTrip(trip);
+          if (!r.ok) {
+            onError?.(r.error ?? "Hochladen fehlgeschlagen");
+            return;
+          }
+        }
+        onError?.(null);
+      })();
     }, 1200);
   });
 

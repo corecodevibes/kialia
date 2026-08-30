@@ -85,7 +85,9 @@ export function AppShell({
       if (document.visibilityState === "visible") void syncTrips().then(report);
     };
     document.addEventListener("visibilitychange", beimZurueckkommen);
-    const stopPush = startAutoSync();
+    const stopPush = startAutoSync((msg) =>
+      setSyncError(msg === null ? null : `Änderungen konnten nicht gespeichert werden: ${msg}`),
+    );
     const stopWatch = watchRemote(() => {
       void syncTrips().then(report);
     });
