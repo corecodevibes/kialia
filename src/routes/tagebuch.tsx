@@ -29,7 +29,6 @@ import {
 } from "@/lib/trip-store";
 import { useVoiceMemo } from "@/lib/use-voice-memo";
 import { transcribe } from "@/lib/transcribe";
-import { extractDay, filledEntries, type DayFields } from "@/lib/day-extract";
 
 export const Route = createFileRoute("/tagebuch")({
   head: () => ({
@@ -112,6 +111,9 @@ function DiaryTab() {
   const [layout, setLayout] = useState<Layout>("schlicht");
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [activeKey, setActiveKey] = useState<string | null>(null);
+  // Zugeklappt ist der Normalfall. Waehrend der Reise ist der heutige Tag
+  // offen — das ist der, den man abends schreiben will.
+  const [openDay, setOpenDay] = useState<string | null>(null);
   const voice = useVoiceMemo();
   // Transkription braucht ein konfiguriertes Backend. Ist keines da, zeigen wir
   // den Mikrofon-Button gar nicht erst an, statt die Aufnahme ins Leere laufen
@@ -120,17 +122,6 @@ function DiaryTab() {
 
   const set = (id: string, patch: Partial<DiaryEntry>) =>
     update({ diary: trip.diary.map((e) => (e.id === id ? { ...e, ...patch } : e)) });
-
-  // Das Ergebnis des Sortierens wartet auf Bestaetigung — uebernommen wird
-  // nichts von selbst. `take` merkt sich, was abgehakt wurde.
-  // Zugeklappt ist der Normalfall. Waehrend der Reise ist der heutige Tag
-  // offen — das ist der, den man abends schreiben will.
-  const [openDay, setOpenDay] = useState<string | null>(null);
-  const [sorted, setSorted] = useState<{
-    id: string;
-    fields: DayFields;
-    take: Partial<Record<keyof DayFields, boolean>>;
-  } | null>(null);
 
   const myName = useMyName();
   const people = travellerNames(trip, myName);
@@ -241,54 +232,6 @@ function DiaryTab() {
         },
       ],
     });
-  }
-
-  /**
-   * Den ganzen Tag einsprechen statt Feld fuer Feld.
-   *
-   * Zwei Schritte: verschriftlichen, dann sortieren. Scheitert der zweite,
-   * ist der Text NICHT verloren — er landet dann im Textfeld, so wie bisher.
-   * Ein Zusatzschritt darf nie das Ergebnis des ersten vernichten.
-   */
-  async function toggleWholeDay(entry: DiaryEntry) {
-    const key = `${entry.id}:ganz`;
-    if (voice.recording && activeKey === key) {
-      setActiveKey(null);
-      const audio = await voice.stop();
-      if (!audio) return;
-      setBusyKey(key);
-      setSorted(null);
-      try {
-        const res = await transcribe(audio, "audio/wav");
-        if (!res.ok) {
-          voice.setError(
-            res.askInstead
-              ? `${res.error} Schreib es kurz auf — die Felder sind offen.`
-              : res.error,
-          );
-          return;
-        }
-        const aus = await extractDay(res.text);
-        if (aus.ok) {
-          setSorted({ id: entry.id, fields: aus.fields, take: {} });
-        } else {
-          // Sortieren ging nicht — dann wenigstens der Text.
-          const prev = entry.text;
-          set(entry.id, { text: prev ? `${prev}\n${res.text}` : res.text });
-          voice.setError(`${aus.error} Der Text steht im Feld „Was hast du heute erlebt".`);
-        }
-      } catch {
-        voice.setError("Das hat nicht geklappt. Schreib es kurz auf.");
-      } finally {
-        setBusyKey(null);
-      }
-      return;
-    }
-    if (voice.recording) voice.cancel();
-    setActiveKey(key);
-    voice.setError(null);
-    setSorted(null);
-    await voice.start();
   }
 
   async function toggleRecording(entry: DiaryEntry, field: FieldKey) {
@@ -404,14 +347,17 @@ function DiaryTab() {
         )}
 
         <div className="space-y-4">
-          {orderedDiary.map((e) => (
-            <Card key={e.id}>
-              {/* Die Breite steuert der Container, nicht eine zweite
+          {/* Ein Stapel Blaetter statt einer Liste Karten: die Tage liegen
+              dicht uebereinander, das aufgeschlagene loest sich heraus. */}
+          <div className="sheet-stack">
+            {orderedDiary.map((e) => (
+              <Card key={e.id} className={`sheet ${openDay === e.id ? "sheet-open" : ""}`}>
+                {/* Die Breite steuert der Container, nicht eine zweite
                   Breitenklasse am Eingabefeld: dateInputClass bringt `w-full`
                   mit, und zwei Breiten-Utilities entscheiden sich nach
                   CSS-Reihenfolge, nicht nach Klassenreihenfolge. Genau daran
                   lief die Karte rechts aus dem Bild. */}
-              {/* Zugeklappt ist die Zeile TEXT, kein Formular.
+                {/* Zugeklappt ist die Zeile TEXT, kein Formular.
                   Vorher standen hier Mikrofon, Datumsfeld, Zustaendigkeit und
                   Papierkorb nebeneinander — vier Bedienelemente, die Titel und
                   Kurzfassung komplett aus der Zeile gedraengt haben. Uebrig
@@ -421,63 +367,45 @@ function DiaryTab() {
                   Jetzt kleines Label, darunter das Datum, darunter ein Blick
                   auf den Inhalt, rechts ein Chevron. Bedient wird erst
                   aufgeklappt. */}
-              <button
-                type="button"
-                onClick={() => setOpenDay((v) => (v === e.id ? null : e.id))}
-                aria-expanded={openDay === e.id}
-                className="flex w-full items-center gap-3 text-left"
-              >
-                <span className="min-w-0 flex-1">
-                  <span className="flex items-center gap-2">
-                    <span className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                      {e.day}. Reisetag
-                    </span>
-                    {e.date === today && (
-                      <span className="rounded-full bg-primary/12 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-wider text-primary">
-                        heute
+                <button
+                  type="button"
+                  onClick={() => setOpenDay((v) => (v === e.id ? null : e.id))}
+                  aria-expanded={openDay === e.id}
+                  className="flex w-full items-center gap-3 text-left"
+                >
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-center gap-2">
+                      <span className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                        {e.day}. Reisetag
                       </span>
-                    )}
-                  </span>
-                  <span className="mt-0.5 block truncate text-[0.95rem] font-semibold leading-snug">
-                    {formatDateLong(e.date) || "Ohne Datum"}
-                  </span>
-                  <span className="block truncate text-xs text-muted-foreground">
-                    {daySummary(e)}
-                  </span>
-                </span>
-                <ChevronDown
-                  className={`size-4 shrink-0 text-muted-foreground transition ${
-                    openDay === e.id ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
-
-              {openDay === e.id && (
-                <>
-                  {/* Aufnahme und Datum — hier, nicht in der zugeklappten
-                      Zeile. Dort haben vier Bedienelemente den Titel und die
-                      Kurzfassung aus dem Bild gedraengt. */}
-                  <div className="mt-3 flex items-center gap-2 border-t border-border pt-3">
-                    <button
-                      type="button"
-                      onClick={() => void toggleWholeDay(e)}
-                      disabled={busyKey === `${e.id}:ganz`}
-                      className={`flex min-w-0 flex-1 items-center justify-center gap-2 rounded-2xl py-2.5 text-sm font-semibold transition ${
-                        voice.recording && activeKey === `${e.id}:ganz`
-                          ? "bg-destructive text-background"
-                          : "acrylic-warm text-background"
-                      } disabled:opacity-50`}
-                    >
-                      {busyKey === `${e.id}:ganz` ? (
-                        <Loader2 className="size-4 animate-spin" />
-                      ) : (
-                        <Mic className="size-4" />
+                      {e.date === today && (
+                        <span className="rounded-full bg-primary/12 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-wider text-primary">
+                          heute
+                        </span>
                       )}
-                      {voice.recording && activeKey === `${e.id}:ganz`
-                        ? "Aufnahme beenden"
-                        : "Tag einsprechen"}
-                    </button>
-                    <div className="w-[7.75rem] shrink-0">
+                    </span>
+                    <span className="mt-0.5 block truncate text-[0.95rem] font-semibold leading-snug">
+                      {formatDateLong(e.date) || "Ohne Datum"}
+                    </span>
+                    <span className="block truncate text-xs text-muted-foreground">
+                      {daySummary(e)}
+                    </span>
+                  </span>
+                  <ChevronDown
+                    className={`size-4 shrink-0 text-muted-foreground transition ${
+                      openDay === e.id ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                {openDay === e.id && (
+                  <>
+                    {/* Nur noch das Datum. "Tag einsprechen" ist raus: die
+                      Memo-Knöpfe an den einzelnen Feldern können dasselbe und
+                      landen direkt am richtigen Ort. Ein zweiter Weg zum
+                      selben Ziel ist keine Hilfe, sondern eine Entscheidung
+                      mehr. */}
+                    <div className="mt-3 border-t border-border pt-3">
                       <input
                         type="date"
                         value={e.date}
@@ -485,224 +413,146 @@ function DiaryTab() {
                         className={`${dateInputClass} py-1.5`}
                       />
                     </div>
-                  </div>
-                  <div className="mt-2 flex items-center gap-2">
-                    <div className="min-w-0 flex-1">
-                      <select
-                        value={e.assignedTo}
-                        aria-label={`Wer dokumentiert Tag ${e.day}?`}
-                        onChange={(ev) => set(e.id, { assignedTo: ev.target.value })}
-                        className={`${inputClass} appearance-none py-1.5 text-xs`}
-                      >
-                        <option value="">Zuständig: offen</option>
-                        {people.map((n) => (
-                          <option key={n} value={n}>
-                            Zuständig: {n}
-                          </option>
-                        ))}
-                      </select>
+                    {/* Zuständigkeit ist raus: im Tagebuch schreibt, wer will,
+                      und abends steht ohnehin fest, wer erzählt. Eine Zuweisung,
+                      die niemand durchsetzt, ist nur ein Feld mehr. In der
+                      Packliste ergibt sie Sinn — dort bleibt sie. */}
+                    <div className="mt-2 flex justify-end">
+                      <DeleteButton
+                        ariaLabel={`Tag ${e.day} löschen`}
+                        onClick={() => update({ diary: trip.diary.filter((x) => x.id !== e.id) })}
+                      />
                     </div>
-                    <DeleteButton
-                      ariaLabel={`Tag ${e.day} löschen`}
-                      onClick={() => update({ diary: trip.diary.filter((x) => x.id !== e.id) })}
-                    />
-                  </div>
-                  {sorted && sorted.id === e.id && (
-                    <div className="mt-3 rounded-2xl bg-secondary/50 p-3">
-                      <p className="text-sm font-semibold">Das habe ich verstanden</p>
-                      <p className="mt-0.5 text-xs text-muted-foreground">
-                        Hak ab, was stimmen soll. Was du weglässt, bleibt wie es war.
-                      </p>
-                      <ul className="mt-2 space-y-1.5">
-                        {filledEntries(sorted.fields).map(([k, label]) => (
-                          <li key={k}>
-                            <label className="flex items-start gap-2">
-                              <input
-                                type="checkbox"
-                                checked={sorted.take[k] ?? true}
-                                onChange={(ev) =>
-                                  setSorted({
-                                    ...sorted,
-                                    take: { ...sorted.take, [k]: ev.target.checked },
-                                  })
-                                }
-                                className="mt-0.5 size-4 shrink-0 accent-[var(--primary)]"
-                              />
-                              <span className="min-w-0 flex-1 text-xs">
-                                <span className="font-semibold">{label}: </span>
-                                <span className="text-muted-foreground">
-                                  {k === "spent"
-                                    ? `${sorted.fields.spent} ${trip.currency || "EUR"}`
-                                    : String(sorted.fields[k])}
-                                </span>
-                              </span>
-                            </label>
-                          </li>
-                        ))}
-                      </ul>
-                      {filledEntries(sorted.fields).length === 0 && (
-                        <p className="mt-2 text-xs text-muted-foreground">
-                          Nichts Verwertbares dabei — sprich nochmal oder schreib es auf.
-                        </p>
-                      )}
-                      <div className="mt-3 flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setSorted(null)}
-                          className="flex-1 rounded-xl bg-card py-2 text-xs font-semibold"
-                        >
-                          Verwerfen
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            // Nur Abgehaktes, und nur was auch Inhalt hat.
-                            const patch: Partial<DiaryEntry> = {};
-                            for (const [k] of filledEntries(sorted.fields)) {
-                              if (sorted.take[k] === false) continue;
-                              const v = sorted.fields[k];
-                              if (k === "spent") patch.spent = Number(v);
-                              else (patch as Record<string, unknown>)[k] = String(v);
-                            }
-                            set(e.id, patch);
-                            setSorted(null);
-                          }}
-                          className="acrylic-warm flex-1 rounded-xl py-2 text-xs font-semibold text-background"
-                        >
-                          Übernehmen
-                        </button>
-                      </div>
-                    </div>
-                  )}
 
-                  {/* Eine Frage, ein Feld. Vier gleich laute Felder sind ein
+                    {/* Eine Frage, ein Feld. Vier gleich laute Felder sind ein
                   Formular — abends nach einem langen Reisetag fuellt das
                   niemand aus, und genau deshalb bleibt ein Tagebuch leer.
                   Alles Weitere ist erreichbar, draengt sich aber nicht auf. */}
-                  <div className="mt-4">
-                    <div className="mb-2 flex items-start justify-between gap-2">
-                      <p className="min-w-0 flex-1 text-[1.05rem] italic leading-snug text-primary">
-                        {questionFor(e.day)}
-                      </p>
-                      <MemoButton entry={e} field="text" />
+                    <div className="mt-4">
+                      <div className="mb-2 flex items-start justify-between gap-2">
+                        <p className="min-w-0 flex-1 text-[1.05rem] italic leading-snug text-primary">
+                          {questionFor(e.day)}
+                        </p>
+                        <MemoButton entry={e} field="text" />
+                      </div>
+                      <textarea
+                        value={e.text}
+                        onChange={(ev) => set(e.id, { text: ev.target.value })}
+                        rows={5}
+                        placeholder="Ein Satz reicht."
+                        className={`${inputClass} resize-y`}
+                      />
                     </div>
-                    <textarea
-                      value={e.text}
-                      onChange={(ev) => set(e.id, { text: ev.target.value })}
-                      rows={5}
-                      placeholder="Ein Satz reicht."
-                      className={`${inputClass} resize-y`}
-                    />
-                  </div>
 
-                  {/* Ein Wort statt Sternen — es faerbt spaeter den Rueckblick. */}
-                  <div className="mt-3">
-                    <span className="text-xs font-medium text-muted-foreground">
-                      Wie war der Tag?
-                    </span>
-                    <div className="mt-1.5 flex flex-wrap gap-1.5">
-                      {moods.map((m) => {
-                        const active = e.mood === m;
-                        return (
-                          <button
-                            key={m}
-                            type="button"
-                            aria-pressed={active}
-                            onClick={() => set(e.id, { mood: active ? "" : m })}
-                            className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
-                              active
-                                ? "bg-primary text-primary-foreground"
-                                : "bg-secondary text-muted-foreground hover:bg-secondary/70"
-                            }`}
-                          >
-                            {m}
-                          </button>
-                        );
-                      })}
+                    {/* Ein Wort statt Sternen — es faerbt spaeter den Rueckblick. */}
+                    <div className="mt-3">
+                      <span className="text-xs font-medium text-muted-foreground">
+                        Wie war der Tag?
+                      </span>
+                      <div className="mt-1.5 flex flex-wrap gap-1.5">
+                        {moods.map((m) => {
+                          const active = e.mood === m;
+                          return (
+                            <button
+                              key={m}
+                              type="button"
+                              aria-pressed={active}
+                              onClick={() => set(e.id, { mood: active ? "" : m })}
+                              className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+                                active
+                                  ? "bg-primary text-primary-foreground"
+                                  : "bg-secondary text-muted-foreground hover:bg-secondary/70"
+                              }`}
+                            >
+                              {m}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="mt-4 space-y-4">
-                    {(["food", "highlight"] as FieldKey[]).map((f) => (
-                      <div key={f}>
-                        <div className="mb-1 flex items-center justify-between gap-2">
-                          <span className="text-xs font-medium text-muted-foreground">
-                            {fieldLabels[f]}
-                          </span>
-                          <MemoButton entry={e} field={f} />
-                        </div>
-                        <textarea
-                          value={e[f] ?? ""}
-                          onChange={(ev) =>
-                            set(e.id, { [f]: ev.target.value } as Partial<DiaryEntry>)
-                          }
-                          rows={3}
-                          placeholder={fieldPlaceholders[f]}
-                          className={`${inputClass} resize-y`}
-                        />
+                    <div className="mt-4 space-y-4">
+                      {(["food", "highlight"] as FieldKey[]).map((f) => (
+                        <div key={f}>
+                          <div className="mb-1 flex items-center justify-between gap-2">
+                            <span className="text-xs font-medium text-muted-foreground">
+                              {fieldLabels[f]}
+                            </span>
+                            <MemoButton entry={e} field={f} />
+                          </div>
+                          <textarea
+                            value={e[f] ?? ""}
+                            onChange={(ev) =>
+                              set(e.id, { [f]: ev.target.value } as Partial<DiaryEntry>)
+                            }
+                            rows={3}
+                            placeholder={fieldPlaceholders[f]}
+                            className={`${inputClass} resize-y`}
+                          />
 
-                        {/* Statt eines Fensters nach dem Tippen: drei Chips direkt
+                          {/* Statt eines Fensters nach dem Tippen: drei Chips direkt
                         darunter. Ein Antippen, kein Unterbrechen, jederzeit
                         zurücknehmbar. */}
-                        {f === "food" && e.food.trim() && (
-                          <div className="mt-1.5 flex flex-wrap gap-1.5">
-                            {(["Empfehlung", "Merke", "War nichts"] as const).map((tag) => {
-                              const active = e.foodTag === tag;
-                              return (
-                                <button
-                                  key={tag}
-                                  type="button"
-                                  aria-pressed={active}
-                                  onClick={() => set(e.id, { foodTag: active ? "" : tag })}
-                                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
-                                    active
-                                      ? "bg-primary text-primary-foreground"
-                                      : "bg-secondary text-muted-foreground hover:bg-secondary/70"
-                                  }`}
-                                >
-                                  {tag}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                          {f === "food" && e.food.trim() && (
+                            <div className="mt-1.5 flex flex-wrap gap-1.5">
+                              {(["Empfehlung", "Merke", "War nichts"] as const).map((tag) => {
+                                const active = e.foodTag === tag;
+                                return (
+                                  <button
+                                    key={tag}
+                                    type="button"
+                                    aria-pressed={active}
+                                    onClick={() => set(e.id, { foodTag: active ? "" : tag })}
+                                    className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+                                      active
+                                        ? "bg-primary text-primary-foreground"
+                                        : "bg-secondary text-muted-foreground hover:bg-secondary/70"
+                                    }`}
+                                  >
+                                    {tag}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      ))}
 
-                    {/* Ausgaben als Satz statt als Formular. Die Aufstellung
+                      {/* Ausgaben als Satz statt als Formular. Die Aufstellung
                     entsteht beim Tippen, die Summe wird berechnet — ein
                     eigenes Summenfeld daneben haette zwei Wahrheiten erzeugt. */}
-                    <ExpenseField
-                      entry={e}
-                      onChange={(patch) => set(e.id, patch)}
-                      currency={trip.currency || "EUR"}
-                    />
+                      <ExpenseField
+                        entry={e}
+                        onChange={(patch) => set(e.id, patch)}
+                        currency={trip.currency || "EUR"}
+                      />
 
-                    <details>
-                      <summary className="cursor-pointer list-none text-xs font-semibold text-muted-foreground">
-                        + Sonstige Notizen
-                      </summary>
-                      <div className="mt-2">
-                        <div className="mb-1 flex items-center justify-between gap-2">
-                          <span className="text-xs font-medium text-muted-foreground">
-                            {fieldLabels.notes}
-                          </span>
-                          <MemoButton entry={e} field="notes" />
+                      <details>
+                        <summary className="cursor-pointer list-none text-xs font-semibold text-muted-foreground">
+                          + Sonstige Notizen
+                        </summary>
+                        <div className="mt-2">
+                          <div className="mb-1 flex items-center justify-between gap-2">
+                            <span className="text-xs font-medium text-muted-foreground">
+                              {fieldLabels.notes}
+                            </span>
+                            <MemoButton entry={e} field="notes" />
+                          </div>
+                          <textarea
+                            value={e.notes}
+                            onChange={(ev) => set(e.id, { notes: ev.target.value })}
+                            rows={3}
+                            placeholder={fieldPlaceholders.notes}
+                            className={`${inputClass} resize-y`}
+                          />
                         </div>
-                        <textarea
-                          value={e.notes}
-                          onChange={(ev) => set(e.id, { notes: ev.target.value })}
-                          rows={3}
-                          placeholder={fieldPlaceholders.notes}
-                          className={`${inputClass} resize-y`}
-                        />
-                      </div>
-                    </details>
-                  </div>
-                </>
-              )}
-            </Card>
-          ))}
+                      </details>
+                    </div>
+                  </>
+                )}
+              </Card>
+            ))}
+          </div>
         </div>
 
         {trip.diary.length === 0 && (

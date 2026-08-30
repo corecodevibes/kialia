@@ -10,9 +10,9 @@ import { Sparkles, ChevronDown } from "lucide-react";
  */
 const FEATURES: { title: string; where: string; note: string }[] = [
   {
-    title: "Ganzen Reisetag einsprechen",
-    where: "Tagebuch",
-    note: "Einmal erzählen — Erlebtes, Highlight, Essen, Stimmung und Ausgaben werden getrennt vorgeschlagen. Du hakst ab, was stimmt.",
+    title: "Reisetag einsprechen",
+    where: "Tagebuch · pro Feld",
+    note: "Sprich statt zu tippen — der Text landet im jeweiligen Feld und bleibt änderbar.",
   },
   {
     title: "Beleg auslesen",

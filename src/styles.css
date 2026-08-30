@@ -486,7 +486,48 @@
   animation: splash-rise 0.55s ease-out 0.15s both;
 }
 
+/* Das Tagebuch als Stapel Blaetter.
+   Zugeklappte Tage liegen dicht uebereinander und ragen nur ein Stueck
+   hervor — wie Zettel in einer Mappe. Man sieht alle Daten, greift aber nur
+   nach dem, den man aufschlaegt.
+
+   Der Effekt entsteht aus drei Kleinigkeiten: negativer Abstand, ein Schatten
+   NACH OBEN (das Blatt liegt auf dem darunter) und eine Kante, die den Rand
+   des Papiers andeutet. Das aufgeschlagene Blatt loest sich aus dem Stapel:
+   voller Abstand, eigener Schatten, und es liegt vorn. */
+.sheet-stack > * + * {
+  margin-top: -0.85rem;
+}
+
+.sheet {
+  position: relative;
+  transition:
+    margin 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 220ms ease,
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow:
+    0 -1px 0 oklch(0.279 0.038 302.4 / 0.06),
+    0 -6px 14px -12px oklch(0.279 0.038 302.4 / 0.5);
+}
+
+.sheet-open {
+  z-index: 2;
+  margin-top: 0.9rem !important;
+  margin-bottom: 0.9rem;
+  transform: translateY(-1px);
+  box-shadow:
+    0 1px 2px oklch(0.279 0.038 302.4 / 0.06),
+    0 14px 32px -20px oklch(0.279 0.038 302.4 / 0.45);
+}
+
+/* Der oberste Zettel braucht keinen Schatten nach oben — darunter liegt
+   nichts. */
+.sheet-stack > .sheet:first-child {
+  box-shadow: 0 1px 2px oklch(0.279 0.038 302.4 / 0.05);
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .sheet,
   .splash-mark,
   .splash-word,
   .acrylic,
