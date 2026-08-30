@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
  */
 const db = supabase as unknown as SupabaseClient;
 import { currentStore, loadStore, saveStore, subscribeStore, type Trip } from "@/lib/trip-store";
+import { mergeTrips } from "@/lib/trip-merge";
 
 /**
  * Reisen zwischen Gerät und Supabase abgleichen.
@@ -180,8 +181,13 @@ export async function syncTrips(): Promise<{ ok: boolean; error?: string }> {
     }
     seen.add(row.id);
     const localNewer = (trip.updatedAt ?? "") > row.updated_at;
-    // Taucht sie wieder auf, ist die Abkopplung aufgehoben.
-    const next = localNewer ? trip : fromRow(row);
+    // Zusammenfuehren statt eine Fassung zu verwerfen.
+    //
+    // Vorher gewann hier eine ganze Fassung. Wer zuletzt hochschob,
+    // ueberschrieb alles vom anderen — auf Kreta hiess das, dass keiner die
+    // Eintraege des anderen zu sehen bekam. Jetzt bleiben Eintraege, die nur
+    // eine Seite hat, und nur bei gleicher id entscheidet das Alter.
+    const next = mergeTrips(trip, fromRow(row), localNewer);
     merged.push({ ...next, orphan: false });
   }
 

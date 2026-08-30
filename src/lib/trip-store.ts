@@ -469,7 +469,20 @@ export function useTrip() {
       mutate((s) => ({
         ...s,
         trips: s.trips.map((t) =>
-          t.id === s.activeId ? { ...t, ...(typeof patch === "function" ? patch(t) : patch) } : t,
+          t.id === s.activeId
+            ? {
+                ...t,
+                ...(typeof patch === "function" ? patch(t) : patch),
+                // Beim Bearbeiten hochsetzen.
+                //
+                // `updatedAt` kam vorher AUSSCHLIESSLICH vom Server. Damit war
+                // die eigene Fassung nach jeder Aenderung rechnerisch aelter
+                // als die des Partners — und der Abgleich verwarf sie. Genau
+                // deshalb sahen Steffen und Annalina die Eintraege des jeweils
+                // anderen nicht.
+                updatedAt: new Date().toISOString(),
+              }
+            : t,
         ),
       }));
     },

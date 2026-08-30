@@ -73,3 +73,24 @@ describe("Komma als Dezimaltrenner UND Trennzeichen", () => {
     expect(expensesTotal(items)).toBeCloseTo(19.7, 5);
   });
 });
+
+// --- Waehrungskuerzel duerfen keine Buchstaben aus Woertern fressen ---------
+
+test("CHF frisst keine Buchstaben mehr aus dem Text", () => {
+  // Der Fehler von Kreta: /[€$£chf]/gi ist eine Zeichenklasse und loescht
+  // jedes c, h und f einzeln.
+  const r = parseExpenses("Frühstück Chania 34, Saft 5, Mittagessen Chania 40");
+  expect(r.map((x) => x.label)).toEqual(["Frühstück Chania", "Saft", "Mittagessen Chania"]);
+  expect(r.map((x) => x.amount)).toEqual([34, 5, 40]);
+});
+
+test("Währungskürzel als eigenes Wort verschwinden weiterhin", () => {
+  expect(parseExpenses("Kaffee 4 CHF")[0]?.label).toBe("Kaffee");
+  expect(parseExpenses("Taxi 20 EUR")[0]?.label).toBe("Taxi");
+  expect(parseExpenses("Bier 6 €")[0]?.label).toBe("Bier");
+});
+
+test("Wörter, die zufällig ein Kürzel enthalten, bleiben ganz", () => {
+  expect(parseExpenses("Eurotunnel 90")[0]?.label).toBe("Eurotunnel");
+  expect(parseExpenses("Chframbo 12")[0]?.label).toBe("Chframbo");
+});

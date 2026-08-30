@@ -179,7 +179,17 @@ export function parseExpenses(text: string): ParsedExpense[] {
     if (!Number.isFinite(amount) || amount <= 0) continue;
 
     const label = (part.slice(0, last.index) + part.slice(last.index! + last[0].length))
-      .replace(/[€$£chf]/gi, "")
+      // Waehrungen als GANZE Woerter entfernen, nicht als Zeichenklasse.
+      //
+      // Vorher stand hier /[€$£chf]/gi — eine Zeichenklasse. Die loescht jedes
+      // einzelne c, h und f aus dem Text. Aus "Fruehstueck Chania" wurde
+      // "ruestueck ania", aus "Saft" wurde "Sat". Steffen ist es auf Kreta
+      // aufgefallen; er hatte sogar den richtigen Verdacht.
+      //
+      // Symbole duerfen weiterhin ueberall stehen, Buchstabenkuerzel nur als
+      // eigenstaendiges Wort.
+      .replace(/[€$£¥]/g, "")
+      .replace(/\b(chf|eur|usd|gbp|euro|franken|dollar|pfund)\b/gi, "")
       .replace(/\s+/g, " ")
       .trim();
 

@@ -74,11 +74,23 @@ export function AppShell({
       setSyncError(r.ok ? null : (r.error ?? "unbekannt"));
 
     void syncTripsThrottled().then(report);
+
+    // Beim Zurueckkommen in die App abgleichen.
+    //
+    // Bisher lief der Abgleich beim Laden und wenn Realtime etwas meldete.
+    // Auf einer Reise liegt das Telefon aber die meiste Zeit in der Tasche:
+    // man kommt zurueck, sieht den Stand von vorhin und schreibt darauf los.
+    // Genau so entstehen zwei Fassungen, die sich gegenseitig ueberholen.
+    const beimZurueckkommen = () => {
+      if (document.visibilityState === "visible") void syncTrips().then(report);
+    };
+    document.addEventListener("visibilitychange", beimZurueckkommen);
     const stopPush = startAutoSync();
     const stopWatch = watchRemote(() => {
       void syncTrips().then(report);
     });
     return () => {
+      document.removeEventListener("visibilitychange", beimZurueckkommen);
       stopPush();
       stopWatch();
     };
