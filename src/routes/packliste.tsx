@@ -65,10 +65,45 @@ function PackingTab() {
   const [newCat, setNewCat] = useState("");
   const [open, setOpen] = useState<Record<string, boolean>>({});
 
-  const categories = trip.packing;
-  const total = categories.reduce((s, c) => s + c.items.length, 0);
   const myName = useMyName();
   const people = travellerNames(trip, myName);
+
+  /**
+   * Wessen Liste gerade zu sehen ist.
+   *
+   * Das Modell hatte das Noetige laengst: jedes Teil traegt ein `who`. Was
+   * fehlte, war die Sicht darauf — zu zweit packt man nicht aus einer Liste.
+   * Deshalb ein Filter, keine zweite Datenstruktur: wer ein Teil jemandem
+   * zuordnet, verschiebt es damit automatisch in dessen Liste, und alle sehen
+   * weiterhin alles, wenn sie wollen.
+   *
+   * "" heisst gemeinsam — Zahnpasta gehoert niemandem allein.
+   */
+  const [wessen, setWessen] = useState<string>("alle");
+
+  const passt = (i: PackItem) =>
+    wessen === "alle" ||
+    (wessen === "gemeinsam" ? !i.who.trim() : i.who.trim().toLowerCase() === wessen.toLowerCase());
+
+  const categories = trip.packing
+    .map((c) => ({ ...c, items: c.items.filter(passt) }))
+    // Kategorien, in denen fuer diese Person nichts liegt, wuerden als leere
+    // Kaesten dastehen. In der Gesamtsicht bleiben sie, damit man dort etwas
+    // anlegen kann.
+    .filter((c) => wessen === "alle" || c.items.length > 0);
+
+  const total = categories.reduce((s, c) => s + c.items.length, 0);
+
+  /** Wie viel in welcher Liste liegt — als Zahl am Reiter. */
+  const zaehle = (wer: string) =>
+    trip.packing.reduce(
+      (n, c) =>
+        n +
+        c.items.filter((i) =>
+          wer === "gemeinsam" ? !i.who.trim() : i.who.trim().toLowerCase() === wer.toLowerCase(),
+        ).length,
+      0,
+    );
 
   /**
    * Zuletzt Geloeschtes, je Kategorie eines.
@@ -207,6 +242,43 @@ function PackingTab() {
             <Undo2 className="size-4" />„{undoCat.cat.name}“ mit {undoCat.cat.items.length}{" "}
             Einträgen zurückholen
           </button>
+        )}
+
+        {/* Wessen Liste. Zuordnen verschiebt automatisch hierher — es ist
+            derselbe Datenbestand, nur anders geschnitten. */}
+        {people.length > 1 && (
+          <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1">
+            {[
+              { key: "alle", label: "Alle" },
+              { key: "gemeinsam", label: "Gemeinsam" },
+              ...people.map((n) => ({ key: n, label: n === myName ? "Meine" : n })),
+            ].map((r) => {
+              const aktiv = wessen === r.key;
+              const n =
+                r.key === "alle"
+                  ? trip.packing.reduce((a, c) => a + c.items.length, 0)
+                  : zaehle(r.key);
+              return (
+                <button
+                  key={r.key}
+                  type="button"
+                  aria-pressed={aktiv}
+                  onClick={() => setWessen(r.key)}
+                  className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                    aktiv ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground"
+                  }`}
+                >
+                  {r.label} <span className="tabular-nums opacity-70">{n}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {categories.length === 0 && wessen !== "alle" && (
+          <p className="px-1 text-sm text-muted-foreground">
+            Hier liegt noch nichts. Ordne in „Alle" ein Teil jemandem zu — dann rutscht es hierher.
+          </p>
         )}
 
         {categories.map((c) => {
