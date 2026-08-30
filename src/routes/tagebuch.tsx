@@ -525,6 +525,7 @@ function DiaryTab() {
                         entry={e}
                         onChange={(patch) => set(e.id, patch)}
                         currency={trip.currency || "EUR"}
+                        people={people}
                       />
 
                       <details>

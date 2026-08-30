@@ -1,5 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { COMMON_CURRENCIES } from "@/lib/currency";
+import { FALLBACK, loadHomeCurrency, saveHomeCurrency } from "@/lib/home-currency";
 import {
   EMPTY_TASTE,
   TASTE_OPTIONS,
@@ -42,6 +44,9 @@ function SettingsPage() {
   const [msg, setMsg] = useState<AuthMessage | null>(null);
   const [confirmText, setConfirmText] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [homeCurrency, setHomeCurrency] = useState<string>(FALLBACK);
+  useEffect(() => setHomeCurrency(loadHomeCurrency()), []);
+
   const [taste, setTaste] = useState<TasteProfile>(EMPTY_TASTE);
   const [tasteSaved, setTasteSaved] = useState(false);
 
@@ -132,6 +137,38 @@ function SettingsPage() {
           {/* Reiseprofil. Nicht "was magst du?" — darauf antwortet niemand
               brauchbar — sondern "was hat dir DORT gefallen?". Ein Ort, den
               man kennt, ist die einzige Referenz, die wirklich traegt. */}
+          {/* Die Waehrung, in der du RECHNEST — nicht die, in der du zahlst.
+              Auf Kreta zahlst du Euro und traegst Euro ein; wissen willst du
+              am Ende, was es in Franken war. Sie gehoert zur Person, nicht zur
+              Reise: sie aendert sich nicht, wenn du verreist. */}
+          <Card>
+            <CardTitle>Deine Rechenwährung</CardTitle>
+            <p className="mt-1 text-sm text-muted-foreground">
+              In dieser Währung willst du am Ende wissen, was die Reise gekostet hat. Was du
+              unterwegs zahlst, trägst du weiterhin so ein, wie du es zahlst.
+            </p>
+            <div className="mt-3">
+              <select
+                value={homeCurrency}
+                aria-label="Rechenwährung"
+                onChange={(ev) => {
+                  saveHomeCurrency(ev.target.value);
+                  setHomeCurrency(ev.target.value);
+                }}
+                className={`${inputClass} appearance-none`}
+              >
+                {COMMON_CURRENCIES.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.code} — {c.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground">
+              Neue Reisen bekommen sie als Zweitwährung, damit sich die Summen umrechnen lassen.
+            </p>
+          </Card>
+
           <Card>
             <CardTitle>Wie ihr reist</CardTitle>
             <p className="mt-1 text-sm text-muted-foreground">

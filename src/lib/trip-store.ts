@@ -142,6 +142,13 @@ export type DiaryEntry = {
   notes: string;
   expenses: string;
   spent: number;
+  /**
+   * Wer welchen Posten ausgelegt hat, als Zuordnung zum Freitext.
+   *
+   * Bewusst keine Abrechnung: eine Uebersicht, damit man am Ende sieht, wer
+   * wie viel vorgestreckt hat. Zurueckzahlen regelt ihr unter euch.
+   */
+  paidBy?: Record<string, string> | undefined;
   /** Was und wo gegessen wurde — auf Reisen die haltbarste Erinnerung. */
   food: string;
   /** "Empfehlung" | "Merke" | "War nichts" — leer, wenn nicht bewertet. */
@@ -363,6 +370,7 @@ function normalize(t: Partial<Trip>): Trip {
       mood: x.mood ?? "",
       food: x.food ?? "",
       assignedTo: x.assignedTo ?? "",
+      paidBy: x.paidBy ?? {},
     })),
   };
 }

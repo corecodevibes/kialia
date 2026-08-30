@@ -20,6 +20,7 @@ import { inviteUrl } from "@/lib/pending-invite";
 import { leaveTrip, syncTrips } from "@/lib/trip-sync";
 import { needsTypedConfirm } from "@/lib/trip-weight";
 import { useMyName } from "@/lib/auth";
+import { loadHomeCurrency } from "@/lib/home-currency";
 import { flagFor } from "@/lib/country";
 import { countMembers, joinTrip } from "@/lib/trip-sync";
 import { COMMON_CURRENCIES, fetchRate } from "@/lib/currency";
@@ -134,6 +135,9 @@ function HomeTab() {
     if (!dest) return;
     addTrip(dest);
     update({
+      // Die Rechenwaehrung als Zweitwaehrung: dann laesst sich von Anfang an
+      // umrechnen, ohne dass jemand daran denken muss.
+      secondCurrency: loadHomeCurrency(),
       startDate: draft.startDate,
       endDate: draft.endDate,
       companions: draft.companions.trim(),
