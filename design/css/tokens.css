@@ -21,24 +21,44 @@
   --line-strong: rgba(47, 42, 62, 0.18);
 
   /* ---- Marke --------------------------------------------------------------
-     ACHTUNG, nachgerechnet: das Marken-Violett #69578E schafft mit weisser
-     Schrift nur 6.26:1 und verfehlt Mazunes Anforderung von 7:1. Gefuellte
-     Flaechen nehmen deshalb den gedrueckten Ton; das helle Violett bleibt fuer
-     Raender, Punkte und Ausgewaehltes. */
-  --primary:      #584876;  /* k-violet-press  (8.07:1) — gefuellte Flaechen */
-  --primary-2:    #4A3C64;  /* k-violet-press-2 (9.90:1) — gedrueckt */
-  --primary-tone: #69578E;  /* k-violet — Raender, Punkte, ausgewaehlt */
-  --sage:         #8596DB;  /* k-periwinkle — Fortschritt, Fokus, Zeitachse */
+     ABGEGLICHEN MIT DER LAUFENDEN APP, nicht mit dem Marken-Handoff. Die beiden
+     unterscheiden sich: das Handoff nennt Violett und Kupfer, die App rendert
+     Perlblau und Terrakotta. Massgeblich ist, was man sieht.
 
-  /* Akzent. Das Marken-Kupfer #CE7B5C traegt nur 3.18:1 und kann keine weisse
-     Schrift halten. Abgedunkelt auf 4.52:1 — praktisch derselbe Wert wie
-     Mazunes eigenes Clay (4.58:1), also dieselbe Rolle bei gleicher Lesbarkeit. */
-  --clay:      #BA5B38;
-  --clay-tone: #CE7B5C;  /* k-copper — Flaechen ohne Text darauf */
-  --clay-soft: #F7E2D6;  /* k-pill-booked-bg */
+     Das Perlblau ist die Marke — es traegt den Verlauf, der kialia ausmacht.
+     Mit weisser Schrift schafft es aber nur 2.65:1. Um auf Mazunes 7:1 zu
+     kommen, muesste es zu #364BC4 werden, einem Koenigsblau, das mit der Marke
+     nichts mehr zu tun hat. Perlblau ist also KEINE Flaechenfarbe, sondern
+     gehoert an Verlauf, Punkte, Raender und Ausgewaehltes.
 
-  --brass: #A57990;  /* k-lagoon — Kicker, Preise, Ornamente */
-  --blush: #EDE7F2;  /* k-pill-planned-bg — Avatare */
+     Gefuellte Flaechen brauchen deshalb einen dunklen Partner aus derselben
+     Familie — dasselbe Blau-Violett, nur tief genug. */
+  --primary:      #584876;  /* gefuellte Flaechen        (8.07:1) */
+  --primary-2:    #4A3C64;  /* gedrueckt                 (9.90:1) */
+  --primary-tone: #8F9BE0;  /* Perlblau der App — Verlauf, Punkte, Auswahl */
+  --sage:         #8F9BE0;  /* Fortschritt, Fokus, Zeitachse */
+
+  /* Akzent. Die App nutzt Terrakotta #CE7F5F, nicht das Kupfer aus dem
+     Handoff. Sie traegt 3.08:1 und kann keine weisse Schrift halten;
+     abgedunkelt auf 4.51:1 bleibt der Ton erkennbar derselbe. */
+  --clay:      #B85D38;  /* gefuellte Handlungsflaechen (4.51:1) */
+  --clay-tone: #CE7F5F;  /* Terrakotta der App — Flaechen ohne Text */
+  --clay-soft: #F7E4D8;
+
+  /* Die warme Seite des Verlaufs. Sonne ist zu hell fuer Text und wird
+     ausschliesslich als Flaeche eingesetzt; Mauve traegt Preise und Kicker. */
+  --sun:   #F7D67F;  /* Sonne der App — nur Flaeche */
+  --brass: #966A7F;  /* Mauve abgedunkelt (4.50:1) — Preise, Kicker */
+  --blush: #EFE8EE;  /* Sekundaerton der App — Avatare */
+
+  /* Der Verlauf ist das Wiedererkennbarste an kialia. Er gehoert deshalb ins
+     System und nicht in eine einzelne Komponente. */
+  --gradient-sky:
+    radial-gradient(75% 120% at 6% 4%, #8F9BE0 0%, transparent 58%),
+    radial-gradient(65% 110% at 96% 0%, #F7D67F 0%, transparent 62%),
+    radial-gradient(85% 130% at 78% 100%, #CE7F5F 0%, transparent 60%),
+    radial-gradient(70% 120% at 22% 104%, #A0798C 0%, transparent 62%),
+    linear-gradient(150deg, #FAF6F0, #FFFCF9);
 
   /* ---- Status -------------------------------------------------------------
      kialia hatte keine eigenen Statusfarben. Abgeleitet aus der Palette:

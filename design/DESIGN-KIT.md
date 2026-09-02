@@ -16,6 +16,7 @@ drei Bausteine, die eine Reise braucht und ein Hochzeitstag nicht.
 | `css/tokens.css` | Nur die Variablen |
 | `css/fonts.css` | Newsreader + Manrope, eingebettet (offlinefähig) |
 | `tokens.json` | Dieselben Werte maschinenlesbar |
+| `icon-vorschlaege.html` | Zwei Icon-Fassungen im Größenvergleich |
 | `fonts/` | Die Schriftdateien |
 
 ---
@@ -41,41 +42,35 @@ Unverändert aus Mazune übernommen — sie sind der Grund, warum es hochwertig 
 
 ---
 
-## 2. Farben — und warum sie so und nicht anders sind
+## 2. Farben — abgeglichen mit der laufenden App
 
-Die Marke gibt die Töne vor, die Lesbarkeit gibt die Werte vor. **Zwei Marken-Töne
-mussten abgedunkelt werden**, weil sie keine weiße Schrift tragen können. Alle Zahlen
-unten sind gerechnet, nicht geschätzt.
+**Wichtig:** kialias Marken-Handoff und die laufende App nennen verschiedene Farben. Das
+Handoff spricht von Violett und Kupfer, die App rendert **Perlblau und Terrakotta**.
+Maßgeblich ist, was man sieht — dieses Kit folgt der App.
 
-| Mazune | kialia | Wert | Weiße Schrift darauf |
+| Rolle | Wert | Herkunft | Weiße Schrift |
 |---|---|---|---|
-| `--ivory` | Elfenbein | `#FAF6F0` | — |
-| `--paper` | Papier | `#FFFCF9` | — |
-| `--paper-2` | Creme (`k-cream`) | `#FAF1E8` | — |
-| `--ink` | Tinte (`k-ink`) | `#2F2A3E` | 12,8:1 auf Elfenbein |
-| `--olive` → `--primary` | **Violett gedrückt** | `#584876` | **8,07:1** ✔ |
-| — | `--primary-tone` (`k-violet`) | `#69578E` | 6,26:1 ✘ nur für Ränder |
-| `--sage` | Perlblau (`k-periwinkle`) | `#8596DB` | Fokus, Zeitachse |
-| `--clay` | **Kupfer abgedunkelt** | `#BA5B38` | **4,52:1** ✔ |
-| — | `--clay-tone` (`k-copper`) | `#CE7B5C` | 3,18:1 ✘ nur ohne Text |
-| `--brass` | Lagune (`k-lagoon`) | `#A57990` | Preise, Kicker |
-| `--blush` | Flieder | `#EDE7F2` | Avatare |
+| `--ivory` | `#FAF6F0` | `--background` der App | — |
+| `--paper` | `#FFFCF9` | `--card` | — |
+| `--paper-2` | `#FAF1E8` | `--secondary` | — |
+| `--ink` | `#2F2A3E` | `--foreground` | 12,8:1 auf Elfenbein |
+| `--primary-tone` | `#8F9BE0` | **Perlblau der App** | 2,65:1 ✘ nie als Fläche |
+| `--primary` | `#584876` | dunkler Partner | **8,07:1** ✔ gefüllte Flächen |
+| `--clay-tone` | `#CE7F5F` | **Terrakotta der App** | 3,08:1 ✘ nur ohne Text |
+| `--clay` | `#B85D38` | abgedunkelt | **4,51:1** ✔ Handlungen |
+| `--sun` | `#F7D67F` | Sonne der App | nur Fläche |
+| `--brass` | `#966A7F` | Mauve, abgedunkelt | 4,50:1 — Preise, Kicker |
 
-**Die zwei Abdunklungen im Detail.** Mazune verlangt für die Primärfarbe ≥ 7:1.
-`k-violet #69578E` schafft 6,26:1 — knapp daneben, aber daneben. Die Marke hat mit
-`k-violet-press #584876` bereits einen passenden Ton (8,07:1); er wird zur Primärfarbe,
-das hellere Violett bleibt für Ränder, Punkte und Ausgewähltes.
+**Warum Perlblau keine Flächenfarbe sein kann.** Es trägt 2,65:1 mit weißer Schrift. Um
+Mazunes 7:1 zu erreichen, müsste es zu `#364BC4` werden — einem Königsblau, das mit der
+Marke nichts mehr zu tun hat. Perlblau gehört deshalb an Verlauf, Punkte, Ränder und
+Ausgewähltes; gefüllte Flächen brauchen einen dunklen Partner aus derselben Familie.
 
-`k-copper #CE7B5C` trägt nur 3,18:1 und kann **keine** weiße Schrift halten — als
-gefüllter Handlungs-Button wäre er unlesbar. Abgedunkelt auf `#BA5B38` sind es 4,52:1,
-praktisch derselbe Wert wie Mazunes eigenes Clay (4,58:1). Gleiche Rolle, gleiche
-Lesbarkeit.
+**Der Verlauf** ist das Wiedererkennbarste an kialia und steht als `--gradient-sky` im
+System — dieselben vier Farbkreise wie in der App.
 
-**Status.** kialia hatte keine Statusfarben. Abgeleitet aus der Palette, damit sie nicht
-wie Fremdkörper wirken: Grün `#4E7A63`, Ocker `#8A6A2E`, Rot `#9A4F53` — alle drei tragen
-weiße Schrift.
-
----
+**Status.** Die App hatte keine. Abgeleitet, damit sie nicht wie Fremdkörper wirken:
+Grün `#4E7A63`, Ocker `#8A6A2E`, Rot `#9A4F53` — alle drei tragen weiße Schrift.
 
 ## 3. Typografie
 
@@ -178,15 +173,28 @@ Mikrofon, Buch, Rucksack) stehen in `examples.html` zum Kopieren.
 
 ## 7. Logo
 
-Das Fernglas bleibt — es ist die Marke. Zwei Angleichungen an dieses System:
+Das Fernglas bleibt — es ist die Marke. Die Silhouette wird nicht angefasst.
 
-- **Die Wortmarke** wird gesperrt gesetzt (`KIALIA`, `letter-spacing .34em`) mit einem
-  Punkt in Kupfer dahinter, Tagline als Serif-Kursiv darunter.
-- **Der Verlauf im Icon** darf ruhiger werden. Er ist heute der lauteste Teil der Marke
-  und konkurriert mit dem Inhalt; ein reduzierter Verlauf oder ein einfarbiger Grund in
-  `--primary` mit hellem Fernglas passt besser zu einem System, das auf Papier setzt.
+**Die Wortmarke** wird gesperrt gesetzt (`KIALIA`, `letter-spacing .34em`) mit einem Punkt
+in `--clay` dahinter, Tagline als Serif-Kursiv darunter.
 
-Nicht anfassen: die Silhouette des Fernglases.
+**Das Icon** ist die eine Stelle, an der die heutige Marke mit diesem System bricht: der
+Verlauf liegt über der ganzen Fläche, und das Fernglas hat kaum Kontrast dazu. Bei 28 px —
+der Größe im App-Umschalter und in den Einstellungen — wird daraus ein Farbfleck.
+
+Zwei Fassungen in Mazunes Formensprache stehen in `icon-vorschlaege.html`, beide mit
+kialias Farben, beide ohne Konturen und ohne Fotorealismus:
+
+| | Grund | Fernglas | Bei 28 px |
+|---|---|---|---|
+| **Heute** | Verlauf über alles | dunkel auf bunt | Farbfleck |
+| **A** | Creme, flach | dunkel, Landschaftsbänder in den Gläsern | klar, aber die Bänder werden Matsch |
+| **B** | `--primary`, flach | hell, Silhouette | stärkster Kontrast |
+
+**Empfehlung: B.** Ein App-Icon wird öfter klein gesehen als groß, und dort entscheidet
+allein die Silhouette. Der Verlauf geht dabei nicht verloren — er ist als `--gradient-sky`
+im System und trägt weiterhin jeden Bildschirmhintergrund. Er gehört dorthin, nicht auf
+zwölf Quadratmillimeter.
 
 ## 8. Abnahme-Checkliste
 
