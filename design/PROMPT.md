@@ -47,8 +47,9 @@
 > Akzent `--clay` → **[Farbe]**, Primär `--primary` → **[Farbe]**, Serif → **[Schrift]**.
 >
 > **Rechne die Kontraste nach, bevor du eine Farbe setzt:** die Primärfarbe braucht ≥ 7:1
-> mit weißer Schrift, der Akzent ≥ 4,5:1. Genau daran ist kialias Marken-Violett
-> gescheitert (6,26:1) — deshalb steht dort der gedrückte Ton.
+> mit weißer Schrift, der Akzent ≥ 4,5:1. Genau daran ist kialias Perlblau gescheitert
+> (2,65:1) — es bleibt die Marken-Farbe für Verlauf, Punkte und Ränder, aber gefüllte
+> Flächen bekommen einen abgedunkelten Partner. Plane von Anfang an mit diesem Paar.
 >
 > Alles andere bleibt: Elfenbein statt Weiß, Papierkorn, warme Schatten, Kicker-Zeilen,
 > Serif-Zahlen, zwei Abstände, Pillen-Radien, Blätterstapel.
@@ -58,8 +59,9 @@
 
 ## Kurzfassung (wenn nur ein Absatz reinpasst)
 
-> Design: warmes Elfenbein `#FAF6F0` statt Weiß, Text Tinte `#2F2A3E`, Primärfarbe tiefes
-> Violett `#584876`, Akzent Kupfer `#BA5B38`, Lagune `#A57990` für Preise und Kicker,
+> Design: warmes Elfenbein `#FAF6F0` statt Weiß, Text Tinte `#2F2A3E`, Marken-Perlblau
+> `#8F9BE0` für Verlauf, Punkte und Ränder mit `#584876` für gefüllte Flächen, Akzent
+> Terrakotta `#CE7F5F` mit `#B85D38` für Handlungen, Mauve `#966A7F` für Preise und Kicker,
 > Status Grün `#4E7A63` / Ocker `#8A6A2E` / Rot `#9A4F53`. Newsreader für Titel, Uhrzeiten
 > und Beträge, Manrope für alles andere; über jeder Überschrift eine gesperrte Kicker-Zeile
 > in Versalien. Karten: Papier, 1-px-Hairline, Radius 20, weicher warmer Schatten. Alles
