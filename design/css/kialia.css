@@ -1,0 +1,573 @@
+@import './fonts.css';
+
+@import "./fonts.css";
+
+/* ===========================================================================
+   kialia Design System
+   ---------------------------------------------------------------------------
+   Portierung des Mazune Design Kits auf kialias Farbwelt. Die Struktur, die
+   Klassennamen und die Regeln stammen 1:1 aus Mazune — geaendert sind nur die
+   Farben, die Schriften und drei Ergaenzungen fuer eine Reise-App
+   (Blaetterstapel, Reisestatus, Waehrungspille).
+
+   Zuordnungstabelle und Begruendungen: ../DESIGN-KIT.md, Abschnitt 2.
+   =========================================================================== */
+
+/* ============================== Tokens ================================= */
+:root {
+  --nav-h: 66px;
+  --tab-h: calc(64px + env(safe-area-inset-bottom));
+
+  /* ---- Flaechen -----------------------------------------------------------
+     Mazune: "Elfenbein statt Weiss". kialias Papierton ist waermer und
+     violettstichiger als Mazunes Sandton — das ist der Charakterunterschied
+     zwischen Hochzeit und Reise und darf bleiben. */
+  --ivory:   #FAF6F0;  /* Seitenhintergrund */
+  --paper:   #FFFCF9;  /* Karten */
+  --paper-2: #FAF1E8;  /* eingebettete Flaechen, Segmented Control (k-cream) */
+
+  /* ---- Text --------------------------------------------------------------- */
+  --ink:      #2F2A3E;  /* k-ink        (12.8:1 auf Elfenbein) */
+  --ink-2:    #4A4258;  /* k-ink-2      ( 8.8:1) */
+  --ink-soft: #6C6480;  /* k-secondary  ( 5.2:1) */
+  --line:        rgba(47, 42, 62, 0.10);
+  --line-strong: rgba(47, 42, 62, 0.18);
+
+  /* ---- Marke --------------------------------------------------------------
+     ACHTUNG, nachgerechnet: das Marken-Violett #69578E schafft mit weisser
+     Schrift nur 6.26:1 und verfehlt Mazunes Anforderung von 7:1. Gefuellte
+     Flaechen nehmen deshalb den gedrueckten Ton; das helle Violett bleibt fuer
+     Raender, Punkte und Ausgewaehltes. */
+  --primary:      #584876;  /* k-violet-press  (8.07:1) — gefuellte Flaechen */
+  --primary-2:    #4A3C64;  /* k-violet-press-2 (9.90:1) — gedrueckt */
+  --primary-tone: #69578E;  /* k-violet — Raender, Punkte, ausgewaehlt */
+  --sage:         #8596DB;  /* k-periwinkle — Fortschritt, Fokus, Zeitachse */
+
+  /* Akzent. Das Marken-Kupfer #CE7B5C traegt nur 3.18:1 und kann keine weisse
+     Schrift halten. Abgedunkelt auf 4.52:1 — praktisch derselbe Wert wie
+     Mazunes eigenes Clay (4.58:1), also dieselbe Rolle bei gleicher Lesbarkeit. */
+  --clay:      #BA5B38;
+  --clay-tone: #CE7B5C;  /* k-copper — Flaechen ohne Text darauf */
+  --clay-soft: #F7E2D6;  /* k-pill-booked-bg */
+
+  --brass: #A57990;  /* k-lagoon — Kicker, Preise, Ornamente */
+  --blush: #EDE7F2;  /* k-pill-planned-bg — Avatare */
+
+  /* ---- Status -------------------------------------------------------------
+     kialia hatte keine eigenen Statusfarben. Abgeleitet aus der Palette:
+     Gruen aus dem Salbei-Bereich, Warnung aus dem Bernstein, Absage aus dem
+     Lagunenton ins Rote gezogen. Alle drei tragen weisse Schrift. */
+  --ok:   #4E7A63;  --ok-soft:   #E4EFE9;
+  --warn: #8A6A2E;  --warn-soft: #F7EEDC;
+  --no:   #9A4F53;  --no-soft:   #F6E4E5;
+
+  /* ---- Schrift ------------------------------------------------------------
+     Mazune: Serif fuers Feierliche, Grotesk fuers Funktionale. kialias
+     Markenserif ist Newsreader — Mazune nennt sie selbst als Alternative zu
+     Cormorant ("redaktioneller"), das passt zu einem Reisetagebuch besser als
+     eine Hochzeitsschrift. Grotesk bleibt Manrope, weil sie in der App bereits
+     mitgeliefert wird und kein weiterer Download noetig ist. */
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, serif;
+  --sans:  "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* ---- Radien -------------------------------------------------------------
+     kialias Marke nennt 20px fuer Karten und 14px fuer Felder; Mazune 22/16.
+     Uebernommen wird die kialia-Staffel, sie ist eine Spur kompakter. */
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 20px;
+  --r-xl: 30px;
+  /* Pillen: 999px */
+
+  /* ---- Schatten -----------------------------------------------------------
+     Warm getoent aus der Tinte, nie grau-blau. */
+  --sh-1: 0 1px 2px rgba(47, 42, 62, 0.05);
+  --sh-2: 0 2px 6px rgba(47, 42, 62, 0.05), 0 16px 36px -22px rgba(47, 42, 62, 0.35);
+  --sh-3: 0 4px 12px rgba(47, 42, 62, 0.07), 0 30px 60px -30px rgba(47, 42, 62, 0.45);
+
+  /* ---- Abstaende ----------------------------------------------------------
+     Mazunes harte Regel: nur zwei vertikale Abstaende. */
+  --gap:    14px;
+  --gap-lg: 26px;
+}
+
+/* ============================== Reset ================================== */
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; padding: 0; }
+html, body, #root { height: 100%; }
+body {
+  font-family: var(--sans);
+  background: var(--ivory);
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.35;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+}
+img, svg { display: block; max-width: 100%; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { background: none; border: none; cursor: pointer; }
+a { color: inherit; }
+::selection { background: var(--blush); }
+
+/* ============================ Typography =============================== */
+.display {
+  font-family: var(--serif);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+.d1 { font-size: clamp(38px, 10vw, 64px); }
+.d2 { font-size: clamp(30px, 7vw, 42px); }
+.d3 { font-size: clamp(23px, 5.4vw, 30px); }
+.serif-it { font-family: var(--serif); font-style: italic; }
+.kicker {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--ink-soft);
+}
+.kicker.brass { color: var(--brass); }
+.muted { color: var(--ink-soft); }
+.small { font-size: 13px; }
+.tiny { font-size: 12px; }
+.center { text-align: center; }
+.rule { height: 1px; background: var(--line); border: 0; }
+.rule-ornament {
+  display: flex; align-items: center; gap: 12px; color: var(--brass);
+}
+.rule-ornament::before, .rule-ornament::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--line-strong), transparent);
+}
+
+/* ============================ Wordmark ================================= */
+.wordmark {
+  font-family: var(--sans); font-weight: 600; font-size: 15px;
+  letter-spacing: 0.34em; text-transform: uppercase;
+}
+.wordmark .dot { color: var(--clay); }
+.tagline { font-family: var(--serif); font-style: italic; font-size: 15px; color: var(--ink-soft); }
+
+/* ============================= Layout ================================== */
+.app { position: relative; z-index: 1; min-height: 100%; display: flex; flex-direction: column; }
+.page {
+  width: 100%; max-width: 680px; margin: 0 auto;
+  padding: 20px 18px calc(28px + var(--tab-h));
+  animation: fadeUp 0.4s ease;
+}
+.page.wide { max-width: 1080px; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.stack { display: flex; flex-direction: column; gap: 14px; }
+.stack-lg { display: flex; flex-direction: column; gap: 26px; }
+.row { display: flex; align-items: center; gap: 10px; }
+.row.between { justify-content: space-between; }
+.row > svg { flex: none; }
+.row.wrap { flex-wrap: wrap; }
+.spacer { flex: 1; }
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+.grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(148px, 1fr)); gap: 12px; }
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+.section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
+
+/* ============================== Topbar ================================= */
+.topbar {
+  position: sticky; top: 0; z-index: 40;
+  height: var(--nav-h); display: flex; align-items: center; gap: 14px;
+  padding: 0 18px;
+  background: rgba(250, 246, 240, 0.86);
+  backdrop-filter: blur(14px) saturate(1.2);
+  border-bottom: 1px solid var(--line);
+}
+.topbar .brand { display: flex; align-items: baseline; gap: 10px; }
+.topnav { display: none; gap: 4px; }
+.topnav button {
+  padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 500;
+  color: var(--ink-soft); transition: 0.18s;
+}
+.topnav button:hover { color: var(--ink); background: rgba(47, 42, 62, 0.04); }
+.topnav button.active { color: var(--paper); background: var(--primary); }
+@media (min-width: 861px) { .topnav { display: flex; } }
+
+/* ============================ Bottom tabs ============================== */
+.tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+  height: var(--tab-h); padding-bottom: env(safe-area-inset-bottom);
+  display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
+  background: rgba(250, 246, 240, 0.92);
+  backdrop-filter: blur(16px) saturate(1.2);
+  border-top: 1px solid var(--line);
+}
+.tabbar button {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--ink-soft);
+  transition: color 0.18s;
+}
+.tabbar button svg { width: 21px; height: 21px; stroke-width: 1.5; }
+.tabbar button.active { color: var(--primary); }
+.tabbar button.active svg { stroke-width: 1.9; }
+.tabbar button .tabdot {
+  width: 4px; height: 4px; border-radius: 999px; background: var(--clay); opacity: 0;
+  transition: 0.2s;
+}
+.tabbar button.active .tabdot { opacity: 1; }
+@media (min-width: 861px) { .tabbar { display: none; } :root { --tab-h: 24px; } }
+
+/* ============================== Cards ================================== */
+.card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-1);
+  padding: 18px;
+  overflow-wrap: break-word;
+  transition: box-shadow 0.25s, transform 0.25s, border-color 0.25s;
+}
+.card.flat { box-shadow: none; }
+.card.raised { box-shadow: var(--sh-2); }
+.card.tint { background: linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%); }
+.card.dark {
+  background: linear-gradient(165deg, var(--primary) 0%, #322A46 100%);
+  color: #FBF7F2; border-color: rgba(255, 255, 255, 0.10);
+}
+.card.dark .muted { color: rgba(242, 238, 230, 0.62); }
+.card.pad-lg { padding: 26px; }
+.card.pad-sm { padding: 14px; }
+
+/* ============================= Buttons ================================= */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 46px; padding: 0 20px; border-radius: 999px;
+  font-size: 14px; font-weight: 550; letter-spacing: 0.01em;
+  border: 1px solid transparent; transition: 0.18s; white-space: nowrap; text-decoration: none;
+}
+.btn:active { transform: scale(0.985); }
+.btn:disabled { opacity: 0.42; cursor: not-allowed; }
+.btn-primary { background: var(--primary); color: #FBF7F2; box-shadow: var(--sh-1); }
+.btn-primary:hover:not(:disabled) { background: var(--primary-2); box-shadow: var(--sh-2); }
+.btn-clay { background: var(--clay); color: #FFF7F3; }
+.btn-clay:hover:not(:disabled) { filter: brightness(1.06); }
+.btn-ghost { border-color: var(--line-strong); color: var(--ink); background: rgba(255, 255, 255, 0.5); }
+.btn-ghost:hover:not(:disabled) { background: var(--paper); border-color: var(--ink-soft); }
+.btn-quiet { color: var(--ink-soft); height: 38px; padding: 0 12px; }
+.btn-quiet:hover { color: var(--ink); background: rgba(47, 42, 62, 0.05); }
+.btn.block { width: 100%; }
+.btn.sm { height: 36px; padding: 0 14px; font-size: 13px; }
+.btn svg { width: 17px; height: 17px; stroke-width: 1.7; }
+
+/* ============================= Badges ================================== */
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 999px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
+  background: var(--paper-2); color: var(--ink-2); border: 1px solid var(--line);
+}
+.badge svg { width: 12px; height: 12px; stroke-width: 2; }
+.badge.ok { background: var(--ok-soft); color: var(--ok); border-color: rgba(78, 122, 99, 0.22); }
+.badge.warn { background: var(--warn-soft); color: var(--warn); border-color: rgba(138, 106, 46, 0.22); }
+.badge.no { background: var(--no-soft); color: var(--no); border-color: rgba(154, 79, 83, 0.22); }
+.badge.clay { background: var(--clay-soft); color: var(--clay); border-color: rgba(186, 91, 56, 0.22); }
+.badge.brass { background: #F3E9EE; color: #7C5468; border-color: rgba(165, 121, 144, 0.25); }
+.badge.paid { background: var(--ok-soft); color: var(--ok); border-color: rgba(78, 122, 99, 0.22); }
+.badge.booked { background: #E4E8F8; color: #3F4E8C; border-color: rgba(63, 78, 140, 0.22); }
+.badge.solid { background: var(--primary); color: #FBF7F2; border-color: transparent; }
+
+/* ============================== Chips ================================== */
+.chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  height: 38px; padding: 0 14px; border-radius: 999px;
+  border: 1px solid var(--line-strong); background: var(--paper);
+  font-size: 13px; font-weight: 500; color: var(--ink-2);
+  transition: 0.16s;
+}
+.chip:hover { border-color: var(--ink-soft); }
+.chip.on { background: var(--primary); border-color: var(--primary); color: #FBF7F2; }
+.chip.off { opacity: 0.62; }
+.chip .tick {
+  width: 17px; height: 17px; border-radius: 999px; border: 1.5px solid var(--line-strong);
+  display: grid; place-items: center; flex: none;
+}
+.chip.on .tick { background: rgba(255, 255, 255, 0.22); border-color: transparent; }
+.chip .tick svg { width: 11px; height: 11px; stroke-width: 3; }
+
+/* ============================== Forms ================================== */
+.field { display: flex; flex-direction: column; gap: 6px; }
+.label { font-size: 12px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-soft); }
+.input, .select, .textarea {
+  width: 100%; min-height: 46px; padding: 11px 14px;
+  background: var(--paper); border: 1px solid var(--line-strong); border-radius: var(--r-sm);
+  font-size: 15px; transition: 0.16s; outline: none;
+}
+.input:focus, .select:focus, .textarea:focus {
+  border-color: var(--sage); box-shadow: 0 0 0 3px rgba(133, 150, 219, 0.18);
+}
+.textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
+.select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' stroke='%237A7166' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+.input.code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.22em; text-transform: uppercase; text-align: center; font-size: 17px; }
+
+.segmented { display: flex; gap: 4px; padding: 4px; background: var(--paper-2); border-radius: 999px; border: 1px solid var(--line); }
+.segmented button {
+  flex: 1; height: 36px; border-radius: 999px; font-size: 13px; font-weight: 550; color: var(--ink-soft);
+  transition: 0.18s;
+}
+.segmented button.active { background: var(--paper); color: var(--ink); box-shadow: var(--sh-1); }
+
+/* ============================ Option cards ============================= */
+.option {
+  display: flex; align-items: flex-start; gap: 12px; width: 100%; text-align: left;
+  padding: 13px 15px; border-radius: var(--r-md);
+  border: 1px solid var(--line-strong); background: var(--paper);
+  transition: 0.16s;
+}
+.option:hover { border-color: var(--sage); }
+.option.on { border-color: var(--primary); background: #F6F4FA; box-shadow: inset 0 0 0 1px var(--primary); }
+.option .radio {
+  width: 19px; height: 19px; border-radius: 999px; border: 1.6px solid var(--line-strong);
+  flex: none; margin-top: 2px; display: grid; place-items: center; transition: 0.16s;
+}
+.option.on .radio { border-color: var(--primary); }
+.option.on .radio::after { content: ''; width: 9px; height: 9px; border-radius: 999px; background: var(--primary); }
+
+/* ============================== Timeline =============================== */
+.timeline { position: relative; display: flex; flex-direction: column; gap: 14px; }
+.tl-item { position: relative; display: grid; grid-template-columns: 62px 1fr; gap: 12px; }
+.tl-time { position: relative; padding-top: 17px; }
+.tl-time .t { font-family: var(--serif); font-size: 19px; font-weight: 600; line-height: 1; }
+.tl-time .t2 { font-size: 11px; color: var(--ink-soft); margin-top: 3px; }
+.tl-item::before {
+  content: ''; position: absolute; left: 68px; top: 0; bottom: -14px; width: 1px;
+  background: linear-gradient(180deg, var(--line-strong), var(--line));
+}
+.tl-item:last-child::before { display: none; }
+.tl-dot {
+  position: absolute; left: 63px; top: 22px; width: 11px; height: 11px; border-radius: 999px;
+  background: var(--ivory); border: 2px solid var(--sage); z-index: 1;
+}
+.tl-item.is-highlight .tl-dot { border-color: var(--clay); background: var(--clay); }
+.tl-item.is-out .tl-dot { border-color: var(--line-strong); }
+.tl-body { padding-left: 14px; }
+.tl-card { padding: 15px 16px; }
+.tl-item.is-out .tl-card { background: transparent; box-shadow: none; border-style: dashed; }
+.tl-item.is-out .tl-card .tl-title { color: var(--ink-soft); }
+.tl-title { font-family: var(--serif); font-size: 21px; font-weight: 600; line-height: 1.2; }
+@media (max-width: 420px) {
+  .tl-item { grid-template-columns: 52px 1fr; }
+  .tl-item::before { left: 58px; }
+  .tl-dot { left: 53px; }
+  .tl-title { font-size: 19px; }
+}
+
+/* ============================ Day switcher ============================= */
+.dayscroll {
+  position: sticky; top: var(--nav-h); z-index: 30;
+  margin: 0 -18px; padding: 10px 18px 12px;
+  background: var(--ivory);
+  box-shadow: 0 10px 14px -12px rgba(47, 42, 62, 0.35);
+}
+.dayscroll .inner { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.dayscroll .inner::-webkit-scrollbar { display: none; }
+.daypill {
+  flex: none; min-width: 96px; padding: 9px 14px; border-radius: var(--r-md);
+  border: 1px solid var(--line-strong); background: var(--paper);
+  text-align: left; transition: 0.2s;
+}
+.daypill .dp-day { font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-soft); }
+.daypill .dp-date { font-family: var(--serif); font-size: 19px; font-weight: 600; line-height: 1.15; }
+.daypill .dp-label { font-size: 11.5px; color: var(--ink-soft); }
+.daypill.active { background: var(--primary); border-color: var(--primary); box-shadow: var(--sh-2); }
+.daypill.active .dp-day, .daypill.active .dp-label { color: rgba(242, 238, 230, 0.72); }
+.daypill.active .dp-date { color: #FBF7F2; }
+
+/* ============================== Hero =================================== */
+.hero {
+  position: relative; overflow: hidden; box-shadow: var(--sh-2);
+  border-radius: 0 0 var(--r-xl) var(--r-xl);
+  min-height: clamp(310px, 44vh, 480px);
+}
+.hero .art { position: absolute; inset: 0; width: 100%; height: 100%; }
+.hero .veil {
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(180deg, rgba(30, 26, 42, 0.34) 0%, rgba(30, 26, 42, 0) 32%),
+    linear-gradient(180deg, rgba(30, 26, 42, 0) 30%, rgba(30, 26, 42, 0.48) 58%, rgba(28, 24, 40, 0.86) 100%);
+}
+.hero .content { position: absolute; left: 0; right: 0; bottom: 0; padding: 26px 22px 28px; color: #FCF9F4; }
+.hero .content .d1 { text-shadow: 0 2px 24px rgba(28, 24, 40, 0.35); }
+.hero .content .kicker { color: rgba(252, 249, 244, 0.78); }
+.villa-art { border-radius: var(--r-md); overflow: hidden; }
+
+.hint {
+  display: flex; gap: 9px; align-items: flex-start; margin-top: 11px;
+  padding: 9px 12px; border-radius: 13px; background: var(--paper-2);
+  border: 1px solid var(--line); font-size: 13px; line-height: 1.45;
+}
+.hint svg { width: 15px; height: 15px; flex: none; margin-top: 2px; color: var(--brass); }
+.hint b { font-weight: 600; letter-spacing: .02em; }
+
+/* ============================== Stats ================================== */
+.stat { padding: 16px 18px; }
+.stat .n { font-family: var(--serif); font-size: 38px; font-weight: 600; line-height: 1; }
+.stat .l { font-size: 12px; color: var(--ink-soft); margin-top: 4px; }
+.bar { height: 8px; border-radius: 999px; background: var(--paper-2); overflow: hidden; }
+.bar > span { display: block; height: 100%; border-radius: 999px; background: var(--sage); transition: width 0.5s ease; }
+.bar.clay > span { background: var(--clay); }
+
+/* ============================== Sheet ================================== */
+.overlay {
+  position: fixed; inset: 0; z-index: 60; background: rgba(35, 30, 48, 0.42);
+  backdrop-filter: blur(3px); display: flex; align-items: flex-end; justify-content: center;
+  animation: fade 0.2s ease;
+}
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+.sheet {
+  width: 100%; max-width: 560px; max-height: 88vh; overflow-y: auto;
+  background: var(--ivory); border-radius: var(--r-xl) var(--r-xl) 0 0;
+  padding: 22px 20px calc(24px + env(safe-area-inset-bottom));
+  box-shadow: var(--sh-3); animation: slideUp 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes slideUp { from { transform: translateY(18px); opacity: 0.6; } to { transform: none; opacity: 1; } }
+.sheet .grab { width: 38px; height: 4px; border-radius: 999px; background: var(--line-strong); margin: 0 auto 14px; }
+@media (min-width: 700px) {
+  .overlay { align-items: center; }
+  .sheet { border-radius: var(--r-xl); max-height: 84vh; }
+}
+
+/* ============================== Toast ================================== */
+.toast {
+  position: fixed; left: 50%; bottom: calc(var(--tab-h) + 16px); transform: translateX(-50%);
+  z-index: 80; padding: 11px 18px; border-radius: 999px;
+  background: var(--primary); color: #FBF7F2; font-size: 13.5px; font-weight: 500;
+  box-shadow: var(--sh-3); animation: toastIn 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  display: flex; align-items: center; gap: 8px; max-width: 90vw;
+}
+@keyframes toastIn { from { opacity: 0; transform: translate(-50%, 12px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+/* ============================== Misc =================================== */
+.avatar {
+  width: 34px; height: 34px; border-radius: 999px; flex: none;
+  display: grid; place-items: center; font-size: 12.5px; font-weight: 600;
+  background: var(--blush); color: #5B4C77; border: 1px solid rgba(255, 255, 255, 0.6);
+}
+.avatar.sm { width: 26px; height: 26px; font-size: 10.5px; }
+.avatar.brandfill { background: var(--primary); color: #FBF7F2; }
+.avatar-stack { display: flex; }
+.avatar-stack .avatar + .avatar { margin-left: -9px; }
+.list-row {
+  display: flex; align-items: center; gap: 12px; padding: 13px 0;
+  border-bottom: 1px solid var(--line);
+}
+.list-row:last-child { border-bottom: none; }
+.progress-dots { display: flex; gap: 6px; }
+.progress-dots i {
+  width: 22px; height: 3px; border-radius: 999px; background: var(--line-strong); transition: 0.3s;
+}
+.progress-dots i.on { background: var(--primary); }
+.link { color: var(--clay); text-decoration: none; border-bottom: 1px solid rgba(186, 91, 56, 0.35); }
+.link:hover { border-color: var(--clay); }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.14em; }
+.empty { text-align: center; padding: 34px 18px; color: var(--ink-soft); }
+.scroll-x { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; margin: 0 -18px; padding: 2px 18px 6px; }
+.scroll-x::-webkit-scrollbar { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ===========================================================================
+   Ergaenzungen fuer eine Reise-App
+   ---------------------------------------------------------------------------
+   Mazune ist fuer einen Anlass gebaut: ein Ort, vier Tage, feste Programmpunkte.
+   Eine Reise ist etwas anderes — sie hat Seiten, die man umblaettert, Betraege
+   in fremder Waehrung und Dinge, die man erst unterwegs entscheidet. Drei
+   Zusaetze, mehr braucht es nicht.
+   =========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Blaetterstapel — Tagebuch, Plan, Packliste
+   --------------------------------------------------------------------------
+   Vorbild ist ein Stapel aufgefaecherter Pergamentblaetter: dicht
+   uebereinander, jedes ragt ein Stueck hervor, das aufgeschlagene loest sich
+   heraus. Das ist die Metapher fuer alles, was in kialia nach Tagen sortiert
+   ist.
+
+   Der Effekt entsteht aus drei Kleinigkeiten:
+     1. negativer Abstand — die Blaetter ueberlappen
+     2. ein Schatten NACH OBEN — das Blatt liegt auf dem darunter, nicht
+        darueber in der Luft
+     3. eine Kante am oberen Rand, die den Papierrand andeutet
+
+   Ohne Punkt 2 sieht es aus wie schlecht gesetzte Karten. Mit Punkt 2 sieht
+   es aus wie Papier.
+   -------------------------------------------------------------------------- */
+.leafstack { display: flex; flex-direction: column; }
+.leafstack > * + * { margin-top: -18px; }
+
+.leaf {
+  position: relative;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 16px 18px;
+  transition:
+    margin 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.24s ease,
+    transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow:
+    0 -1px 0 rgba(47, 42, 62, 0.06),
+    0 -6px 14px -12px rgba(47, 42, 62, 0.5);
+}
+/* Der oberste Zettel braucht keinen Schatten nach oben — darunter liegt nichts. */
+.leafstack > .leaf:first-child { box-shadow: var(--sh-1); }
+
+.leaf.open {
+  z-index: 2;
+  margin-top: 12px !important;
+  margin-bottom: 12px;
+  transform: translateY(-1px);
+  box-shadow: var(--sh-2);
+}
+.leafstack > .leaf.open:first-child { margin-top: 0 !important; }
+
+/* Kopf eines Blatts: Kicker, Datum als Serif, ein Blick auf den Inhalt. */
+.leaf-head { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; }
+.leaf-head .leaf-title { font-family: var(--serif); font-size: 20px; font-weight: 600; line-height: 1.2; }
+.leaf-head .leaf-peek { font-size: 12.5px; color: var(--ink-soft); }
+.leaf-head .chev { flex: none; transition: transform 0.24s; color: var(--ink-soft); }
+.leaf.open .leaf-head .chev { transform: rotate(180deg); }
+.leaf-body { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+
+/* --------------------------------------------------------------------------
+   Waehrungspille
+   --------------------------------------------------------------------------
+   Auf Kreta zahlt man Euro und rechnet in Franken. Ein Betrag ohne Waehrung
+   ist auf einer Reise wertlos, und zwei Waehrungen nebeneinander brauchen eine
+   klare Rangfolge: gezahlt wird gross, umgerechnet klein daneben.
+   -------------------------------------------------------------------------- */
+.amount { display: inline-flex; align-items: baseline; gap: 6px; }
+.amount .val { font-family: var(--serif); font-size: 21px; font-weight: 600; line-height: 1; }
+.amount .cur { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: var(--ink-soft); text-transform: uppercase; }
+.amount .conv { font-size: 12px; color: var(--ink-soft); }
+.amount.lg .val { font-size: 34px; }
+
+/* --------------------------------------------------------------------------
+   Reisestatus
+   --------------------------------------------------------------------------
+   Mazunes Regel "Farbe bedeutet etwas" uebertragen: Gruen = bezahlt,
+   Blau = gebucht aber offen, Messing = kostet noch Geld, Rot = abgesagt.
+   -------------------------------------------------------------------------- */
+.pricetag { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: var(--brass); }
+.pricetag svg { width: 13px; height: 13px; stroke-width: 1.8; }
+
+@media (prefers-reduced-motion: reduce) {
+  .leaf { transition: none; }
+}

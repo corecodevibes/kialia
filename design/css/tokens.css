@@ -1,0 +1,79 @@
+/* kialia Design System — Tokens
+   ---------------------------------------------------------------------------
+   Struktur nach dem Mazune Design Kit, Farben aus der kialia-Marke.
+   Jede Zuordnung ist begruendet; die Kontraste sind nachgerechnet, nicht
+   geschaetzt (Werte in Klammern: weisse Schrift auf der Flaeche).
+   --------------------------------------------------------------------------- */
+:root {
+  /* ---- Flaechen -----------------------------------------------------------
+     Mazune: "Elfenbein statt Weiss". kialias Papierton ist waermer und
+     violettstichiger als Mazunes Sandton — das ist der Charakterunterschied
+     zwischen Hochzeit und Reise und darf bleiben. */
+  --ivory:   #FAF6F0;  /* Seitenhintergrund */
+  --paper:   #FFFCF9;  /* Karten */
+  --paper-2: #FAF1E8;  /* eingebettete Flaechen, Segmented Control (k-cream) */
+
+  /* ---- Text --------------------------------------------------------------- */
+  --ink:      #2F2A3E;  /* k-ink        (12.8:1 auf Elfenbein) */
+  --ink-2:    #4A4258;  /* k-ink-2      ( 8.8:1) */
+  --ink-soft: #6C6480;  /* k-secondary  ( 5.2:1) */
+  --line:        rgba(47, 42, 62, 0.10);
+  --line-strong: rgba(47, 42, 62, 0.18);
+
+  /* ---- Marke --------------------------------------------------------------
+     ACHTUNG, nachgerechnet: das Marken-Violett #69578E schafft mit weisser
+     Schrift nur 6.26:1 und verfehlt Mazunes Anforderung von 7:1. Gefuellte
+     Flaechen nehmen deshalb den gedrueckten Ton; das helle Violett bleibt fuer
+     Raender, Punkte und Ausgewaehltes. */
+  --primary:      #584876;  /* k-violet-press  (8.07:1) — gefuellte Flaechen */
+  --primary-2:    #4A3C64;  /* k-violet-press-2 (9.90:1) — gedrueckt */
+  --primary-tone: #69578E;  /* k-violet — Raender, Punkte, ausgewaehlt */
+  --sage:         #8596DB;  /* k-periwinkle — Fortschritt, Fokus, Zeitachse */
+
+  /* Akzent. Das Marken-Kupfer #CE7B5C traegt nur 3.18:1 und kann keine weisse
+     Schrift halten. Abgedunkelt auf 4.52:1 — praktisch derselbe Wert wie
+     Mazunes eigenes Clay (4.58:1), also dieselbe Rolle bei gleicher Lesbarkeit. */
+  --clay:      #BA5B38;
+  --clay-tone: #CE7B5C;  /* k-copper — Flaechen ohne Text darauf */
+  --clay-soft: #F7E2D6;  /* k-pill-booked-bg */
+
+  --brass: #A57990;  /* k-lagoon — Kicker, Preise, Ornamente */
+  --blush: #EDE7F2;  /* k-pill-planned-bg — Avatare */
+
+  /* ---- Status -------------------------------------------------------------
+     kialia hatte keine eigenen Statusfarben. Abgeleitet aus der Palette:
+     Gruen aus dem Salbei-Bereich, Warnung aus dem Bernstein, Absage aus dem
+     Lagunenton ins Rote gezogen. Alle drei tragen weisse Schrift. */
+  --ok:   #4E7A63;  --ok-soft:   #E4EFE9;
+  --warn: #8A6A2E;  --warn-soft: #F7EEDC;
+  --no:   #9A4F53;  --no-soft:   #F6E4E5;
+
+  /* ---- Schrift ------------------------------------------------------------
+     Mazune: Serif fuers Feierliche, Grotesk fuers Funktionale. kialias
+     Markenserif ist Newsreader — Mazune nennt sie selbst als Alternative zu
+     Cormorant ("redaktioneller"), das passt zu einem Reisetagebuch besser als
+     eine Hochzeitsschrift. Grotesk bleibt Manrope, weil sie in der App bereits
+     mitgeliefert wird und kein weiterer Download noetig ist. */
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, serif;
+  --sans:  "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* ---- Radien -------------------------------------------------------------
+     kialias Marke nennt 20px fuer Karten und 14px fuer Felder; Mazune 22/16.
+     Uebernommen wird die kialia-Staffel, sie ist eine Spur kompakter. */
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 20px;
+  --r-xl: 30px;
+  /* Pillen: 999px */
+
+  /* ---- Schatten -----------------------------------------------------------
+     Warm getoent aus der Tinte, nie grau-blau. */
+  --sh-1: 0 1px 2px rgba(47, 42, 62, 0.05);
+  --sh-2: 0 2px 6px rgba(47, 42, 62, 0.05), 0 16px 36px -22px rgba(47, 42, 62, 0.35);
+  --sh-3: 0 4px 12px rgba(47, 42, 62, 0.07), 0 30px 60px -30px rgba(47, 42, 62, 0.45);
+
+  /* ---- Abstaende ----------------------------------------------------------
+     Mazunes harte Regel: nur zwei vertikale Abstaende. */
+  --gap:    14px;
+  --gap-lg: 26px;
+}
