@@ -1,119 +1,178 @@
 #!/usr/bin/env python3
 """Erzeugt saemtliche App-Icons aus einer einzigen Beschreibung.
 
-Warum ein Skript und keine Bilddatei: das alte Icon lag nur als 1024er-PNG vor.
-Jede Aenderung war Handarbeit in einem Bildprogramm, und die abgeleiteten
-Groessen liefen auseinander. Hier ist die Form der Quelltext — `python3
-scripts/generate_icons.py` schreibt Logo, beide PWA-Groessen, das maskable
-Icon und das Favicon in einem Durchgang neu.
+Warum ein Skript und keine Bilddatei: das Icon lag bisher nur als 1024er-PNG
+vor. Jede Aenderung war Handarbeit in einem Bildprogramm, und die abgeleiteten
+Groessen liefen auseinander. Hier ist die Form der Quelltext —
+`python3 scripts/generate_icons.py` schreibt Logo, beide PWA-Groessen, das
+maskable Icon und das Favicon in einem Durchgang neu.
 
-Zur Gestaltung. Die Vorgabe war "duenner, feiner, edler", und die steht in
-direktem Konflikt mit der Groesse, in der ein App-Icon meistens gesehen wird:
-eine Haarlinie, die bei 512 px edel wirkt, ist bei 28 px schlicht weg.
-Ein erster Versuch mit ausgehoehltem Koerper sah bei 180 px gut aus und
-zerfiel darunter zu Rauschen.
+DIE FORM ist die bisherige, an der Vorlage abgemessen: Mitten, Radien und
+Fassungsstaerke stammen aus dem alten Icon. Neu ist die Ausfuehrung — statt
+gefuellter Flaechen eine feine Linie in Beige, Berggrat und Palmenwedel in
+Gruen. Schultern, Mittelstueck und Glaeser sind eine einzige Flaeche, also
+laeuft auch nur eine Linie aussen herum; einzeln gezeichnete Umrisse haetten
+an den Ueberlappungen Nahtstellen.
 
-Aufgeloest ist es ueber eine Arbeitsteilung:
+DER VERLAUF ist derselbe wie in der App (--gradient-sky), nur weicher. "Weich"
+heisst hier ausdruecklich nicht "heller": die Linien sind beige, also hell —
+ein aufgehellter Grund laesst sie verschwinden. Weich wird er ueber breitere
+Flanken der Farbkreise und eine leicht zurueckgenommene Saettigung. Gemessen
+traegt diese Fassung 2,60:1 gegen die Linie und damit MEHR als die kraeftigere
+Vorversion mit 2,41:1.
 
-  Die Silhouette traegt die Erkennbarkeit. Der Koerper ist eine durchgehende
-  helle Flaeche — zwei schmale, hohe Tuben, ein kurzer Steg, zwei Objektive,
-  die breiter ausstellen als die Tuben. Das ist auch als reiner Umriss noch
-  ein Fernglas.
+Zwei Fallen, beide in der Verlaufsberechnung, beide hier vermieden:
+  - In CSS liegt die ZUERST genannte Verlaufsebene oben. Traegt man sie in
+    Lesereihenfolge auf, landet das Orange aus der letzten Zeile ueber allem
+    und deckt das Perlblau zu.
+  - Die Alpha-Flanke laeuft in CSS linear. Eine weiche Kurve (smoothstep) sieht
+    gefaelliger aus, verwaescht aber die Farbkreise.
 
-  Die feine Linie traegt die Anmutung, und zwar dort, wo sie wirkt: in den
-  Glaesern. Berg und Palme sind duenne Konturen statt gefuellter Flaechen,
-  dazu je eine Haarlinie als Fassung. Bei 180 px sieht man ein praezise
-  gebautes Objekt; darunter loesen sich die Motive auf, ohne die Form
-  mitzunehmen.
-
-Das Bisherige hatte einen Farbverlauf als Grund und gefuellte Motive in den
-Glaesern. Bei 28 px wurde daraus ein Farbfleck. Der Grund ist jetzt eine
-ruhige Flaeche in --primary; der Verlauf lebt in der App weiter, wo er Platz
-hat.
+Bleibt eine Grenze, die in der Sache liegt und nicht in der Ausfuehrung: eine
+feine helle Linie auf hellem Grund traegt nie viel Kontrast. Bei 28 px loest
+sich die Zeichnung sichtbar auf. Das ist der Preis dieser Richtung.
 """
 
+import colorsys
+import math
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFilter
-S=4096; K=S/1024.0
-PRIMARY=(88,72,118); PRIMARY_HI=(108,90,142); IVORY=(250,246,240); CLAY=(206,127,95)
+from PIL import Image, ImageDraw
+S=2048; K=S/1024.0
+BEIGE=(246,235,217); GREEN=(72,114,92)
 def p(v): return v*K
-def q(v, k, c): return (c + (v - c) * k) * K
-def bez(a,b,c,n=52):
+def bez(a,b,c,n=72):
     return [((1-t)**2*a[0]+2*(1-t)*t*b[0]+t*t*c[0],(1-t)**2*a[1]+2*(1-t)*t*b[1]+t*t*c[1])
             for t in (i/n for i in range(n+1))]
 
-CX, CY, SEP, R = 512, 594, 144, 134
-BW, BTOP = 126, 330
+def pastell(c, saett=0.76, auf=0.06):
+    """Weicher, nicht heller.
 
-def koerper(img, k=1.0):
-    """Eine durchgehende helle Silhouette. Zwei schmale Tuben, ein kurzer Steg,
-       zwei Objektive, die breiter ausstellen als die Tuben — daran erkennt man
-       ein Fernglas auch als Umriss allein.
-       Die Feinheit steckt nicht in einer duennen Aussenlinie, sondern in der
-       Proportion und in dem, was innen passiert. Eine ausgehoehlte Form waere
-       bei 28 px nur noch Rauschen."""
-    m = Image.new("L",(S,S),0); d = ImageDraw.Draw(m)
+    "Pastellig" heisst umgangssprachlich meist "aufgehellt". Genau das darf hier
+    nicht passieren: die Linien sind beige, also hell — wird der Grund heller,
+    verschwinden sie. Also wird die Saettigung zurueckgenommen und die
+    Helligkeit nur minimal angehoben. Das Ergebnis wirkt weich, behaelt aber
+    den Abstand zur Linie."""
+    h,l,s = colorsys.rgb_to_hls(*[v/255 for v in c])
+    r,g,b = colorsys.hls_to_rgb(h, min(1.0, l + auf*(1-l)), s*saett)
+    return (int(r*255), int(g*255), int(b*255))
+
+STOPS=[((143,155,224),0.06,0.04,0.75,1.20,0.58),
+       ((247,214,127),0.96,0.00,0.65,1.10,0.62),
+       ((206,127, 95),0.78,1.00,0.85,1.30,0.60),
+       ((160,121,140),0.22,1.04,0.70,1.20,0.62),
+       ((240,160, 85),0.50,0.40,1.20,0.90,0.70)]
+def grund():
+    N=256; im=Image.new("RGB",(N,N)); px=im.load()
+    ca,sa = math.cos(math.radians(50)), math.sin(math.radians(50))
+    A, B = pastell((143,155,224)), pastell((240,160,85))
+    stops = [(pastell(c),cx,cy,rx*1.10,ry*1.10,end*1.16) for c,cx,cy,rx,ry,end in STOPS]
+    for j in range(N):
+        for i in range(N):
+            u,v=i/(N-1), j/(N-1)
+            t=max(0.0,min(1.0,(u*ca+v*sa)/(ca+sa)))
+            r,g,b=[A[k]+(B[k]-A[k])*t for k in range(3)]
+            for (cr,cg,cb),cx,cy,rx,ry,end in reversed(stops):
+                a=max(0.0,min(1.0,1-math.hypot((u-cx)/rx,(v-cy)/ry)/end))
+                r,g,b = r+(cr-r)*a, g+(cg-g)*a, b+(cb-b)*a
+            px[i,j]=(int(r),int(g),int(b))
+    return im.resize((S,S), Image.LANCZOS)
+
+CX, CY, SEP = 513, 555, 181
+RO, RW = 182, 146
+SH_W, SH_TOP = 168, 300
+MID_W, MID_TOP = 124, 346
+
+def silhouette(d, off=0.0):
     for s in (-1,1):
-        ox = CX+s*SEP
-        d.rounded_rectangle([p(ox-BW/2),p(BTOP),p(ox+BW/2),p(CY)], radius=p(42), fill=255)
-        d.ellipse([p(ox-R),p(CY-R),p(ox+R),p(CY+R)], fill=255)
-    d.rounded_rectangle([p(CX-SEP+BW/2-16),p(352),p(CX+SEP-BW/2+16),p(398)], radius=p(22), fill=255)
-    img.paste(Image.new("RGB",(S,S),IVORY),(0,0),m)
+        ox=CX+s*SEP
+        d.ellipse([p(ox-RO+off),p(CY-RO+off),p(ox+RO-off),p(CY+RO-off)], fill=255)
+        d.rounded_rectangle([p(ox-SH_W/2+off),p(SH_TOP+off),p(ox+SH_W/2-off),p(CY)],
+                            radius=p(max(2,58-off)), fill=255)
+    d.rounded_rectangle([p(CX-MID_W/2+off),p(MID_TOP+off),p(CX+MID_W/2-off),p(CY)],
+                        radius=p(max(2,58-off)), fill=255)
 
-def berg(d, ox):
-    o = lambda x,y: (p(ox+x), p(CY+y))
-    lw = int(p(17))
-    d.line([o(-94,52), o(94,52)], fill=PRIMARY, width=lw)
-    d.line([o(-84,52), o(-30,-46), o(4,6), o(36,-30), o(88,52)], fill=PRIMARY, width=lw, joint="curve")
-    d.line([o(-48,-4), o(-30,-28)], fill=PRIMARY, width=int(p(11)))
+def berg(d, ox, lw):
+    """Zwei Gipfel statt vier Zacken. Der Grat lief vorher mit gleicher
+       Strichstaerke bis in die Horizontlinie und wurde dort zum Knoten; jetzt
+       treffen sich beide sauber auf der Linie."""
+    o=lambda x,y:(p(ox+x),p(CY+y))
+    d.line([o(-104,54), o(104,54)], fill=BEIGE, width=lw)
+    d.line([o(-96,54), o(-34,-56), o(2,12)], fill=GREEN, width=lw, joint="curve")
+    d.line([o(2,12), o(40,-34), o(92,54)], fill=GREEN, width=lw, joint="curve")
+    d.line([o(-54,-6), o(-34,-34), o(-16,-6)], fill=GREEN, width=max(2,int(lw*0.62)), joint="curve")
 
-def strand(d, ox):
-    o = lambda x,y: (p(ox+x), p(CY+y))
-    lw = int(p(17))
-    d.ellipse([p(ox+26),p(CY-76),p(ox+86),p(CY-16)], fill=CLAY)
-    d.line([o(-94,52), o(94,52)], fill=PRIMARY, width=lw)
-    d.line([(p(ox+x),p(CY+y)) for x,y in bez((-10,52),(-38,6),(-34,-42))],
-           fill=PRIMARY, width=lw, joint="curve")
-    for ex,ey in ((-92,-46),(-64,-84),(6,-76),(24,-28)):
-        d.line([(p(ox+x),p(CY+y)) for x,y in bez((-34,-42),((ex-34)/2,-88),(ex,ey))],
-               fill=PRIMARY, width=int(p(12)), joint="curve")
-    d.ellipse([p(ox+34),p(CY+26),p(ox+66),p(CY+44)], outline=PRIMARY, width=int(p(9)))
+def strand(d, ox, lw):
+    """Vier Wedel statt fuenf, jeder mit eigener Laenge und einer Spitze, die
+       nach unten auslaeuft — das unterscheidet eine Palme von einem Stern."""
+    o=lambda x,y:(p(ox+x),p(CY+y))
+    krone=(-36,-48)
+    d.ellipse([p(ox+38),p(CY-98),p(ox+98),p(CY-38)], outline=BEIGE, width=max(2,int(lw*0.85)))
+    d.line([o(-104,54), o(104,54)], fill=BEIGE, width=lw)
+    d.line([(p(ox+x),p(CY+y)) for x,y in bez((-58,54),(-36,34),(6,54))],
+           fill=BEIGE, width=max(2,int(lw*0.7)), joint="curve")          # Duene
+    d.line([(p(ox+x),p(CY+y)) for x,y in bez((-14,54),(-44,6),krone)],
+           fill=BEIGE, width=lw, joint="curve")                          # Stamm
+    for spitze, hoch in ((-98,-38),(-70,-96),(6,-92),(38,-46)):
+        d.line([(p(ox+x),p(CY+y)) for x,y in
+                bez(krone, ((krone[0]+spitze)/2, krone[1]-52), (spitze,hoch))],
+               fill=GREEN, width=lw, joint="curve")
 
-def glaeser(img, k=1.0):
-    d = ImageDraw.Draw(img)
-    for s in (-1,1):
-        ox = CX+s*SEP
-        rr = R-22          # Fassung: eine Haarlinie, die das Glas vom Koerper loest
-        d.ellipse([p(ox-rr),p(CY-rr),p(ox+rr),p(CY+rr)], outline=PRIMARY, width=int(p(7)))
-    for s,fn in ((-1,berg),(1,strand)):
-        ox = CX+s*SEP
-        lay = Image.new("RGB",(S,S),IVORY); fn(ImageDraw.Draw(lay), ox)
-        m = Image.new("L",(S,S),0); rr = R-32
-        ImageDraw.Draw(m).ellipse([p(ox-rr),p(CY-rr),p(ox+rr),p(CY+rr)], fill=255)
-        img.paste(lay,(0,0),m)
+def zeichen():
+    """Das Zeichen auf durchsichtigem Grund.
 
-def grund(img):
-    ImageDraw.Draw(img).rectangle([0,0,S,S],fill=PRIMARY)
-    g=Image.new("L",(S,S),0); ImageDraw.Draw(g).ellipse([p(-260),p(-320),p(760),p(560)],fill=255)
-    img.paste(Image.new("RGB",(S,S),PRIMARY_HI),(0,0),g.filter(ImageFilter.GaussianBlur(p(190))))
+    Getrennt vom Verlauf, weil die maskable Fassung nur das Zeichen verkleinern
+    darf. Ein verkleinertes Gesamtbild auf den Verlauf zu setzen hinterlaesst
+    eine sichtbare Naht dort, wo der geschrumpfte Verlauf auf den vollen trifft.
+    """
+    lay = Image.new("RGBA", (S, S), (0, 0, 0, 0))
+    d = ImageDraw.Draw(lay)
+    lw = int(p(16))
+
+    # Glaeser milchig hinterlegen, damit Berg und Palme ruhig stehen
+    for s_ in (-1, 1):
+        ox = CX + s_ * SEP
+        d.ellipse([p(ox - RW), p(CY - RW), p(ox + RW), p(CY + RW)], fill=(255, 252, 249, 132))
+
+    # Aussenlinie der ganzen Form: eine Flaeche, also eine Linie
+    a = Image.new("L", (S, S), 0)
+    silhouette(ImageDraw.Draw(a), 0)
+    b = Image.new("L", (S, S), 0)
+    silhouette(ImageDraw.Draw(b), lw / K)
+    kontur = Image.composite(Image.new("L", (S, S), 0), a, b)
+    lay.paste(Image.new("RGBA", (S, S), BEIGE + (255,)), (0, 0), kontur)
+
+    d = ImageDraw.Draw(lay)
+    for s_ in (-1, 1):
+        ox = CX + s_ * SEP
+        d.ellipse([p(ox - RW), p(CY - RW), p(ox + RW), p(CY + RW)], outline=BEIGE, width=lw)
+
+    sc = Image.new("RGBA", (S, S), (0, 0, 0, 0))
+    ds = ImageDraw.Draw(sc)
+    for s_, fn in ((-1, berg), (1, strand)):
+        fn(ds, CX + s_ * SEP, max(2, int(lw * 0.88)))
+    clip = Image.new("L", (S, S), 0)
+    dc = ImageDraw.Draw(clip)
+    for s_ in (-1, 1):
+        ox = CX + s_ * SEP
+        rr = RW - lw / K - 6
+        dc.ellipse([p(ox - rr), p(CY - rr), p(ox + rr), p(CY + rr)], fill=255)
+    lay.paste(sc, (0, 0), Image.composite(sc.split()[3], Image.new("L", (S, S), 0), clip))
+    return lay
 
 
 def build(maskable=False):
-    """maskable: Android beschneidet das Icon auf die inneren rund 80 %.
-       Ohne diesen Rand saegt ein Kreiszuschnitt die Tuben oben ab."""
-    img = Image.new("RGB", (S, S), PRIMARY)
-    grund(img)
-    layer = Image.new("RGB", (S, S), PRIMARY)
-    grund(layer)
-    koerper(layer)
-    glaeser(layer)
-    if not maskable:
-        return layer
-    k = 0.74
-    small = layer.resize((int(S * k), int(S * k)), Image.LANCZOS)
-    off = (S - small.width) // 2
-    img.paste(small, (off, off))
+    """maskable: Android beschneidet auf die inneren rund 80 %. Ohne diesen
+       Rand saegt ein Kreiszuschnitt die Schultern oben ab. Verkleinert wird
+       nur das Zeichen — der Verlauf fuellt weiter die ganze Flaeche."""
+    img = grund()
+    z = zeichen()
+    if maskable:
+        k = 0.76
+        klein = z.resize((int(S * k), int(S * k)), Image.LANCZOS)
+        z = Image.new("RGBA", (S, S), (0, 0, 0, 0))
+        z.paste(klein, ((S - klein.width) // 2, (S - klein.height) // 2))
+    img.paste(z, (0, 0), z)
     return img
 
 
@@ -132,8 +191,7 @@ def rounded(img, size, radius_ratio=0.2237):
 if __name__ == "__main__":
     root = Path(__file__).resolve().parent.parent
     (root / "public/icons").mkdir(parents=True, exist_ok=True)
-    voll = build()
-    maske = build(maskable=True)
+    voll, maske = build(), build(maskable=True)
     # Quadratisch ohne Rundung: iOS und Android legen ihre eigene Maske an
     voll.resize((1024, 1024), Image.LANCZOS).save(root / "src/assets/kialia-logo.png")
     voll.resize((512, 512), Image.LANCZOS).save(root / "public/icons/icon-512.png")

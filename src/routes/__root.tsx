@@ -85,9 +85,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { name: "author", content: "CoreCodeVibes" },
       // Die Farbe der Statusleiste in der installierten App. Sie muss zur
-      // obersten Flaeche passen, und das ist seit der Umstellung der Kopf mit
-      // dem Verlauf ueber Elfenbein — nicht mehr das Perlblau.
-      { name: "theme-color", content: "#584876" },
+      // OBERSTEN Flaeche passen, und das ist der Kopf mit dem Verlauf — dort
+      // steht das Perlblau. Kurzzeitig stand hier #584876, weil Perlblau als
+      // Flaechenfarbe unter Text ausgeschieden ist; das gilt fuer Knoepfe, nicht
+      // fuer die Systemleiste, auf der kein Text von uns steht. Dunkles Violett
+      // ergaebe einen harten Balken ueber einem hellen Kopf.
+      { name: "theme-color", content: "#8F9BE0" },
       { name: "mobile-web-app-capable", content: "yes" },
       // Legacy-Pendant, das iOS bis heute auswertet.
       { name: "apple-mobile-web-app-capable", content: "yes" },
