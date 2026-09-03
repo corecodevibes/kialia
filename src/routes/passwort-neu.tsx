@@ -109,7 +109,7 @@ function NewPasswordPage() {
               <button
                 type="button"
                 onClick={() => navigate({ to: "/auth" })}
-                className="acrylic-warm mt-4 w-full rounded-2xl px-4 py-3.5 text-sm font-semibold text-background"
+                className="btn-warm mt-4 w-full rounded-2xl px-4 py-3.5 text-sm font-semibold"
               >
                 Zurück zur Anmeldung
               </button>
@@ -144,7 +144,7 @@ function NewPasswordPage() {
               <button
                 type="submit"
                 disabled={busy}
-                className="acrylic-warm mt-4 w-full rounded-2xl px-4 py-3.5 text-sm font-semibold text-background disabled:opacity-60"
+                className="btn-warm mt-4 w-full rounded-2xl px-4 py-3.5 text-sm font-semibold disabled:opacity-60"
               >
                 {busy ? "Einen Moment …" : "Passwort speichern"}
               </button>

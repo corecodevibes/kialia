@@ -147,7 +147,7 @@ function OnboardingPage() {
               <button
                 type="button"
                 onClick={() => setStep(1)}
-                className="acrylic-warm w-full rounded-2xl px-4 py-3.5 text-sm font-semibold text-background"
+                className="btn-warm w-full rounded-2xl px-4 py-3.5 text-sm font-semibold"
               >
                 Weiter
               </button>
@@ -192,7 +192,7 @@ function OnboardingPage() {
                   type="button"
                   onClick={finish}
                   disabled={busy}
-                  className="acrylic-warm flex-1 rounded-2xl px-4 py-3.5 text-sm font-semibold text-background disabled:opacity-60"
+                  className="btn-warm flex-1 rounded-2xl px-4 py-3.5 text-sm font-semibold disabled:opacity-60"
                 >
                   {busy ? "Einen Moment …" : "Los geht's"}
                 </button>

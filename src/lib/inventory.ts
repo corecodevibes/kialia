@@ -85,7 +85,7 @@ export async function downloadInventory(trip: Trip): Promise<InventoryResult> {
 <title>Inventar – ${esc(trip.destination || "Reise")}</title>
 <style>
   body{font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-       max-width:52rem;margin:0 auto;padding:2rem 1.25rem;color:#2F2A3E}
+       max-width:52rem;margin:0 auto;padding:2rem 1.25rem;color:#3A342C}
   h1{font-size:1.6rem;margin:0 0 .25rem}
   .lead{color:#6C6480;margin:0 0 2rem}
   section{border-top:1px solid #EFE8E2;padding:1.25rem 0}

@@ -87,7 +87,7 @@ export function LinkList({
           // Kupfer statt Violett: das hier TUT etwas (Link anlegen). Violett ist in
           // dieser App der ausgewaehlte Zustand — Chips, Radios, aktive Tabs.
           // Ein Knopf, der handelt, gehoert auf die Handlungsfarbe.
-          className="acrylic-warm grid size-11 shrink-0 place-items-center rounded-xl text-background disabled:opacity-40"
+          className="btn-warm grid size-11 shrink-0 place-items-center rounded-xl disabled:opacity-40"
         >
           <Plus className="size-4" />
         </button>
@@ -136,7 +136,7 @@ export function StatusPicker({
 export function Wordmark({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
   const scale = { sm: "text-xl", md: "text-[1.7rem]", lg: "text-[2.1rem]" }[size];
   return (
-    <span className={`display ${scale} text-foreground`}>
+    <span className={`display ${scale}`}>
       kialia <span className="text-[var(--clay)]">·</span> κιάλια
     </span>
   );

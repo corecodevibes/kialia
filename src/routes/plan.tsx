@@ -621,7 +621,7 @@ function PlanTab() {
                     className="flex w-full items-start gap-2 text-left"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-[0.95rem] font-semibold leading-snug">
+                      <p className="display truncate text-[1.06rem] leading-snug">
                         {a.name || "Ohne Namen"}
                       </p>
                       <p className="mt-0.5 truncate text-xs text-muted-foreground">
@@ -959,7 +959,7 @@ function PlanTab() {
                       aria-label="Sparfortschritt"
                     >
                       <div
-                        className="acrylic-warm h-full rounded-full transition-[width] duration-500 ease-out"
+                        className="bg-[var(--sage)] h-full rounded-full transition-[width] duration-500 ease-out"
                         style={{
                           width: `${Math.max(plan.progress * 100, plan.covered > 0 ? 3 : 0)}%`,
                         }}
@@ -1049,13 +1049,22 @@ function Itinerary({ trip }: { trip: Trip }) {
           {stops.map((s) => {
             const gap = s.kind === "stay" && s.endDate ? gapAfter.get(s.endDate) : undefined;
             return (
-              <li key={`${s.kind}-${s.id}`}>
-                <div className="flex items-baseline gap-3">
-                  <span className="w-14 shrink-0 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground tabular-nums">
+              <li key={`${s.kind}-${s.id}`} className="group/stop">
+                {/* Eine Haarlinie mit Punkten macht aus vier untereinander
+                    stehenden Zeilen einen Verlauf. Ohne sie ist es eine Liste,
+                    mit ihr eine Reise. */}
+                <div className="relative flex items-baseline gap-3 pl-0">
+                  <span className="kicker w-12 shrink-0 pt-1 tabular-nums">
                     {s.day ? `Tag ${s.day}` : formatDateLong(s.date).split(" ")[0]}
                   </span>
+                  <span
+                    aria-hidden
+                    // Die Linie verbindet zwei Punkte — nach dem letzten hat sie nichts
+                    // mehr zu verbinden und lief bisher ins Leere.
+                    className="relative mt-1.5 size-1.5 shrink-0 rounded-full bg-[var(--sage)] before:absolute before:left-1/2 before:top-3 before:h-[calc(100%+1.4rem)] before:w-px before:-translate-x-1/2 before:bg-border group-last/stop:before:hidden"
+                  />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold">{s.title}</p>
+                    <p className="display truncate text-[1.04rem] leading-snug">{s.title}</p>
                     <p className="text-xs text-muted-foreground">
                       {[
                         formatDateLong(s.date),

@@ -379,12 +379,12 @@ function DiaryTab() {
                         {e.day}. Reisetag
                       </span>
                       {e.date === today && (
-                        <span className="rounded-full bg-primary/12 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-wider text-primary">
+                        <span className="kicker rounded-full bg-[var(--ok-soft)] px-2 py-0.5 text-[9.5px] text-[var(--primary)]">
                           heute
                         </span>
                       )}
                     </span>
-                    <span className="mt-0.5 block truncate text-[0.95rem] font-semibold leading-snug">
+                    <span className="display mt-0.5 block truncate text-[1.1rem] leading-snug">
                       {formatDateLong(e.date) || "Ohne Datum"}
                     </span>
                     <span className="block truncate text-xs text-muted-foreground">

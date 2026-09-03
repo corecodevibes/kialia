@@ -34,14 +34,21 @@ export const CATEGORY_LABELS: Record<ExpenseCategory, string> = {
   sonstiges: "Sonstiges",
 };
 
-/** Farben aus der Markenpalette, alle mit Tinte über 4.5:1 geprüft. */
+/**
+ * Farben der Ausgabenarten — dieselbe gedaempfte Familie wie die
+ * Personenfarben, damit eine Aufstellung nicht zur Ampel wird.
+ *
+ * Vorher standen hier gesaettigte Toene. Sie waren gut unterscheidbar, aber
+ * die lautesten Flaechen des Bildschirms markierten damit die
+ * nebensaechlichste Angabe. Alle sechs tragen die Tinte mit ueber 6:1.
+ */
 export const CATEGORY_COLORS: Record<ExpenseCategory, string> = {
-  essen: "#F59D55",
-  transport: "#8596DB",
-  unterkunft: "#C39FBB",
-  aktivitaet: "#F6D176",
-  einkauf: "#F7C06D",
-  sonstiges: "#D1C8D0",
+  essen: "#E3B392",
+  transport: "#AEB6D8",
+  unterkunft: "#CDB3C2",
+  aktivitaet: "#DCCFA0",
+  einkauf: "#E0C79A",
+  sonstiges: "#C9C3B6",
 };
 
 const KEYWORDS: Record<Exclude<ExpenseCategory, "sonstiges">, string[]> = {

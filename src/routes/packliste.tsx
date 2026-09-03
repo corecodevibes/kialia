@@ -192,7 +192,7 @@ function PackingTab() {
             </div>
             <div className="h-2 w-32 overflow-hidden rounded-full bg-muted">
               <div
-                className="acrylic-warm h-full rounded-full transition-all"
+                className="bg-[var(--sage)] h-full rounded-full transition-all"
                 style={{ width: `${total ? (done / total) * 100 : 0}%` }}
               />
             </div>
@@ -297,9 +297,7 @@ function PackingTab() {
                   ) : (
                     <ChevronRight className="size-4" />
                   )}
-                  <span className="text-[0.95rem] font-semibold leading-snug tracking-[-0.01em]">
-                    {c.name}
-                  </span>
+                  <span className="display text-[1.02rem] leading-snug">{c.name}</span>
                   <span className="text-xs text-muted-foreground">
                     {catDone}/{c.items.length}
                   </span>
@@ -399,7 +397,7 @@ function PackingTab() {
                                 ),
                               )
                             }
-                            className={`${rowInput} w-[3.6rem] shrink-0 appearance-none px-1 text-center text-[11px] font-semibold text-[#2F2A3E]`}
+                            className={`${rowInput} w-[3.6rem] shrink-0 appearance-none px-1 text-center text-[11px] font-semibold text-foreground`}
                             style={
                               item.who ? { background: personColor(trip, item.who) } : undefined
                             }
@@ -544,7 +542,7 @@ function PackingTab() {
                   setNewCat("");
                 }}
                 aria-label="Kategorie hinzufügen"
-                className="acrylic-warm grid size-11 shrink-0 place-items-center rounded-xl text-background"
+                className="btn-warm grid size-11 shrink-0 place-items-center rounded-xl"
               >
                 <Plus className="size-4" />
               </button>

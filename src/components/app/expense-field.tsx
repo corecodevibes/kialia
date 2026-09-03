@@ -59,7 +59,7 @@ export function ExpenseField({
             <div key={key} className="rounded-xl bg-secondary/40 px-2.5 py-1.5">
               <div className="flex items-center gap-2">
                 <span
-                  className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold text-[#2F2A3E]"
+                  className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold text-foreground"
                   style={{ background: CATEGORY_COLORS[it.category] }}
                 >
                   {CATEGORY_LABELS[it.category]}

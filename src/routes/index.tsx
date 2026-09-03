@@ -303,8 +303,10 @@ function HomeTab() {
               return (
                 <div
                   key={t.id}
-                  className={`flex items-center gap-2 rounded-2xl border px-3 py-2.5 transition ${
-                    active ? "border-primary bg-primary/10" : "border-border"
+                  className={`flex items-center gap-2 rounded-[var(--radius)] border px-3.5 py-3 transition ${
+                    active
+                      ? "border-[var(--sage)] bg-[var(--ok-soft)]"
+                      : "border-border hover:border-[var(--input)]"
                   }`}
                 >
                   <button
@@ -339,8 +341,14 @@ function HomeTab() {
                              sind sonst nicht auseinanderzuhalten. */}
                       <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px]">
                         <span
+                          /* Rot war hier zu laut. "Nur auf diesem Geraet" ist
+                             kein Fehler, sondern ein Zustand — es soll auffallen,
+                             ohne wie ein Absturz auszusehen. Ocker sagt genau
+                             das. */
                           className={
-                            t.remoteId && !t.orphan ? "text-muted-foreground" : "text-destructive"
+                            t.remoteId && !t.orphan
+                              ? "text-muted-foreground"
+                              : "font-medium text-[var(--warn)]"
                           }
                         >
                           {t.remoteId && !t.orphan
@@ -390,7 +398,7 @@ function HomeTab() {
               />
               <button
                 type="submit"
-                className="acrylic-warm grid size-11 shrink-0 place-items-center rounded-xl text-background"
+                className="btn-warm grid size-11 shrink-0 place-items-center rounded-xl"
                 aria-label="Reise hinzufügen"
               >
                 <Plus className="size-4" />
@@ -427,7 +435,7 @@ function HomeTab() {
                   <button
                     type="submit"
                     disabled={joinCode.trim().length < 4}
-                    className="acrylic-warm shrink-0 rounded-xl px-4 py-2.5 text-sm font-semibold text-background disabled:opacity-50"
+                    className="btn-warm shrink-0 rounded-xl px-4 py-2.5 text-sm font-semibold disabled:opacity-50"
                   >
                     Beitreten
                   </button>
@@ -633,7 +641,7 @@ function HomeTab() {
                           removeTrip(t.id);
                           setPendingDelete(null);
                         }}
-                        className="flex-1 rounded-2xl bg-destructive py-3 text-sm font-semibold text-background disabled:opacity-50"
+                        className="flex-1 rounded-2xl bg-destructive py-3 text-sm font-semibold disabled:opacity-50"
                       >
                         {deleting ? "Wird entfernt …" : "Entfernen"}
                       </button>
@@ -698,7 +706,7 @@ function HomeTab() {
                     setTimeout(() => setCopied(false), 2000);
                   }
                 }}
-                className="acrylic-warm mt-3 w-full rounded-2xl px-4 py-3 text-sm font-semibold text-background"
+                className="btn-warm mt-3 w-full rounded-2xl px-4 py-3 text-sm font-semibold"
               >
                 Einladung senden
               </button>

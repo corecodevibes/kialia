@@ -119,7 +119,7 @@ export function ScanSheet({
             if (!off.has("amount") && fields.currency) accepted.currency = fields.currency;
             onApply(accepted);
           }}
-          className="acrylic-warm flex-1 rounded-xl px-3 py-2.5 text-sm font-semibold text-background"
+          className="btn-warm flex-1 rounded-xl px-3 py-2.5 text-sm font-semibold"
         >
           Übernehmen
         </button>

@@ -505,7 +505,12 @@ describe("personColor", () => {
 
   test("eine ausdrückliche Zuweisung gewinnt", () => {
     const t = tripWith({ companions: "Ana", personColors: { Ana: "gold" } });
-    expect(personColor(t, "Ana")).toBe("#F6D176");
+    // Geprüft wird, dass die Zuweisung die Position schlägt — nicht, welcher
+    // Farbwert hinter "gold" steht. Stand hier der Hex fest, brach der Test bei
+    // jeder Anpassung der Palette, ohne dass am Verhalten etwas falsch war.
+    const gold = PERSON_COLORS.find((c) => c.key === "gold")!.hex;
+    expect(personColor(t, "Ana")).toBe(gold);
+    expect(gold).not.toBe(PERSON_COLORS[1]!.hex);
   });
 
   test("eine unbekannte Zuweisung fällt auf die Position zurück statt zu leeren", () => {

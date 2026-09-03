@@ -138,7 +138,7 @@ export function AppShell({
           <button
             type="button"
             onClick={() => window.location.reload()}
-            className="acrylic-warm mt-4 w-full rounded-2xl px-4 py-3 text-sm font-semibold text-background"
+            className="btn-warm mt-4 w-full rounded-2xl px-4 py-3 text-sm font-semibold"
           >
             Erneut versuchen
           </button>
@@ -203,7 +203,7 @@ export function AppShell({
                   {flag}
                 </span>
               )}
-              <h1 className="display min-w-0 truncate text-[1.5rem] text-foreground">
+              <h1 className="display min-w-0 truncate text-[1.55rem]">
                 {trip.destination || "kialia"}
               </h1>
             </div>
@@ -269,7 +269,7 @@ export function AppShell({
               {/* Der aktive Tab traegt einen Punkt in der Markenfarbe statt
                   einer gefuellten Flaeche. Fuenf gefaerbte Flaechen
                   nebeneinander ergeben eine Ampel; ein Punkt ordnet ein. */}
-              <span className="h-1 w-1 rounded-full bg-[var(--periwinkle)] opacity-0 transition-opacity group-[.text-primary]:opacity-100" />
+              <span className="h-1 w-1 rounded-full bg-[var(--sage)] opacity-0 transition-opacity group-[.text-primary]:opacity-100" />
             </Link>
           ))}
         </div>
@@ -406,7 +406,7 @@ export function NoTripYet({ what }: { what: string }) {
         </p>
         <Link
           to="/"
-          className="acrylic-warm mt-5 w-full rounded-2xl px-4 py-3.5 text-center text-sm font-semibold text-background"
+          className="btn-warm mt-5 w-full rounded-2xl px-4 py-3.5 text-center text-sm font-semibold"
         >
           Reise anlegen
         </Link>
@@ -551,7 +551,7 @@ export function PersonColors({
             type="button"
             aria-expanded={editing === name}
             onClick={() => setEditing(editing === name ? null : name)}
-            className="rounded-full px-3 py-1.5 text-xs font-semibold text-[#2F2A3E]"
+            className="rounded-full px-3 py-1.5 text-xs font-semibold text-foreground"
             style={{ background: personColor(trip, name) }}
           >
             {name}
@@ -597,13 +597,14 @@ export function SectionTitle({ children }: { children: ReactNode }) {
   return <h2 className="kicker mb-2.5 mt-7 px-1">{children}</h2>;
 }
 
-/** Einheitliche Überschrift innerhalb einer Karte – überall gleich. */
+/** Einheitliche Überschrift innerhalb einer Karte – überall gleich.
+ *
+ * In der Serif, nicht in fetter Grotesk. Vorher war ein Kartentitel von
+ * hervorgehobenem Fließtext nicht zu unterscheiden — beide waren dieselbe
+ * Schrift, nur eine Stufe fetter. Die Serif macht daraus eine eigene Ebene,
+ * ohne dass Größe oder Farbe lauter werden müssen. */
 export function CardTitle({ children }: { children: ReactNode }) {
-  return (
-    <h2 className="text-[0.95rem] font-semibold leading-snug tracking-[-0.01em] text-foreground">
-      {children}
-    </h2>
-  );
+  return <h2 className="display text-[1.12rem]">{children}</h2>;
 }
 
 /** Einheitlicher Kennzahl-Block (z. B. Reisedauer, Gesamtkosten). */
@@ -646,7 +647,7 @@ export function PrimaryButton({
       onClick={onClick}
       disabled={disabled}
       aria-label={ariaLabel}
-      className={`acrylic-warm flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold text-background transition active:scale-[0.99] disabled:opacity-60 ${className}`}
+      className={`btn-warm flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold transition active:scale-[0.99] disabled:opacity-60 ${className}`}
     >
       {children}
     </button>
@@ -667,7 +668,7 @@ export function IconButton({
       type="button"
       aria-label={ariaLabel}
       onClick={onClick}
-      className="acrylic-warm grid size-11 shrink-0 place-items-center rounded-xl text-background transition active:scale-95"
+      className="btn-warm grid size-11 shrink-0 place-items-center rounded-xl transition active:scale-95"
     >
       {children}
     </button>

@@ -1174,13 +1174,27 @@ export function safeHref(url: string): string | undefined {
  * liegen zwischen 4.85:1 und 9.40:1 mit Tinte.
  * ------------------------------------------------------------------------ */
 
+/**
+ * Die sechs Personenfarben.
+ *
+ * Vorher waren es gesaettigte Toene — ein kraeftiges Blau und ein Rosé
+ * nebeneinander auf beigem Papier. Sie waren gut auseinanderzuhalten, haben
+ * aber jede Liste in eine Ampel verwandelt: die lautesten Flaechen des ganzen
+ * Bildschirms markierten die nebensaechlichste Angabe.
+ *
+ * Jetzt sind es gedaempfte Erdtoene aus derselben Familie. Sie unterscheiden
+ * sich weiterhin klar — Salbei, Ton, Sand, Stein, Rauch, Olive liegen in
+ * Farbton weit genug auseinander —, treten aber hinter den Text zurueck.
+ * Alle sechs tragen dunkle Schrift; keiner ist so tief, dass er helle
+ * braeuchte.
+ */
 export const PERSON_COLORS = [
-  { key: "periwinkle", hex: "#8596DB", label: "Blau" },
-  { key: "rose", hex: "#C39FBB", label: "Rosé" },
-  { key: "apricot", hex: "#F59D55", label: "Apricot" },
-  { key: "amber", hex: "#F7C06D", label: "Bernstein" },
-  { key: "gold", hex: "#F6D176", label: "Gold" },
-  { key: "mist", hex: "#D1C8D0", label: "Nebel" },
+  { key: "periwinkle", hex: "#AEB6D8", label: "Blau" },
+  { key: "rose", hex: "#CDB3C2", label: "Rosé" },
+  { key: "apricot", hex: "#E3B392", label: "Apricot" },
+  { key: "amber", hex: "#E0C79A", label: "Bernstein" },
+  { key: "gold", hex: "#DCCFA0", label: "Sand" },
+  { key: "mist", hex: "#C9C3B6", label: "Nebel" },
 ] as const;
 
 /**

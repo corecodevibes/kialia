@@ -231,7 +231,7 @@ function IdeasTab() {
         {trip.ideas.map((idea) => (
           <Card key={idea.id}>
             <div className="flex items-start gap-2">
-              <p className="min-w-0 flex-1 whitespace-pre-wrap break-words text-sm font-medium leading-snug">
+              <p className="display min-w-0 flex-1 whitespace-pre-wrap break-words text-[1.04rem] leading-snug">
                 {idea.text}
               </p>
               <DeleteButton
