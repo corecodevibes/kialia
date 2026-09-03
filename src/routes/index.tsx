@@ -21,9 +21,10 @@ import { leaveTrip, syncTrips } from "@/lib/trip-sync";
 import { needsTypedConfirm } from "@/lib/trip-weight";
 import { useMyName } from "@/lib/auth";
 import { loadHomeCurrency } from "@/lib/home-currency";
-import { flagFor } from "@/lib/country";
+import { countryCodeFor } from "@/lib/country";
 import { countMembers, joinTrip } from "@/lib/trip-sync";
 import { COMMON_CURRENCIES, fetchRate } from "@/lib/currency";
+import { FlagMark } from "@/components/app/bits";
 import {
   downloadAllTrips,
   downloadTrip,
@@ -299,7 +300,7 @@ function HomeTab() {
           <div className="mt-3 space-y-2">
             {trips.map((t) => {
               const active = t.id === activeId;
-              const f = flagFor(t.destination);
+              const f = countryCodeFor(t.destination);
               return (
                 <div
                   key={t.id}
@@ -315,8 +316,8 @@ function HomeTab() {
                     className="flex flex-1 items-center gap-2.5 text-left"
                   >
                     {f ? (
-                      <span className="text-xl leading-none" aria-hidden>
-                        {f}
+                      <span className="text-[1.05rem] leading-none" aria-hidden>
+                        <FlagMark code={f} />
                       </span>
                     ) : (
                       <MapPin
@@ -324,7 +325,7 @@ function HomeTab() {
                       />
                     )}
                     <span className="min-w-0">
-                      <span className="block truncate text-sm font-medium">{t.destination}</span>
+                      <span className="display block truncate text-[1.05rem]">{t.destination}</span>
                       <span className="block text-xs text-muted-foreground">
                         {t.startDate
                           ? `${formatDateLong(t.startDate)}${t.endDate ? ` – ${formatDateLong(t.endDate)}` : ""}`

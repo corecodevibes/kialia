@@ -1,6 +1,6 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { personColor, travellerNames, useTrip, PERSON_COLORS, type Trip } from "@/lib/trip-store";
-import { flagFor } from "@/lib/country";
+import { countryCodeFor } from "@/lib/country";
 import { takeInvite } from "@/lib/pending-invite";
 import { money } from "@/lib/currency";
 import { mapsQuery, mapsUrl } from "@/lib/maps";
@@ -16,6 +16,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import logo from "@/assets/kialia-logo.png";
 import { useProfile, useSession, useMyName } from "@/lib/auth";
 import { onboardingGate, readOnboardedCache } from "@/lib/onboarding-gate";
+import { FlagMark } from "@/components/app/bits";
 
 const tabs = [
   { to: "/", label: "Home", icon: Home },
@@ -97,7 +98,9 @@ export function AppShell({
       stopWatch();
     };
   }, [session]);
-  const flag = flagFor(trip.destination);
+  // Die Flagge zeichnen wir selbst (bits.tsx) — Emoji-Flaggen sind knallige
+  // Systemgrafik und der eine Fremdkoerper in der gedaempften Palette.
+  const flagCode = countryCodeFor(trip.destination);
 
   // "Profil nicht abrufbar" ist keine Aussage darueber, ob jemand das
   // Onboarding erledigt hat. Ohne diese Unterscheidung landet offline jeder
@@ -194,13 +197,9 @@ export function AppShell({
                 `shrink-0` und `min-w-0` am Namen sorgen dafuer, dass bei langen
                 Zielen der Name gekuerzt wird und nicht die Flagge wegfaellt. */}
             <div className="flex items-baseline gap-2">
-              {flag && (
-                <span
-                  key={flag}
-                  aria-hidden
-                  className="hero-flag shrink-0 text-[1.2rem] leading-none"
-                >
-                  {flag}
+              {flagCode && (
+                <span key={flagCode} aria-hidden className="hero-flag shrink-0 text-[1.15rem]">
+                  <FlagMark code={flagCode} />
                 </span>
               )}
               <h1 className="display min-w-0 truncate text-[1.55rem]">
@@ -220,7 +219,7 @@ export function AppShell({
           </Link>
         </div>
         {subtitle && (
-          <p className="mx-auto mt-2 max-w-lg text-sm leading-snug text-foreground/75">
+          <p className="mx-auto mt-2 max-w-lg font-serif text-[15px] italic leading-snug text-foreground/70">
             {subtitle}
           </p>
         )}
@@ -278,9 +277,18 @@ export function AppShell({
   );
 }
 
-export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
+export function Card({
+  children,
+  className = "",
+  id,
+}: {
+  children: ReactNode;
+  className?: string;
+  id?: string;
+}) {
   return (
     <section
+      id={id}
       className={`rounded-[var(--radius)] border border-border bg-card p-4 shadow-[var(--sh-1)] ${className}`}
     >
       {children}

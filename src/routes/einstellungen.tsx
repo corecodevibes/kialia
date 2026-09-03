@@ -103,7 +103,10 @@ function SettingsPage() {
 
   return (
     <div className="acrylic-page min-h-screen px-5 pb-16 pt-6">
-      <div className="mx-auto max-w-lg">
+      {/* relative z-10, weil der Kopfverlauf der Seite absolut positioniert ist
+          und sonst UEBER dem Inhalt malt — nicht-positionierter Inhalt liegt in
+          der Malreihenfolge unter jedem positionierten Element. */}
+      <div className="relative z-10 mx-auto max-w-lg">
         <button
           type="button"
           onClick={() => navigate({ to: "/" })}
@@ -112,9 +115,7 @@ function SettingsPage() {
           <ChevronLeft className="size-4" /> Zurück
         </button>
 
-        <h1 className="text-[1.35rem] font-extrabold leading-tight tracking-[-0.02em]">
-          Einstellungen
-        </h1>
+        <h1 className="display text-[1.6rem]">Einstellungen</h1>
 
         <div className="mt-5 space-y-4">
           <Card>

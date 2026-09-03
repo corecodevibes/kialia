@@ -20,6 +20,7 @@ import {
 import {
   formatDateLong,
   missingDiaryDays,
+  parseLocalDate,
   travellerNames,
   nextDiaryDay,
   todayLocalISO,
@@ -347,11 +348,74 @@ function DiaryTab() {
         )}
 
         <div className="space-y-4">
+          {/* Der Tagesumschalter: Wochentag, Datum in der Serif, darunter das
+              Stichwort des Tages. Er beantwortet "wo im Buch bin ich?" mit
+              einem Blick und traegt einen aufs Datum, ohne durch den ganzen
+              Stapel zu rollen. */}
+          {orderedDiary.length > 1 && (
+            <div className="-mx-4 mb-4 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="flex gap-2 pb-1">
+                {orderedDiary.map((e) => {
+                  const d = parseLocalDate(e.date);
+                  const aktiv = openDay === e.id;
+                  return (
+                    <button
+                      key={e.id}
+                      type="button"
+                      onClick={() => {
+                        setOpenDay(e.id);
+                        document.getElementById(`tag-${e.id}`)?.scrollIntoView({
+                          behavior: "smooth",
+                          block: "center",
+                        });
+                      }}
+                      className={`min-w-[92px] shrink-0 rounded-[14px] border px-3.5 py-2 text-left transition ${
+                        aktiv
+                          ? "border-primary bg-primary shadow-[var(--sh-2)]"
+                          : "border-border bg-card"
+                      }`}
+                    >
+                      <span
+                        className={`block text-[10px] font-semibold uppercase tracking-[0.14em] ${
+                          aktiv ? "text-primary-foreground/70" : "text-muted-foreground"
+                        }`}
+                      >
+                        {d
+                          ? d.toLocaleDateString("de-DE", { weekday: "short" }).replace(".", "")
+                          : `Tag ${e.day}`}
+                      </span>
+                      <span
+                        className={`display block text-[1.15rem] leading-tight ${
+                          aktiv ? "text-primary-foreground" : ""
+                        }`}
+                      >
+                        {d
+                          ? `${d.getDate()}. ${d.toLocaleDateString("de-DE", { month: "short" })}`
+                          : e.day}
+                      </span>
+                      <span
+                        className={`block max-w-[9rem] truncate text-[11px] ${
+                          aktiv ? "text-primary-foreground/70" : "text-muted-foreground"
+                        }`}
+                      >
+                        {e.highlight || daySummary(e) || "\u00a0"}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Ein Stapel Blaetter statt einer Liste Karten: die Tage liegen
               dicht uebereinander, das aufgeschlagene loest sich heraus. */}
           <div className="sheet-stack">
             {orderedDiary.map((e) => (
-              <Card key={e.id} className={`sheet ${openDay === e.id ? "sheet-open" : ""}`}>
+              <Card
+                key={e.id}
+                id={`tag-${e.id}`}
+                className={`sheet ${openDay === e.id ? "sheet-open" : ""}`}
+              >
                 {/* Die Breite steuert der Container, nicht eine zweite
                   Breitenklasse am Eingabefeld: dateInputClass bringt `w-full`
                   mit, und zwei Breiten-Utilities entscheiden sich nach

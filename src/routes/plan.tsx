@@ -1054,8 +1054,11 @@ function Itinerary({ trip }: { trip: Trip }) {
                     stehenden Zeilen einen Verlauf. Ohne sie ist es eine Liste,
                     mit ihr eine Reise. */}
                 <div className="relative flex items-baseline gap-3 pl-0">
-                  <span className="kicker w-12 shrink-0 pt-1 tabular-nums">
-                    {s.day ? `Tag ${s.day}` : formatDateLong(s.date).split(" ")[0]}
+                  <span className="w-12 shrink-0">
+                    <span className="kicker block">Tag</span>
+                    <span className="display block text-[1.35rem] leading-none">
+                      {s.day || formatDateLong(s.date).split(" ")[0]}
+                    </span>
                   </span>
                   <span
                     aria-hidden

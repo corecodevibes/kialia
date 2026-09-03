@@ -380,17 +380,21 @@
 
   /* Der Verlauf ist das Wiedererkennbarste an kialia und steht jetzt auch im
      Zeichen — dieselben Farbkreise, dort nur weicher. */
+  /* Dieselben pastelligen Werte wie im Icon (Saettigung x0,76, minimal
+     aufgehellt) — App und Zeichen zeigen damit denselben Himmel. Die vollen
+     Toene waren gegen das beige Papier zu hart: der Kopf sah nach Bildschirm
+     aus, der Rest nach Papier. */
   --gradient-sky:
-    radial-gradient(75% 120% at 6% 4%, #8F9BE0 0%, transparent 58%),
-    radial-gradient(65% 110% at 96% 0%, #F7D67F 0%, transparent 62%),
-    radial-gradient(85% 130% at 78% 100%, #CE7F5F 0%, transparent 60%),
-    radial-gradient(70% 120% at 22% 104%, #A0798C 0%, transparent 62%),
-    radial-gradient(120% 90% at 50% 40%, #F0A055 0%, transparent 70%),
-    linear-gradient(140deg, #8F9BE0, #F0A055);
+    radial-gradient(75% 120% at 6% 4%, #9EA7D8 0%, transparent 58%),
+    radial-gradient(65% 110% at 96% 0%, #E9D294 0%, transparent 62%),
+    radial-gradient(85% 130% at 78% 100%, #C48B75 0%, transparent 60%),
+    radial-gradient(70% 120% at 22% 104%, #A18593 0%, transparent 62%),
+    radial-gradient(120% 90% at 50% 40%, #DFA670 0%, transparent 70%),
+    linear-gradient(140deg, #9EA7D8, #DFA670);
   --gradient-warm:
-    radial-gradient(80% 140% at 0% 0%, #F7D67F 0%, transparent 60%),
-    radial-gradient(90% 140% at 100% 100%, #A0798C 0%, transparent 62%),
-    linear-gradient(120deg, #F0A055, #CE7F5F);
+    radial-gradient(80% 140% at 0% 0%, #E9D294 0%, transparent 60%),
+    radial-gradient(90% 140% at 100% 100%, #A18593 0%, transparent 62%),
+    linear-gradient(120deg, #DFA670, #C48B75);
   --gradient-soft:
     radial-gradient(90% 140% at 0% 0%, #EAE0CE 0%, transparent 65%),
     radial-gradient(80% 130% at 100% 20%, rgba(247, 214, 127, 0.35) 0%, transparent 60%),
@@ -510,9 +514,9 @@
     background: var(--gradient-sky);
     background-size: 150% 150%;
     background-position: 0% 40%;
-    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 34%, transparent 100%);
-    mask-image: linear-gradient(to bottom, #000 0%, #000 34%, transparent 100%);
-    opacity: 0.9;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 30%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0%, #000 30%, transparent 100%);
+    opacity: 0.82;
     pointer-events: none;
   }
 
@@ -655,16 +659,48 @@
   pointer-events: none;
 }
 
+/* Das aufgeschlagene Blatt ist eine Buchseite.
+
+   Drei Zutaten machen aus einer abgesetzten Karte eine Seite:
+   1. Der Falz: ein schmaler Schatten an der linken Innenkante, wie ihn die
+      Kruemmung zum Buchruecken wirft.
+   2. Der Seitenstapel: unter der offenen Seite schauen rechts unten zwei
+      weitere Blaetter hervor.
+   3. Das Aufblaettern: die Seite dreht beim Oeffnen ganz leicht um die linke
+      Kante herein — 6 Grad, 0,45 s, einmal. */
 .sheet-open {
   z-index: 2;
   margin-top: 0.9rem !important;
-  margin-bottom: 0.9rem;
-  transform: translateY(-1px);
-  box-shadow: var(--sh-3);
+  margin-bottom: 1.1rem;
+  transform-origin: left center;
+  box-shadow:
+    inset 26px 0 26px -26px rgb(58 52 44 / 0.16),
+    var(--sh-3);
+  animation: page-open 450ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .sheet-open::before {
   display: none;
+}
+
+.sheet-open::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 6px -4px -6px 10px;
+  background: #F2EAD9;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 3px 4px 0 -1px #EDE3CF, 3px 4px 0 0 var(--border);
+}
+
+@keyframes page-open {
+  from {
+    transform: perspective(1100px) rotateY(-6deg);
+  }
+  to {
+    transform: perspective(1100px) rotateY(0deg);
+  }
 }
 
 /* Der oberste Zettel braucht keinen Schatten nach oben — darunter liegt
@@ -674,6 +710,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .sheet-open,
   .sheet,
   .splash-mark,
   .splash-word,
