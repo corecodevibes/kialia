@@ -65,9 +65,7 @@ export function ExpenseField({
                   {CATEGORY_LABELS[it.category]}
                 </span>
                 <span className="min-w-0 flex-1 truncate text-sm">{it.label}</span>
-                <span className="shrink-0 text-sm font-semibold tabular-nums">
-                  {money(it.amount, currency)}
-                </span>
+                <span className="amount shrink-0 text-[0.95rem]">{money(it.amount, currency)}</span>
               </div>
               {/* Wer ausgelegt hat. Nur sichtbar, wenn ihr mehr als eine
                   Person seid — allein reist man ohne Aufteilung. */}
@@ -95,7 +93,7 @@ export function ExpenseField({
 
           <div className="flex items-center justify-between px-2.5 pt-1.5">
             <span className="text-sm font-semibold">Summe heute</span>
-            <span className="text-base font-bold tabular-nums">{money(total, currency)}</span>
+            <span className="amount text-[1.1rem]">{money(total, currency)}</span>
           </div>
 
           {/* Wer wie viel vorgestreckt hat. Bewusst OHNE Ausgleichsrechnung:

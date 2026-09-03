@@ -606,9 +606,24 @@
     margin 220ms cubic-bezier(0.22, 1, 0.36, 1),
     box-shadow 220ms ease,
     transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  /* Der Schatten geht nach OBEN. Papier, das auf Papier liegt, wirft seinen
+     Schatten auf das Blatt darunter — nach unten ins Leere waere eine Karte,
+     die schwebt. Daran haengt der ganze Effekt. */
   box-shadow:
-    0 -1px 0 oklch(0.279 0.038 302.4 / 0.06),
-    0 -6px 14px -12px oklch(0.279 0.038 302.4 / 0.5);
+    0 -1px 0 rgb(47 42 62 / 0.05),
+    0 -7px 16px -12px rgb(47 42 62 / 0.42);
+}
+
+/* Die feine Kante am oberen Rand ist der Papierschnitt. Sie macht aus zwei
+   ueberlappenden Flaechen zwei Blaetter statt einer Stufe. */
+.sheet-stack > .sheet + .sheet::before {
+  content: "";
+  position: absolute;
+  inset: 0 16px auto 16px;
+  height: 1px;
+  background: var(--border);
+  border-radius: 1px;
+  pointer-events: none;
 }
 
 .sheet-open {
@@ -616,15 +631,17 @@
   margin-top: 0.9rem !important;
   margin-bottom: 0.9rem;
   transform: translateY(-1px);
-  box-shadow:
-    0 1px 2px oklch(0.279 0.038 302.4 / 0.06),
-    0 14px 32px -20px oklch(0.279 0.038 302.4 / 0.45);
+  box-shadow: var(--sh-3);
+}
+
+.sheet-open::before {
+  display: none;
 }
 
 /* Der oberste Zettel braucht keinen Schatten nach oben — darunter liegt
    nichts. */
 .sheet-stack > .sheet:first-child {
-  box-shadow: 0 1px 2px oklch(0.279 0.038 302.4 / 0.05);
+  box-shadow: var(--sh-1);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -901,52 +918,3 @@ body {
   }
 }
 
-/* --- Blaetterstapel ------------------------------------------------------
-   Der kialia-eigene Teil: Tagebuch, Plan und Packliste liegen als
-   aufgefaechertes Papier uebereinander statt als Liste getrennter Karten.
-   Der Effekt haengt an einem Schatten nach OBEN — Papier, das auf Papier
-   liegt, wirft seinen Schatten auf das Blatt darunter, nicht nach unten ins
-   Leere. Ohne ihn sind es nur schlecht gesetzte Karten. */
-@utility leafstack {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-}
-
-@utility leaf {
-  position: relative;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: 0 -6px 16px -10px rgb(47 42 62 / 0.30);
-  transition:
-    margin 0.28s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.28s;
-
-  & + & {
-    margin-top: -18px;
-  }
-
-  /* Die feine Kante am oberen Rand ist der Papierschnitt. Sie macht aus zwei
-     ueberlappenden Flaechen zwei Blaetter. */
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0 14px auto 14px;
-    height: 1px;
-    background: var(--border);
-    border-radius: 1px;
-  }
-
-  &:first-child::before {
-    display: none;
-  }
-}
-
-/* Das aufgeschlagene Blatt loest sich aus dem Stapel. */
-@utility leaf-open {
-  z-index: 2;
-  margin-top: 12px;
-  margin-bottom: 12px;
-  box-shadow: var(--sh-3);
-}

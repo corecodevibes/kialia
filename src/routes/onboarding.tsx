@@ -109,7 +109,7 @@ function OnboardingPage() {
         >
           {step === 0 ? (
             <div className="space-y-4">
-              <h1 className="text-xl font-semibold">Schön, dass du da bist</h1>
+              <h1 className="display text-[1.4rem]">Schön, dass du da bist</h1>
               <Field label="Wie heißt du?">
                 <input
                   value={name}
@@ -154,7 +154,7 @@ function OnboardingPage() {
             </div>
           ) : (
             <div className="space-y-4">
-              <h1 className="flex items-center gap-2 text-xl font-semibold">
+              <h1 className="display flex items-center gap-2 text-[1.4rem]">
                 <Sparkles className="size-5 text-accent" />
                 Kurz zur App
               </h1>

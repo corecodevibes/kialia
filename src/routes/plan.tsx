@@ -494,7 +494,7 @@ function PlanTab() {
                       <span className="text-muted-foreground">
                         {COST_CATEGORY_LABELS[r.category] ?? r.category}
                       </span>
-                      <span className="tabular-nums font-medium">
+                      <span className="amount">
                         {money(r.min, costs.currency)} – {money(r.max, costs.currency)}
                       </span>
                     </li>
@@ -631,7 +631,7 @@ function PlanTab() {
                       </p>
                     </div>
                     {a.cost > 0 && (
-                      <span className="shrink-0 pt-0.5 text-sm font-semibold tabular-nums">
+                      <span className="amount shrink-0 pt-0.5 text-[0.95rem]">
                         {money(a.cost, a.currency || trip.currency || "EUR")}
                       </span>
                     )}
@@ -794,7 +794,7 @@ function PlanTab() {
         <SectionTitle>Gesamtkosten</SectionTitle>
         <Card>
           <CardTitle>Geplant</CardTitle>
-          <p className="mt-1 text-3xl font-extrabold tracking-tight tabular-nums">
+          <p className="amount mt-1 text-[2rem]">
             <Money value={totals.total} />
           </p>
           <div className="mt-3 space-y-1 text-sm text-muted-foreground">
@@ -852,7 +852,7 @@ function PlanTab() {
             <div className="mt-4 rounded-2xl bg-secondary/40 p-3">
               <div className="flex items-baseline justify-between gap-3">
                 <CardTitle>Tatsächlich ausgegeben</CardTitle>
-                <span className="text-lg font-bold tabular-nums">
+                <span className="amount text-[1.2rem]">
                   <Money value={totals.actual} />
                 </span>
               </div>
@@ -935,7 +935,7 @@ function PlanTab() {
                   </>
                 ) : (
                   <>
-                    <p className="mt-1 text-2xl font-extrabold tracking-tight tabular-nums">
+                    <p className="amount mt-1 text-[1.7rem]">
                       <Money value={plan.perMonth} /> / Monat
                     </p>
                     <p className="mt-1 text-xs text-muted-foreground">
@@ -966,7 +966,7 @@ function PlanTab() {
                       />
                     </div>
                     <p className="mt-1.5 text-xs text-muted-foreground">
-                      <span className="font-semibold text-foreground tabular-nums">
+                      <span className="amount text-foreground">
                         {Math.round(plan.progress * 100)} %
                       </span>{" "}
                       beisammen — <Money value={plan.covered} /> von <Money value={plan.total} />
@@ -992,19 +992,19 @@ function PlanTab() {
                 <dl className="mt-3 space-y-1 border-t border-foreground/10 pt-2 text-xs">
                   <div className="flex justify-between gap-3">
                     <dt className="text-muted-foreground">Geplante Kosten</dt>
-                    <dd className="tabular-nums">
+                    <dd className="amount">
                       <Money value={plan.total} />
                     </dd>
                   </div>
                   <div className="flex justify-between gap-3">
                     <dt className="text-muted-foreground">Gespart und Kredit</dt>
-                    <dd className="tabular-nums">
+                    <dd className="amount">
                       − <Money value={plan.covered} />
                     </dd>
                   </div>
                   <div className="flex justify-between gap-3 font-semibold">
                     <dt>Noch offen</dt>
-                    <dd className="tabular-nums">
+                    <dd className="amount">
                       <Money value={plan.open} />
                     </dd>
                   </div>

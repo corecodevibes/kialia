@@ -175,7 +175,7 @@ function AuthPage() {
     return (
       <AuthFrame>
         <div className="rounded-[var(--radius)] border border-border bg-card p-5 shadow-[var(--sh-2)]">
-          <h2 className="text-lg font-bold">
+          <h2 className="display text-[1.15rem]">
             {isSignup ? "Fast geschafft" : "Link ist unterwegs"}
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">

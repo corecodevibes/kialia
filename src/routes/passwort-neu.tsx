@@ -94,14 +94,14 @@ function NewPasswordPage() {
             <p className="text-sm text-muted-foreground">Einen Moment …</p>
           ) : done ? (
             <>
-              <h2 className="text-lg font-bold">Passwort geändert</h2>
+              <h2 className="display text-[1.15rem]">Passwort geändert</h2>
               <p className="mt-2 text-sm text-muted-foreground">
                 Du bist angemeldet. Es geht gleich weiter.
               </p>
             </>
           ) : !hasSession ? (
             <>
-              <h2 className="text-lg font-bold">Dieser Link wirkt nicht mehr</h2>
+              <h2 className="display text-[1.15rem]">Dieser Link wirkt nicht mehr</h2>
               <p className="mt-2 text-sm text-muted-foreground">
                 Rücksetz-Links gelten aus Sicherheitsgründen nur kurz und nur einmal. Fordere
                 einfach einen neuen an.
@@ -116,7 +116,7 @@ function NewPasswordPage() {
             </>
           ) : (
             <form onSubmit={submit}>
-              <h2 className="text-lg font-bold">Neues Passwort</h2>
+              <h2 className="display text-[1.15rem]">Neues Passwort</h2>
               <p className="mt-1 mb-3 text-sm text-muted-foreground">
                 Wähle ein neues Passwort für dein Konto.
               </p>

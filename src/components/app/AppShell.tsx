@@ -326,7 +326,7 @@ export function Money({
 }) {
   const { trip } = useTrip();
   return (
-    <span className={`tabular-nums ${className}`.trim()}>
+    <span className={`amount ${className}`.trim()}>
       {money(value, currency || trip.currency || "EUR")}
     </span>
   );
@@ -591,14 +591,10 @@ export const inputClass =
 /** Datums-Felder: gleiches Aussehen, aber kompakter, damit nichts abgeschnitten wird. */
 export const dateInputClass = `${inputClass} box-border appearance-none px-2.5 text-[13px] [&::-webkit-date-and-time-value]:text-left [&::-webkit-calendar-picker-indicator]:ml-0`;
 
-export const selectClass = `${inputClass} appearance-none bg-background pr-8`;
+export const selectClass = `${inputClass} appearance-none bg-secondary pr-8`;
 
 export function SectionTitle({ children }: { children: ReactNode }) {
-  return (
-    <h2 className="mb-2 mt-7 px-1 text-[10.5px] font-semibold uppercase tracking-[0.2em] text-foreground/55">
-      {children}
-    </h2>
-  );
+  return <h2 className="kicker mb-2.5 mt-7 px-1">{children}</h2>;
 }
 
 /** Einheitliche Überschrift innerhalb einer Karte – überall gleich. */

@@ -202,9 +202,7 @@ function HomeTab() {
     return (
       <AppShell title="" subtitle="">
         <div className="pt-2">
-          <h2 className="text-[1.75rem] font-extrabold leading-[1.15] tracking-[-0.02em]">
-            Let&rsquo;s start a new adventure
-          </h2>
+          <h2 className="display text-[1.85rem]">Let&rsquo;s start a new adventure</h2>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
             Sag uns, wohin es geht. Plan, Budget, Packliste und Tagebuch gehören danach zu genau
             dieser Reise.
@@ -574,7 +572,7 @@ function HomeTab() {
                 const passt = !schwer || typedName.trim().toLowerCase() === name.toLowerCase();
                 return (
                   <>
-                    <p className="text-lg font-bold tracking-tight">
+                    <p className="display text-[1.2rem]">
                       „{name || "Reise ohne Namen"}" entfernen?
                     </p>
                     <p className="mt-2 text-sm text-muted-foreground">
