@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Field, inputClass } from "@/components/app/AppShell";
 import { authErrorMessage, type AuthMessage } from "@/lib/auth-errors";
 import logo from "@/assets/kialia-logo.png";
+import { Wordmark } from "@/components/app/bits";
 
 export const Route = createFileRoute("/passwort-neu")({
   head: () => ({
@@ -83,8 +84,8 @@ function NewPasswordPage() {
             height={160}
             className="size-24 rounded-3xl shadow-sm"
           />
-          <h1 className="mt-4 text-2xl font-extrabold tracking-tight text-foreground">
-            kialia · κιάλια
+          <h1 className="mt-4">
+            <Wordmark />
           </h1>
         </div>
 

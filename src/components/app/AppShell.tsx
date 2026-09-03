@@ -187,9 +187,7 @@ export function AppShell({
             {/* Der Bildschirmname ist die Nebensache, die Reise die Identitaet.
                 Vorher stand im Plan-Tab "Plan" und auf Home "Kreta" — zwei
                 verschiedene Dinge an derselben Stelle. */}
-            <p className="truncate text-[10.5px] font-semibold uppercase tracking-[0.2em] text-foreground/55">
-              {title || "kialia · κιάλια"}
-            </p>
+            <p className="kicker truncate text-foreground/60">{title || "kialia · κιάλια"}</p>
             {/* Die Flagge steht NEBEN dem Namen, nicht auf der Marke.
                 Auf dem Logo lag sie halb darueber und verdeckte ein Glas —
                 und inhaltlich gehoert sie ohnehin zur Reise, nicht zur Marke.
@@ -205,7 +203,7 @@ export function AppShell({
                   {flag}
                 </span>
               )}
-              <h1 className="min-w-0 truncate text-[1.35rem] font-extrabold leading-tight tracking-[-0.02em] text-foreground">
+              <h1 className="display min-w-0 truncate text-[1.5rem] text-foreground">
                 {trip.destination || "kialia"}
               </h1>
             </div>
@@ -216,7 +214,7 @@ export function AppShell({
           <Link
             to="/einstellungen"
             aria-label="Einstellungen"
-            className="shrink-0 rounded-xl p-2 text-foreground/70 transition hover:bg-foreground/10"
+            className="shrink-0 rounded-full p-2.5 text-foreground/70 transition hover:bg-foreground/8"
           >
             <Settings className="size-5" />
           </Link>
@@ -232,7 +230,7 @@ export function AppShell({
         {joined && (
           <div
             role="status"
-            className="mx-auto mb-3 max-w-md rounded-2xl bg-secondary px-4 py-2.5 text-xs"
+            className="mx-auto mb-3 max-w-md rounded-[var(--radius)] border border-border bg-secondary px-4 py-2.5 text-xs"
           >
             <p className="font-semibold">Reise übernommen</p>
             <p className="mt-0.5 text-muted-foreground">
@@ -243,7 +241,7 @@ export function AppShell({
         {syncError && (
           <div
             role="status"
-            className="mx-auto mb-3 max-w-md rounded-2xl bg-destructive/10 px-4 py-2.5 text-xs text-destructive"
+            className="mx-auto mb-3 max-w-md rounded-[var(--radius)] border border-destructive/25 bg-[var(--no-soft)] px-4 py-2.5 text-xs text-destructive"
           >
             <p className="font-semibold">Abgleich fehlgeschlagen</p>
             <p className="mt-0.5">
@@ -264,10 +262,14 @@ export function AppShell({
               activeOptions={{ exact: to === "/" }}
               activeProps={{ className: "text-primary" }}
               inactiveProps={{ className: "text-muted-foreground" }}
-              className="flex flex-1 flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition"
+              className="group flex flex-1 flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition"
             >
-              <Icon className="size-5" />
+              <Icon className="size-5" strokeWidth={1.6} />
               {label}
+              {/* Der aktive Tab traegt einen Punkt in der Markenfarbe statt
+                  einer gefuellten Flaeche. Fuenf gefaerbte Flaechen
+                  nebeneinander ergeben eine Ampel; ein Punkt ordnet ein. */}
+              <span className="h-1 w-1 rounded-full bg-[var(--periwinkle)] opacity-0 transition-opacity group-[.text-primary]:opacity-100" />
             </Link>
           ))}
         </div>
@@ -279,8 +281,7 @@ export function AppShell({
 export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
     <section
-      className={`rounded-3xl border border-border/60 bg-card p-4 ${className}`}
-      style={{ boxShadow: "var(--shadow-soft)" }}
+      className={`rounded-[var(--radius)] border border-border bg-card p-4 shadow-[var(--sh-1)] ${className}`}
     >
       {children}
     </section>
@@ -580,8 +581,12 @@ export function PersonColors({
   );
 }
 
+/* Felder liegen eingesenkt im Papier: Creme-Grund statt Seitenfarbe, damit
+   sichtbar ist, wo man schreiben kann, ohne dass ein Rahmen laut werden muss.
+   16 px erzwingt die Regel weiter unten fuer Touch-Geraete — darunter zoomt
+   iOS beim Fokus hinein und bleibt so. */
 export const inputClass =
-  "block w-full min-w-0 max-w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground transition focus:border-primary";
+  "block w-full min-w-0 max-w-full rounded-[14px] border border-border bg-secondary px-3.5 py-2.5 text-sm text-foreground transition placeholder:text-muted-foreground/70 focus:border-[var(--ring)] focus:bg-card focus:outline-none";
 
 /** Datums-Felder: gleiches Aussehen, aber kompakter, damit nichts abgeschnitten wird. */
 export const dateInputClass = `${inputClass} box-border appearance-none px-2.5 text-[13px] [&::-webkit-date-and-time-value]:text-left [&::-webkit-calendar-picker-indicator]:ml-0`;

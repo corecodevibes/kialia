@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import logo from "@/assets/kialia-logo.png";
+import { Wordmark } from "@/components/app/bits";
 
 /**
  * Kurzer Markenmoment beim Kaltstart: das Fernglas dreht sich einmal um die
@@ -51,9 +52,7 @@ export function SplashScreen() {
         className="splash-mark size-28 rounded-3xl shadow-sm"
       />
       <div className="splash-word flex flex-col items-center gap-1.5">
-        <span className="text-3xl font-extrabold tracking-tight text-foreground">
-          kialia · κιάλια
-        </span>
+        <Wordmark size="lg" />
         <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-foreground/50">
           See more. travel further.
         </span>

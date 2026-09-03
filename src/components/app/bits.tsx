@@ -122,3 +122,22 @@ export function StatusPicker({
     </div>
   );
 }
+
+/**
+ * Der Schriftzug. Stand bisher an fuenf Stellen als eigener Absatz mit
+ * jeweils eigener Groesse und Schriftstaerke — jede Aenderung musste fuenfmal
+ * gemacht werden, und zwei der fuenf waren bereits auseinandergelaufen.
+ *
+ * Er steht in der Serif des Designsystems, weil der Name das Persoenliche der
+ * App ist und nicht ihre Bedienung. Das Trennzeichen traegt die Handlungsfarbe
+ * — ein einzelner warmer Punkt, der den lateinischen vom griechischen Teil
+ * loest, ohne eine zweite Schrift zu brauchen.
+ */
+export function Wordmark({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
+  const scale = { sm: "text-xl", md: "text-[1.7rem]", lg: "text-[2.1rem]" }[size];
+  return (
+    <span className={`display ${scale} text-foreground`}>
+      kialia <span className="text-[var(--clay)]">·</span> κιάλια
+    </span>
+  );
+}

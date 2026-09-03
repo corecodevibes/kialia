@@ -7,6 +7,7 @@ import { Field, inputClass } from "@/components/app/AppShell";
 import { authErrorMessage, type AuthMessage } from "@/lib/auth-errors";
 import { writeOnboardedCache } from "@/lib/onboarding-gate";
 import logo from "@/assets/kialia-logo.png";
+import { Wordmark } from "@/components/app/bits";
 
 export const Route = createFileRoute("/onboarding")({
   head: () => ({
@@ -93,8 +94,8 @@ function OnboardingPage() {
             height={96}
             className="size-20 rounded-3xl shadow-sm"
           />
-          <p className="mt-3 text-xl font-extrabold tracking-tight text-foreground">
-            kialia · κιάλια
+          <p className="mt-3">
+            <Wordmark size="sm" />
           </p>
           <p className="text-xs font-medium text-foreground/70">See more. travel further.</p>
           <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-foreground/70">

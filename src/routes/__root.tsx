@@ -86,7 +86,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content: "Ideen sammeln, Kosten planen und jeden Reisetag festhalten – mit kialia.",
       },
       { name: "author", content: "CoreCodeVibes" },
-      { name: "theme-color", content: "#a3a8dd" },
+      // Die Farbe der Statusleiste in der installierten App. Sie muss zur
+      // obersten Flaeche passen, und das ist seit der Umstellung der Kopf mit
+      // dem Verlauf ueber Elfenbein — nicht mehr das Perlblau.
+      { name: "theme-color", content: "#584876" },
       { name: "mobile-web-app-capable", content: "yes" },
       // Legacy-Pendant, das iOS bis heute auswertet.
       { name: "apple-mobile-web-app-capable", content: "yes" },

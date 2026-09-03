@@ -8,6 +8,7 @@ import { authErrorMessage, type AuthMessage } from "@/lib/auth-errors";
 import logo from "@/assets/kialia-logo.png";
 import { peekInvite } from "@/lib/pending-invite";
 import { LegalFooter } from "@/components/app/legal";
+import { Wordmark } from "@/components/app/bits";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -173,7 +174,7 @@ function AuthPage() {
     const isSignup = phase === "signup-sent";
     return (
       <AuthFrame>
-        <div className="rounded-3xl bg-card p-5" style={{ boxShadow: "var(--shadow-soft)" }}>
+        <div className="rounded-[var(--radius)] border border-border bg-card p-5 shadow-[var(--sh-2)]">
           <h2 className="text-lg font-bold">
             {isSignup ? "Fast geschafft" : "Link ist unterwegs"}
           </h2>
@@ -195,7 +196,7 @@ function AuthPage() {
               type="button"
               onClick={resendConfirmation}
               disabled={busy || cooldown > 0}
-              className="mt-4 w-full rounded-2xl bg-secondary px-4 py-3 text-sm font-semibold disabled:opacity-60"
+              className="mt-4 w-full rounded-full bg-secondary px-4 py-3 text-sm font-semibold transition active:scale-[0.985] disabled:opacity-40"
             >
               {cooldown > 0 ? `Erneut senden in ${cooldown}\u00a0s` : "E-Mail erneut senden"}
             </button>
@@ -203,7 +204,7 @@ function AuthPage() {
           <button
             type="button"
             onClick={backToForm}
-            className="mt-2 w-full rounded-2xl px-4 py-3 text-sm font-medium text-muted-foreground"
+            className="mt-2.5 w-full rounded-full px-4 py-3 text-sm font-medium text-muted-foreground transition hover:text-foreground"
           >
             Andere Adresse verwenden
           </button>
@@ -216,10 +217,9 @@ function AuthPage() {
     <AuthFrame>
       <form
         onSubmit={submit}
-        className="rounded-3xl border border-border/60 bg-card p-5"
-        style={{ boxShadow: "var(--shadow-soft)" }}
+        className="rounded-[var(--radius)] border border-border bg-card p-5 shadow-[var(--sh-2)]"
       >
-        <div className="mb-4 grid grid-cols-2 gap-1 rounded-2xl bg-secondary p-1 text-sm font-medium">
+        <div className="mb-5 grid grid-cols-2 gap-1 rounded-full bg-secondary p-1 text-sm font-medium">
           {(["signup", "login"] as const).map((m) => (
             <button
               key={m}
@@ -228,8 +228,10 @@ function AuthPage() {
                 setMode(m);
                 setMsg(null);
               }}
-              className={`rounded-xl py-2 transition ${
-                mode === m ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
+              className={`rounded-full py-2 transition ${
+                mode === m
+                  ? "bg-card text-foreground shadow-[var(--sh-1)]"
+                  : "text-muted-foreground"
               }`}
             >
               {m === "signup" ? "Registrieren" : "Anmelden"}
@@ -265,7 +267,7 @@ function AuthPage() {
         <button
           type="submit"
           disabled={busy || cooldown > 0}
-          className="acrylic-warm mt-4 w-full rounded-2xl px-4 py-3.5 text-sm font-semibold text-background disabled:opacity-60"
+          className="mt-5 w-full rounded-full bg-[var(--clay)] px-4 py-3.5 text-sm font-semibold text-[#FFF7F3] shadow-[var(--sh-1)] transition active:scale-[0.985] disabled:opacity-40"
         >
           {busy
             ? "Einen Moment …"
@@ -281,7 +283,7 @@ function AuthPage() {
             type="button"
             onClick={requestReset}
             disabled={busy}
-            className="mt-2 w-full rounded-2xl px-4 py-2.5 text-sm font-medium text-muted-foreground disabled:opacity-60"
+            className="mt-2.5 w-full rounded-full px-4 py-2.5 text-sm font-medium text-muted-foreground transition hover:text-foreground disabled:opacity-40"
           >
             Passwort vergessen?
           </button>
@@ -310,16 +312,18 @@ function AuthFrame({ children }: { children: React.ReactNode }) {
             height={160}
             className="size-32 rounded-3xl shadow-sm"
           />
-          <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-foreground">
-            kialia · κιάλια
+          <h1 className="mt-4">
+            <Wordmark size="lg" />
           </h1>
-          <p className="mt-1 text-sm font-medium text-foreground/70">See more. travel further.</p>
+          <p className="mt-1.5 font-serif text-[15px] italic text-muted-foreground">
+            See more. travel further.
+          </p>
         </div>
         {/* Wer ueber einen Einladungslink kommt, wollte eine Reise sehen und
             landet auf einer Anmeldemaske. Ohne diesen Satz wirkt der Link
             kaputt und der Abbruch ist wahrscheinlicher als die Anmeldung. */}
         {hasInvite && (
-          <div className="mb-4 rounded-2xl bg-card/80 px-4 py-3 text-center text-sm">
+          <div className="mb-4 rounded-[var(--radius)] border border-border bg-card/85 px-4 py-3 text-center text-sm">
             <p className="font-semibold">Du wurdest zu einer Reise eingeladen</p>
             <p className="mt-0.5 text-xs text-muted-foreground">
               Leg kurz ein Konto an — danach ist die Reise sofort da.

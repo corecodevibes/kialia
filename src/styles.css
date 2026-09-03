@@ -171,6 +171,63 @@
     U+A720-A7FF;
 }
 
+/* Source Serif 4 — die Serif des Designsystems.
+   Mazunes Kit nennt Newsreader. Die hat aber kein Griechisch, und der
+   Schriftzug heisst "kialia · kialia" mit griechischem Zweitteil: Newsreader
+   faellt dort sichtbar auf eine Systemschrift zurueck, mitten im Wort.
+   Source Serif 4 liegt Newsreader im Duktus am naechsten, bringt Griechisch
+   mit und traegt auch kleine Groessen wie Uhrzeiten und Betraege.
+   Eine Variable-Datei je Subset deckt 400-600 ab; das Geraet laedt nur die
+   Subsets, die es tatsaechlich zeichnet. */
+@font-face {
+  font-family: "Source Serif 4";
+  font-style: italic;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/sourceserif-greek-it.woff2") format("woff2");
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: "Source Serif 4";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/sourceserif-greek.woff2") format("woff2");
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: "Source Serif 4";
+  font-style: italic;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/sourceserif-latin-ext-it.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Source Serif 4";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/sourceserif-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Source Serif 4";
+  font-style: italic;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/sourceserif-latin-it.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Source Serif 4";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/sourceserif-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 @source "../src";
 @import "tw-animate-css";
 
@@ -231,6 +288,10 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --font-serif: "Source Serif 4", "Iowan Old Style", Palatino, Georgia, serif;
+  --color-clay: var(--clay);
+  --color-brass: var(--brass);
+  --color-ink-soft: var(--muted-foreground);
   --color-periwinkle: var(--periwinkle);
   --color-mauve: var(--mauve);
   --color-lilac: var(--lilac);
@@ -239,73 +300,104 @@
   --color-sunset: var(--sunset);
 }
 
+/* ---------------------------------------------------------------------------
+   Farben nach design/DESIGN-KIT.md, Abschnitt 2.
+   Der Kern der Umstellung ist eine Trennung, die vorher fehlte: die
+   Marken-Toene und die Flaechen-Toene sind nicht dieselben Farben.
+
+   Perlblau #8F9BE0 ist die Farbe, an der man kialia erkennt — es traegt den
+   Verlauf. Mit weisser Schrift schafft es aber nur 2,65:1. Als --primary stand
+   es bis hierher auf jedem gefuellten Knopf; darum wirkte die App hell und
+   beliebig statt hochwertig. Perlblau bleibt jetzt Marke (Verlauf, Punkte,
+   Raender, Ausgewaehltes), und gefuellte Flaechen bekommen den dunklen Partner
+   aus derselben Familie: #584876 mit 8,07:1.
+
+   Zweite Aenderung mit grosser Wirkung: Karten sind nicht mehr reinweiss,
+   sondern Papier #FFFCF9 auf Elfenbein #FAF6F0. Weiss auf Weiss braucht einen
+   Schatten, um sich abzuheben — Papier auf Elfenbein braucht nur eine Linie.
+   --------------------------------------------------------------------------- */
 :root {
-  --radius: 1rem;
-  --background: oklch(0.978 0.004 56.4);
-  --foreground: oklch(0.279 0.038 302.4);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.279 0.038 302.4);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.279 0.038 302.4);
-  --primary: oklch(0.707 0.102 275.9);
-  --primary-foreground: oklch(0.995 0.002 300);
-  --secondary: oklch(0.938 0.011 330.2);
-  --secondary-foreground: oklch(0.42 0.05 320);
-  --muted: oklch(0.938 0.011 330.2);
-  --muted-foreground: oklch(0.52 0.035 320);
-  --accent: oklch(0.771 0.132 61.9);
-  --accent-foreground: oklch(0.279 0.038 302.4);
-  --destructive: oklch(0.673 0.108 42.6);
-  --destructive-foreground: oklch(0.995 0.002 300);
-  --border: oklch(0.884 0.018 325.7);
-  --input: oklch(0.884 0.018 325.7);
-  --ring: oklch(0.707 0.102 275.9);
+  --radius: 1.25rem;              /* 20px, Kartenradius des Kits */
 
-  --periwinkle: oklch(0.707 0.102 275.9);
-  --mauve: oklch(0.62 0.055 348);
-  --lilac: oklch(0.844 0.018 325.7);
-  --sun: oklch(0.886 0.113 89.3);
-  --terracotta: oklch(0.673 0.108 42.6);
-  --sunset: oklch(0.771 0.132 61.9);
+  --background: #FAF6F0;          /* Elfenbein statt Weiss */
+  --foreground: #2F2A3E;          /* Tinte, 12,8:1 */
+  --card: #FFFCF9;                /* Papier, warm */
+  --card-foreground: #2F2A3E;
+  --popover: #FFFCF9;
+  --popover-foreground: #2F2A3E;
 
-  /* Acryl / Spachtel-Look: übereinandergelegte Farbflecken statt linearem Verlauf */
+  --primary: #584876;             /* gefuellte Flaechen  (8,07:1) */
+  --primary-foreground: #FFFCF9;
+  --secondary: #FAF1E8;           /* Creme, eingebettete Flaechen */
+  --secondary-foreground: #4A4258;
+  --muted: #F3EDE6;
+  --muted-foreground: #6C6480;    /* 5,2:1 */
+  /* --accent ist in dieser Codebasis fast nur der Hover-Grund der Radix-
+     Bausteine. Vorher stand hier ein kraeftiges Orange — jeder Hover wurde zum
+     Signal. Jetzt ist es die Creme-Flaeche und meldet sich nur leise. */
+  --accent: #F5EDE4;
+  --accent-foreground: #2F2A3E;
+  --destructive: #9A4F53;
+  --destructive-foreground: #FFFCF9;
+  --border: rgba(47, 42, 62, 0.10);
+  --input: rgba(47, 42, 62, 0.18);
+  --ring: #8F9BE0;                /* Fokus traegt die Markenfarbe */
+
+  /* ---- Marken-Toene: Verlauf, Punkte, Raender — nie Flaeche unter Text ---- */
+  --periwinkle: #8F9BE0;
+  --mauve: #966A7F;               /* abgedunkelt auf 4,50:1 — Preise, Kicker */
+  --lilac: #EFE8EE;
+  --sun: #F7D67F;                 /* nur Flaeche, zu hell fuer Text */
+  --terracotta: #CE7F5F;          /* Flaeche ohne Text          (3,08:1) */
+  --sunset: #F0A055;              /* warme Seite des Verlaufs */
+  --clay: #B85D38;                /* gefuellte Handlungen       (4,51:1) */
+  --clay-soft: #F7E4D8;
+  --brass: #966A7F;
+
+  /* ---- Status ------------------------------------------------------------ */
+  --ok: #4E7A63;   --ok-soft: #E4EFE9;
+  --warn: #8A6A2E; --warn-soft: #F7EEDC;
+  --no: #9A4F53;   --no-soft: #F6E4E5;
+
+  /* Acryl / Spachtel-Look: uebereinandergelegte Farbflecken statt linearem
+     Verlauf. Unveraendert — er ist das Wiedererkennbarste an kialia. */
   --gradient-sky:
-    radial-gradient(75% 120% at 6% 4%, oklch(0.707 0.102 275.9) 0%, transparent 58%),
-    radial-gradient(65% 110% at 96% 0%, oklch(0.886 0.113 89.3) 0%, transparent 62%),
-    radial-gradient(85% 130% at 78% 100%, oklch(0.673 0.108 42.6) 0%, transparent 60%),
-    radial-gradient(70% 120% at 22% 104%, oklch(0.62 0.055 348) 0%, transparent 62%),
-    radial-gradient(120% 90% at 50% 40%, oklch(0.771 0.132 61.9) 0%, transparent 70%),
-    linear-gradient(140deg, oklch(0.707 0.102 275.9), oklch(0.771 0.132 61.9));
+    radial-gradient(75% 120% at 6% 4%, #8F9BE0 0%, transparent 58%),
+    radial-gradient(65% 110% at 96% 0%, #F7D67F 0%, transparent 62%),
+    radial-gradient(85% 130% at 78% 100%, #CE7F5F 0%, transparent 60%),
+    radial-gradient(70% 120% at 22% 104%, #A0798C 0%, transparent 62%),
+    radial-gradient(120% 90% at 50% 40%, #F0A055 0%, transparent 70%),
+    linear-gradient(140deg, #8F9BE0, #F0A055);
   --gradient-warm:
-    radial-gradient(80% 140% at 0% 0%, oklch(0.886 0.113 89.3) 0%, transparent 60%),
-    radial-gradient(90% 140% at 100% 100%, oklch(0.62 0.055 348) 0%, transparent 62%),
-    linear-gradient(120deg, oklch(0.771 0.132 61.9), oklch(0.673 0.108 42.6));
+    radial-gradient(80% 140% at 0% 0%, #F7D67F 0%, transparent 60%),
+    radial-gradient(90% 140% at 100% 100%, #A0798C 0%, transparent 62%),
+    linear-gradient(120deg, #F0A055, #CE7F5F);
   --gradient-soft:
-    radial-gradient(90% 140% at 0% 0%, oklch(0.938 0.011 330.2) 0%, transparent 65%),
-    radial-gradient(80% 130% at 100% 20%, oklch(0.886 0.113 89.3 / 0.35) 0%, transparent 60%),
-    linear-gradient(160deg, oklch(1 0 0), oklch(0.978 0.004 56.4));
-  /* Ruhiger. Der vorige Schatten war 40px weich mit 45% Deckung — jede Karte
-     schwebte deutlich sichtbar ueber dem Verlauf. Bei zwoelf Karten
-     untereinander wird daraus Unruhe. Teuer wirkende Oberflaechen tragen
-     wenig Schatten und dafuer klare Kanten: hier eine feine Linie plus ein
-     kaum sichtbarer Absatz. */
-  --shadow-soft:
-    0 1px 2px oklch(0.279 0.038 302.4 / 0.06), 0 8px 24px -18px oklch(0.279 0.038 302.4 / 0.28);
-  --shadow-lift: 0 28px 60px -30px oklch(0.62 0.055 348 / 0.55);
+    radial-gradient(90% 140% at 0% 0%, #FAF1E8 0%, transparent 65%),
+    radial-gradient(80% 130% at 100% 20%, rgba(247, 214, 127, 0.35) 0%, transparent 60%),
+    linear-gradient(160deg, #FFFCF9, #FAF6F0);
 
-  --chart-1: oklch(0.707 0.102 275.9);
-  --chart-2: oklch(0.62 0.055 348);
-  --chart-3: oklch(0.886 0.113 89.3);
-  --chart-4: oklch(0.673 0.108 42.6);
-  --chart-5: oklch(0.844 0.018 325.7);
-  --sidebar: oklch(0.938 0.011 330.2);
-  --sidebar-foreground: oklch(0.279 0.038 302.4);
-  --sidebar-primary: oklch(0.707 0.102 275.9);
-  --sidebar-primary-foreground: oklch(0.995 0.002 300);
-  --sidebar-accent: oklch(0.978 0.004 56.4);
-  --sidebar-accent-foreground: oklch(0.279 0.038 302.4);
-  --sidebar-border: oklch(0.884 0.018 325.7);
-  --sidebar-ring: oklch(0.707 0.102 275.9);
+  /* Warm getoent aus der Tinte, nie grau-blau. Teuer wirkende Oberflaechen
+     tragen wenig Schatten und dafuer klare Kanten. */
+  --sh-1: 0 1px 2px rgba(47, 42, 62, 0.05);
+  --sh-2: 0 2px 6px rgba(47, 42, 62, 0.05), 0 16px 36px -22px rgba(47, 42, 62, 0.35);
+  --sh-3: 0 4px 12px rgba(47, 42, 62, 0.07), 0 30px 60px -30px rgba(47, 42, 62, 0.45);
+  --shadow-soft: var(--sh-2);
+  --shadow-lift: var(--sh-3);
+
+  --chart-1: #8F9BE0;
+  --chart-2: #966A7F;
+  --chart-3: #F7D67F;
+  --chart-4: #CE7F5F;
+  --chart-5: #EFE8EE;
+  --sidebar: #FAF1E8;
+  --sidebar-foreground: #2F2A3E;
+  --sidebar-primary: #584876;
+  --sidebar-primary-foreground: #FFFCF9;
+  --sidebar-accent: #FAF6F0;
+  --sidebar-accent-foreground: #2F2A3E;
+  --sidebar-border: rgba(47, 42, 62, 0.10);
+  --sidebar-ring: #8F9BE0;
 }
 
 .dark {
@@ -378,34 +470,43 @@
   animation: acrylic-drift 22s ease-in-out infinite alternate;
 }
 
-/* Durchgehender Acryl-Hintergrund für die ganze Seite */
+/* Der Verlauf war bisher die ganze Seite: fixiert, ueber die volle Hoehe, mit
+   einer Milchschicht darueber. Das kostet den Inhalt Ruhe — jede Karte lag auf
+   einer wandernden Farbflaeche, und weisse Karten auf buntem Grund brauchen
+   Schatten, um sich abzuheben. Genau daran erkennt man Vibe-Code.
+
+   Jetzt traegt der Verlauf nur noch den Kopfbereich und laeuft nach unten ins
+   Elfenbein aus. Darunter liegt eine ruhige Papierflaeche mit feinem Korn.
+   Der Verlauf bleibt damit das Erste, was man sieht, und hoert auf, mit dem
+   Inhalt zu konkurrieren. */
 @utility acrylic-page {
   position: relative;
-  background: var(--gradient-sky) fixed;
-  background-size: 140% 140%;
-  background-position: 0% 45%;
-  /* Der Verlauf stand vorher auf 180% und wanderte dauerhaft ueber
-     background-position (26s, infinite alternate). Auf dem Telefon ist das
-     sichtbares Rutschen hinter jedem Inhalt — Bewegung, die nichts erklaert.
-     Das Design-System verlangt eine Bewegung pro Interaktion; ein Hintergrund,
-     der ohne Anlass wandert, ist keine. */
+  background: var(--background);
 
   &::before {
     content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 420px;
+    background: var(--gradient-sky);
+    background-size: 150% 150%;
+    background-position: 0% 40%;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 34%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0%, #000 34%, transparent 100%);
+    opacity: 0.9;
+    pointer-events: none;
+  }
+
+  /* Feines Korn ueber der ganzen Seite. Es ist der Unterschied zwischen
+     "Bildschirm" und "Papier" und faellt einzeln nie auf. */
+  &::after {
+    content: "";
     position: fixed;
     inset: 0;
-    /* Mehr Milch als vorher (0.18/0.30).
-       Der Verlauf ist die Marke, aber er darf nicht mit dem Inhalt um
-       Aufmerksamkeit ringen. Weiter oben bleibt er kraeftig — dort steht der
-       Kopf mit Logo und Ziel — und wird nach unten hin ruhiger, wo die Karten
-       liegen. */
-    background: linear-gradient(
-      to bottom,
-      oklch(1 0 0 / 0.1) 0%,
-      oklch(1 0 0 / 0.34) 22%,
-      oklch(1 0 0 / 0.52) 100%
-    );
+    z-index: 0;
     pointer-events: none;
+    opacity: 0.32;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
   }
 }
 
@@ -744,4 +845,108 @@ body {
     border-bottom: 0.3mm solid #ece7ec;
     padding-bottom: 4mm;
   }
+}
+
+
+/* ===========================================================================
+   Bauteile aus design/DESIGN-KIT.md
+   Nur die Teile, die Tailwind nicht schon abdeckt. Alles andere bleibt
+   Utility-Klasse, damit es eine Quelle der Wahrheit gibt.
+   =========================================================================== */
+
+/* --- Typografie ----------------------------------------------------------
+   Serif fuer Titel, Uhrzeiten und Betraege, Grotesk fuer alles Funktionale.
+   Die Trennung ist der Kern des Kits: die Serif macht das Persoenliche
+   (Reisename, Tagebucheintrag, Summe), die Grotesk das Bedienbare. */
+@utility display {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  line-height: 1.06;
+  letter-spacing: -0.012em;
+}
+
+/* Kicker: die gesperrte Versalzeile ueber jeder Ueberschrift. Sie ordnet ein,
+   bevor der Titel benannt wird, und ist das erkennbarste Merkmal des Kits. */
+@utility kicker {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  line-height: 1.2;
+}
+
+/* Betraege und Uhrzeiten in Serif mit gleichbreiten Ziffern. Ohne
+   tabular-nums springen untereinanderstehende Summen sichtbar. */
+@utility amount {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Zierlinie mit Mittelpunkt — trennt Abschnitte, ohne wie ein Rahmen zu wirken. */
+@utility rule-ornament {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--brass);
+
+  &::before,
+  &::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--input), transparent);
+  }
+}
+
+/* --- Blaetterstapel ------------------------------------------------------
+   Der kialia-eigene Teil: Tagebuch, Plan und Packliste liegen als
+   aufgefaechertes Papier uebereinander statt als Liste getrennter Karten.
+   Der Effekt haengt an einem Schatten nach OBEN — Papier, das auf Papier
+   liegt, wirft seinen Schatten auf das Blatt darunter, nicht nach unten ins
+   Leere. Ohne ihn sind es nur schlecht gesetzte Karten. */
+@utility leafstack {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+@utility leaf {
+  position: relative;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 -6px 16px -10px rgb(47 42 62 / 0.30);
+  transition:
+    margin 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.28s;
+
+  & + & {
+    margin-top: -18px;
+  }
+
+  /* Die feine Kante am oberen Rand ist der Papierschnitt. Sie macht aus zwei
+     ueberlappenden Flaechen zwei Blaetter. */
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0 14px auto 14px;
+    height: 1px;
+    background: var(--border);
+    border-radius: 1px;
+  }
+
+  &:first-child::before {
+    display: none;
+  }
+}
+
+/* Das aufgeschlagene Blatt loest sich aus dem Stapel. */
+@utility leaf-open {
+  z-index: 2;
+  margin-top: 12px;
+  margin-bottom: 12px;
+  box-shadow: var(--sh-3);
 }
