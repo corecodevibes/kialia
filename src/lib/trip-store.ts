@@ -771,20 +771,52 @@ export function attachmentOwnerIds(trip: Trip): string[] {
  * jeder Sicherung. Wer sie fuer den Versicherungsfall aufgenommen hat, haette
  * beim Verlust des Telefons genau das verloren, wogegen sie versichern.
  */
-export async function downloadTrip(trip: Trip): Promise<number> {
-  const files = await exportAttachments(attachmentOwnerIds(trip));
-  const blob = new Blob([JSON.stringify({ ...tripToFile(trip), files }, null, 2)], {
-    type: "application/json",
-  });
+/**
+ * Eine Datei beim Menschen abliefern.
+ *
+ * `a.download` ist der uebliche Weg und funktioniert am Rechner. In einer vom
+ * Homescreen gestarteten App auf iOS wird das Attribut IGNORIERT: es passiert
+ * entweder nichts oder die Datei oeffnet sich als Text im Vollbild, ohne dass
+ * man sie ablegen kann. Ausgerechnet dort wird die Sicherung aber gebraucht.
+ *
+ * Deshalb zuerst das Teilen-Blatt des Systems, wenn es Dateien annimmt — dort
+ * gibt es "In Dateien sichern", iCloud und Mail. Nur wenn das nicht geht oder
+ * abgebrochen wird, der klassische Download.
+ *
+ * Der Rueckgabewert sagt, welcher Weg genommen wurde, damit die Oberflaeche
+ * nicht "gespeichert" behauptet, wenn jemand das Teilen-Blatt weggewischt hat.
+ */
+async function dateiAbliefern(blob: Blob, name: string): Promise<"geteilt" | "geladen"> {
+  const datei = new File([blob], name, { type: blob.type });
+  if (typeof navigator !== "undefined" && navigator.canShare?.({ files: [datei] })) {
+    try {
+      await navigator.share({ files: [datei], title: name });
+      return "geteilt";
+    } catch {
+      // Abgebrochen oder nicht erlaubt (Safari verlangt eine frische
+      // Nutzergeste; das Einsammeln der Belege davor kann sie verbrauchen).
+      // Dann eben herunterladen.
+    }
+  }
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `kialia-${safeFileName(trip.destination)}.json`;
+  a.download = name;
+  a.rel = "noopener";
   document.body.appendChild(a);
   a.click();
   a.remove();
   // Erst nach dem Klick freigeben, sonst bricht der Download in Safari ab.
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+  return "geladen";
+}
+
+export async function downloadTrip(trip: Trip): Promise<number> {
+  const files = await exportAttachments(attachmentOwnerIds(trip));
+  const blob = new Blob([JSON.stringify({ ...tripToFile(trip), files }, null, 2)], {
+    type: "application/json",
+  });
+  await dateiAbliefern(blob, `kialia-${safeFileName(trip.destination)}.json`);
   return files.length;
 }
 
@@ -799,15 +831,8 @@ export async function downloadAllTrips(trips: Trip[]): Promise<number> {
     files,
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
   const stamp = new Date().toISOString().slice(0, 10);
-  a.download = `kialia-sicherung-${stamp}.json`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  await dateiAbliefern(blob, `kialia-sicherung-${stamp}.json`);
   return files.length;
 }
 

@@ -245,7 +245,8 @@ function SettingsPage() {
             <CardTitle>Deine Daten</CardTitle>
             <p className="mt-1 text-xs text-muted-foreground">
               {trips.length === 1 ? "Eine Reise" : `${trips.length} Reisen`} auf diesem Gerät.
-              Angehängte Belege wandern mit — sie stecken als Bilddaten in der Datei.
+              Angehängte Belege wandern mit — sie stecken als Bilddaten in der Datei. Auf dem iPhone
+              öffnet sich das Teilen-Blatt; dort „In Dateien sichern" wählen.
             </p>
             <button
               type="button"
