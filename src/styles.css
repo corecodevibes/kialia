@@ -324,8 +324,8 @@
    DIE MARKENFARBEN kommen aus dem neuen Icon. Es bringt ein Gruen mit
    (Berggrat, Palmenwedel), und das ist die einzige tiefe, gesaettigte Farbe
    der Marke — alles andere ist hell und gehoert in den Verlauf. Also traegt
-   Gruen #35553F die gefuellten Flaechen (8,14:1), Terrakotta #B25936 ist der
-   eine warme Akzent (4,70:1), und Perlblau, Sonne und Mauve bleiben Verlauf,
+   Gruen #35553F die gefuellten Flaechen (7,58:1), Terrakotta #AD5533 ist der
+   eine warme Akzent (4,64:1), und Perlblau, Sonne und Mauve bleiben Verlauf,
    Punkte und Raender. Keiner der drei traegt je Text.
    --------------------------------------------------------------------------- */
 :root {
@@ -350,7 +350,11 @@
   --primary: #35553F;             /* Gruen aus dem Zeichen     (8,14:1) */
   --primary-2: #2B4633;           /* gedrueckt                (10,14:1) */
   --primary-foreground: #F7F1E5;
-  --clay: #B25936;                /* der eine warme Akzent     (4,70:1) */
+  /* 4,64:1 gegen die cremefarbene Schrift, die auf dieser Flaeche steht.
+     Vorher #B25936 — gegen reines Weiss gerechnet ergab das 4,70, gegen die
+     tatsaechliche Schriftfarbe #FBF3EC aber nur 4,37. Die falsche
+     Bezugsfarbe hat den Fehler zwei Durchgaenge lang verdeckt. */
+  --clay: #AD5533;                /* der eine warme Akzent     (4,64:1) */
   --clay-soft: #F2E1D2;
   --destructive: #9A4F53;
   --destructive-foreground: #F7F1E5;
@@ -366,16 +370,20 @@
   /* ---- Marken-Toene: Verlauf, Punkte, Raender — nie Flaeche unter Text ---- */
   --periwinkle: #8F9BE0;
   --sage: #7E9A88;                /* helles Gruen: Fortschritt, Ringe */
-  --mauve: #8A6F5E;               /* warmer Stein fuer Kicker und Preise (4,6:1) */
+  /* Auf dem beigen Papier traegt #8A6F5E nur 4,13:1 — auf dem helleren
+     Papier von vorher waren es 4,55. Beim Wechsel auf Beige ist das
+     mitgerutscht und erst beim Ableiten des Design-Kits aufgefallen, weil
+     dort gegen das Papier gerechnet wird und nicht gegen Weiss. */
+  --mauve: #836858;               /* warmer Stein fuer Kicker und Preise (4,57:1) */
   --lilac: #E7DFE4;
   --sun: #F7D67F;                 /* nur Flaeche, zu hell fuer Text */
   --terracotta: #CE7F5F;          /* Flaeche ohne Text */
   --sunset: #F0A055;              /* warme Seite des Verlaufs */
-  --brass: #8A6F5E;
+  --brass: #836858;
 
   /* ---- Status ------------------------------------------------------------ */
   --ok: #35553F;   --ok-soft: #E3EAE2;
-  --warn: #8A6A2E; --warn-soft: #F3E7CE;
+  --warn: #7F612A; --warn-soft: #F3E7CE;   /* Text auf Papier: 5,04:1 */
   --no: #9A4F53;   --no-soft: #F2DFDB;
 
   /* Der Verlauf ist das Wiedererkennbarste an kialia und steht jetzt auch im
@@ -412,7 +420,7 @@
   --chart-2: #8F9BE0;
   --chart-3: #F7D67F;
   --chart-4: #CE7F5F;
-  --chart-5: #8A6F5E;
+  --chart-5: #836858;
   --sidebar: #EAE0CE;
   --sidebar-foreground: #3A342C;
   --sidebar-primary: #35553F;
@@ -544,7 +552,7 @@
   box-shadow: var(--sh-1);
 
   &:hover:not(:disabled) {
-    background: #9E4C2E;
+    background: #964828;
   }
 }
 

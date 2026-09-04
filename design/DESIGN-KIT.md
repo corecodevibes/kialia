@@ -42,35 +42,93 @@ Unverändert aus Mazune übernommen — sie sind der Grund, warum es hochwertig 
 
 ---
 
-## 2. Farben — abgeglichen mit der laufenden App
+## 2. Farben — abgeleitet aus dem Zeichen, erzeugt aus der App
 
-**Wichtig:** kialias Marken-Handoff und die laufende App nennen verschiedene Farben. Das
-Handoff spricht von Violett und Kupfer, die App rendert **Perlblau und Terrakotta**.
-Maßgeblich ist, was man sieht — dieses Kit folgt der App.
+Die Werte in `css/tokens.css` und `tokens.json` sind **erzeugt**, nicht
+gepflegt: `scripts/sync_design_kit.py` liest den `:root`-Block aus
+`src/styles.css` und schreibt sie. Von Hand geändert wird nur die App.
 
-| Rolle | Wert | Herkunft | Weiße Schrift |
+Der Grund steht in der Geschichte dieses Kits. Die erste Fassung kam aus einem
+Marken-Handoff und zeigte Violett und Kupfer — Farben, die die App nie
+gerendert hat. Zwei Quellen für dieselbe Wahrheit laufen immer auseinander;
+die Frage ist nur, wann es auffällt.
+
+### Woher die Palette kommt
+
+Aus dem Icon. Es bringt ein **Grün** mit (Berggrat, Palmenwedel), und das ist
+die einzige tiefe, gesättigte Farbe der Marke — alles andere (Perlblau, Sonne,
+Terrakotta, Mauve) ist hell und gehört in den Verlauf. Daraus folgt die
+Rollenverteilung von selbst.
+
+### Flächen: drei Beige-Stufen
+
+| Token | Wert | Rolle |
+|---|---|---|
+| `--ivory` | `#EFE7D9` | die Seite |
+| `--paper` | `#F7F1E5` | die Blätter darauf |
+| `--paper-2` | `#EAE0CE` | eingesenkt: Felder, Segmented Control |
+
+Zwischen Seite und Blatt liegen **1,09:1**. Das ist kein Kontrast, sondern eine
+Ahnung — getragen wird die Trennung von der Haarlinie, nicht vom Schatten.
+Genau darin liegt der Unterschied: Weiß auf Weiß *braucht* einen Schatten zum
+Abheben, Papier auf Papier kommt mit einer Linie aus.
+
+### Schrift
+
+| Token | Wert | Rolle | auf Papier |
 |---|---|---|---|
-| `--ivory` | `#FAF6F0` | `--background` der App | — |
-| `--paper` | `#FFFCF9` | `--card` | — |
-| `--paper-2` | `#FAF1E8` | `--secondary` | — |
-| `--ink` | `#2F2A3E` | `--foreground` | 12,8:1 auf Elfenbein |
-| `--primary-tone` | `#8F9BE0` | **Perlblau der App** | 2,65:1 ✘ nie als Fläche |
-| `--primary` | `#584876` | dunkler Partner | **8,07:1** ✔ gefüllte Flächen |
-| `--clay-tone` | `#CE7F5F` | **Terrakotta der App** | 3,08:1 ✘ nur ohne Text |
-| `--clay` | `#B85D38` | abgedunkelt | **4,51:1** ✔ Handlungen |
-| `--sun` | `#F7D67F` | Sonne der App | nur Fläche |
-| `--brass` | `#966A7F` | Mauve, abgedunkelt | 4,50:1 — Preise, Kicker |
+| `--ink` | `#3A342C` | Fließtext | 10,93:1 |
+| `--ink-display` | `#574B3E` | große Serif-Titel | 7,52:1 |
+| `--ink-soft` | `#6B6154` | Beiwerk, Kicker | 5,39:1 |
+| `--brass` | `#836858` | Preise, Kicker | 4,57:1 |
 
-**Warum Perlblau keine Flächenfarbe sein kann.** Es trägt 2,65:1 mit weißer Schrift. Um
-Mazunes 7:1 zu erreichen, müsste es zu `#364BC4` werden — einem Königsblau, das mit der
-Marke nichts mehr zu tun hat. Perlblau gehört deshalb an Verlauf, Punkte, Ränder und
-Ausgewähltes; gefüllte Flächen brauchen einen dunklen Partner aus derselben Familie.
+**Titel stehen nicht in Schwarz.** Fast-Schwarz trägt auf Beige 12,6:1 und wirkt
+dort hart — der Titel schlägt einem entgegen, statt dazuzuliegen. Fließtext
+bleibt dunkler, weil er gelesen und nicht betrachtet wird.
 
-**Der Verlauf** ist das Wiedererkennbarste an kialia und steht als `--gradient-sky` im
-System — dieselben vier Farbkreise wie in der App.
+### Handlung
 
-**Status.** Die App hatte keine. Abgeleitet, damit sie nicht wie Fremdkörper wirken:
-Grün `#4E7A63`, Ocker `#8A6A2E`, Rot `#9A4F53` — alle drei tragen weiße Schrift.
+| Token | Wert | Rolle | gegen die eigene helle Schrift |
+|---|---|---|---|
+| `--primary` | `#35553F` | gefüllte Flächen | 7,58:1 |
+| `--primary-2` | `#2B4633` | gedrückt | 9,44:1 |
+| `--clay` | `#AD5533` | der eine warme Akzent | 4,64:1 |
+
+**In welche Richtung gerechnet wird, entscheidet.** `--clay` stand zwei
+Durchgänge lang auf `#B25936` mit dem Vermerk „4,70:1" — gerechnet gegen reines
+Weiß. Auf der Fläche steht aber cremefarbene Schrift `#FBF3EC`, und dagegen
+waren es nur **4,37:1**. Aufgefallen ist es erst, als das Sync-Skript die
+Prüfung in die richtige Richtung gedreht hat. Dasselbe bei `--brass`: auf dem
+alten helleren Papier 4,55:1, auf dem beigen nur 4,13 — beim Wechsel auf Beige
+mitgerutscht, ohne dass es jemand gemerkt hätte.
+
+Das Skript warnt jetzt bei jedem Lauf, wenn ein Ton unter 4,5 fällt.
+
+### Marke — nie Fläche unter Text
+
+`--periwinkle` `#8F9BE0`, `--sage` `#7E9A88`, `--sun` `#F7D67F`,
+`--terracotta` `#CE7F5F`. Alle vier tragen unter 3:1 und gehören an Verlauf,
+Punkte, Ränder, Fokusringe und Fortschrittsbalken — nie unter Text.
+
+### Der Verlauf
+
+`--gradient-sky` sind dieselben Farbkreise wie im Icon, mit derselben Dämpfung
+(Sättigung ×0,76, minimal aufgehellt). **„Pastellig" heißt hier ausdrücklich
+nicht „heller":** die Linien im Zeichen sind beige, also hell — ein
+aufgehellter Grund lässt sie verschwinden. Weich wird der Verlauf über breitere
+Flanken der Farbkreise, nicht über Entfärbung.
+
+Zwei Fallen beim Nachbauen in Code:
+- In CSS liegt die **zuerst** genannte Verlaufsebene **oben**. Trägt man sie in
+  Lesereihenfolge auf, deckt das Orange aus der letzten Zeile das Perlblau zu.
+- Die Alpha-Flanke läuft **linear**. Eine weiche Kurve (smoothstep) sieht
+  gefälliger aus, verwäscht aber die Farbkreise.
+
+### Personen- und Kategoriefarben
+
+Sechs gedämpfte Erdtöne, alle mit der Tinte über 6:1. Vorher waren es
+gesättigte Töne — gut unterscheidbar, aber damit markierten die lautesten
+Flächen des Bildschirms die nebensächlichste Angabe.
 
 ## 3. Typografie
 
@@ -154,6 +212,34 @@ Der Betrag steht in der Serif — Mazunes Regel „alle Zahlen ≥ 20 px in der 
 
 ---
 
+### Der Blätterstapel und die Buchseite
+
+Der kialia-eigene Teil. Tagebuch, Plan und Packliste liegen als aufgefächertes
+Papier übereinander statt als Liste getrennter Karten.
+
+Drei Dinge tragen den Effekt, und jedes einzelne ist ohne die anderen wertlos:
+
+1. **Der Schatten geht nach oben.** Papier, das auf Papier liegt, wirft seinen
+   Schatten auf das Blatt darunter — nach unten ins Leere wäre eine Karte, die
+   schwebt. `box-shadow: 0 -7px 16px -12px …`
+2. **Die Papierkante.** Eine 1-px-Linie am oberen Rand jedes Blattes außer dem
+   ersten. Ohne sie sind zwei überlappende Flächen eine Stufe, mit ihr zwei
+   Blätter.
+3. **Negativer Abstand.** `margin-top: -0.85rem` zwischen den Blättern.
+
+Das **aufgeschlagene** Blatt ist eine Buchseite und bekommt drei weitere:
+
+- **Der Falz**: `box-shadow: inset 26px 0 26px -26px …` an der linken
+  Innenkante — die Krümmung zum Buchrücken.
+- **Der Seitenstapel**: ein `::after` hinter der Seite, 6 px versetzt, das
+  rechts unten zwei weitere Blätter andeutet.
+- **Das Aufblättern**: die Seite dreht beim Öffnen in 6 Grad um die linke Kante
+  herein. Einmal, 0,45 s, mit `prefers-reduced-motion`-Ausnahme.
+
+Immer genau eine Seite ist aufgeschlagen. Zwei offene Seiten nebeneinander sind
+kein Buch mehr, sondern wieder eine Liste.
+
+
 ## 5. Layout, Bewegung, Sprache
 
 Unverändert aus Mazune: Inhaltsbreite 680 px (1080 px bei `.page.wide`), Seitenpadding
@@ -173,28 +259,54 @@ Mikrofon, Buch, Rucksack) stehen in `examples.html` zum Kopieren.
 
 ## 7. Logo
 
-Das Fernglas bleibt — es ist die Marke. Die Silhouette wird nicht angefasst.
+Das Zeichen ist ein Fernglas, frontal, auf dem Marken-Verlauf. Es liegt als
+**Skript** vor, nicht als Bilddatei: `scripts/generate_icons.py` schreibt Logo,
+beide PWA-Größen, das maskable Icon und das Favicon in einem Durchgang. Vorher
+war jede Änderung Handarbeit in einem Bildprogramm, und die abgeleiteten Größen
+liefen auseinander.
 
-**Die Wortmarke** wird gesperrt gesetzt (`KIALIA`, `letter-spacing .34em`) mit einem Punkt
-in `--clay` dahinter, Tagline als Serif-Kursiv darunter.
+### Die Arbeitsteilung im Zeichen
 
-**Das Icon** ist die eine Stelle, an der die heutige Marke mit diesem System bricht: der
-Verlauf liegt über der ganzen Fläche, und das Fernglas hat kaum Kontrast dazu. Bei 28 px —
-der Größe im App-Umschalter und in den Einstellungen — wird daraus ein Farbfleck.
+„Dünner, feiner, edler" steht im Konflikt mit der Größe, in der ein App-Icon
+meistens gesehen wird: eine Haarlinie, die bei 512 px edel wirkt, ist bei 28 px
+schlicht weg. Aufgelöst ist es über zwei Ebenen.
 
-Zwei Fassungen in Mazunes Formensprache stehen in `icon-vorschlaege.html`, beide mit
-kialias Farben, beide ohne Konturen und ohne Fotorealismus:
+**Die Silhouette trägt die Erkennbarkeit.** Schultern, Mittelstück und Gläser
+sind eine einzige Fläche — also läuft auch nur **eine** Linie außen herum.
+Einzeln gezeichnete Umrisse hätten an den Überlappungen Nahtstellen.
 
-| | Grund | Fernglas | Bei 28 px |
-|---|---|---|---|
-| **Heute** | Verlauf über alles | dunkel auf bunt | Farbfleck |
-| **A** | Creme, flach | dunkel, Landschaftsbänder in den Gläsern | klar, aber die Bänder werden Matsch |
-| **B** | `--primary`, flach | hell, Silhouette | stärkster Kontrast |
+**Die feine Linie trägt die Anmutung, und zwar in den Gläsern.** Berg und Palme
+sind dünne Konturen in Grün statt gefüllter Flächen, dazu je eine Haarlinie als
+Fassung. Bei 180 px sieht man ein präzise gebautes Objekt; darunter lösen sich
+die Motive auf, ohne die Form mitzunehmen.
 
-**Empfehlung: B.** Ein App-Icon wird öfter klein gesehen als groß, und dort entscheidet
-allein die Silhouette. Der Verlauf geht dabei nicht verloren — er ist als `--gradient-sky`
-im System und trägt weiterhin jeden Bildschirmhintergrund. Er gehört dorthin, nicht auf
-zwölf Quadratmillimeter.
+Die Gläser sind milchig hinterlegt (`rgba(255,252,249,0.52)`), damit die Motive
+ruhig stehen. Gemessen trägt diese Fassung **2,60:1** gegen die beige Linie und
+damit *mehr* als die kräftigere Vorversion mit 2,41 — der Gewinn kommt daher,
+dass die milchige Fläche gegen einen ruhigeren Grund stärker absticht.
+
+### Die Grenze, die in der Sache liegt
+
+Eine feine helle Linie auf hellem Grund trägt nie viel Kontrast. Bei 28 px löst
+sich die Zeichnung sichtbar auf. Das ist der Preis dieser Richtung, kein
+Ausführungsfehler — wer mehr Kontrast braucht, dunkelt den Verlauf unter dem
+Zeichen ab, statt die Linie zu verdicken.
+
+### Der Schriftzug
+
+`kialia · κιάλια` in der Serif, das Trennzeichen in `--clay`. Er steht in der
+App an fünf Stellen und ist deshalb **eine Komponente** — vorher war er fünf
+Absätze, von denen zwei bereits auseinandergelaufen waren.
+
+### Flaggen
+
+Emoji-Flaggen sind der eine Fremdkörper in einer gedämpften Palette: knallige
+Systemgrafik, auf Android anders als auf iOS. Das Kit zeichnet stattdessen 64
+Länder selbst — vereinfachte Geometrie (Streifen, Kreuz, Punkt, Halbmond, Feld)
+mit auf die Palette übersetzten Farben. Erkennung kommt von Anordnung und
+Farbklang, nicht von der Normfarbe. Wo die Vereinfachung kippt, bekommt sie ein
+Merkmal zurück: Griechenland trägt das Kreuz im Feld, sonst läse sich das
+gestreifte Blau-Weiß als Kuba.
 
 ## 8. Abnahme-Checkliste
 

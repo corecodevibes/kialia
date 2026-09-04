@@ -1,7 +1,7 @@
 import { useMyName } from "@/lib/auth";
 import { ExpenseField } from "@/components/app/expense-field";
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChevronDown, Loader2, Mic, Plus, Printer, Square } from "lucide-react";
 import {
   AppShell,
@@ -28,6 +28,7 @@ import {
   useTrip,
   type DiaryEntry,
 } from "@/lib/trip-store";
+import { itemsWithPayers } from "@/lib/payers";
 import { useVoiceMemo } from "@/lib/use-voice-memo";
 import { transcribe } from "@/lib/transcribe";
 
@@ -115,6 +116,7 @@ function DiaryTab() {
   // Zugeklappt ist der Normalfall. Waehrend der Reise ist der heutige Tag
   // offen — das ist der, den man abends schreiben will.
   const [openDay, setOpenDay] = useState<string | null>(null);
+  const [kostenOffen, setKostenOffen] = useState(false);
   const voice = useVoiceMemo();
   // Transkription braucht ein konfiguriertes Backend. Ist keines da, zeigen wir
   // den Mikrofon-Button gar nicht erst an, statt die Aufnahme ins Leere laufen
@@ -302,6 +304,40 @@ function DiaryTab() {
 
   const totalSpent = trip.diary.reduce((s, e) => s + (e.spent || 0), 0);
 
+  /**
+   * Wer hat ueber die ganze Reise wie viel ausgelegt.
+   *
+   * Gerechnet wird aus denselben geparsten Posten, aus denen auch `spent` je
+   * Tag entsteht — die Einzelbetraege ergeben deshalb exakt die Summe darueber.
+   * Wuerde hier anders gerechnet, waere die Aufklappung eine zweite Wahrheit.
+   *
+   * Bewusst OHNE Ausgleichsrechnung: das ist eine Uebersicht, keine Abrechnung.
+   */
+  const ausgaben = useMemo(() => {
+    const proPerson = new Map<string, number>();
+    let ohne = 0;
+    let posten = 0;
+    let tage = 0;
+    for (const e of trip.diary) {
+      const items = itemsWithPayers(e.expenses || "", e.paidBy);
+      if (items.length > 0) tage += 1;
+      for (const { item, paidBy } of items) {
+        posten += 1;
+        const wer = paidBy.trim();
+        if (wer) proPerson.set(wer, (proPerson.get(wer) ?? 0) + item.amount);
+        else ohne += item.amount;
+      }
+    }
+    return {
+      proPerson: [...proPerson.entries()]
+        .map(([name, amount]) => ({ name, amount }))
+        .sort((a, b) => b.amount - a.amount),
+      ohne,
+      posten,
+      tage,
+    };
+  }, [trip.diary]);
+
   if (!ready) return <div className="min-h-screen bg-background" />;
   if (!hasTrip) return <NoTripYet what="Ein Reisetagebuch" />;
 
@@ -316,10 +352,58 @@ function DiaryTab() {
     >
       <div className="space-y-4 print:hidden">
         <Card>
-          <Stat label="Bisher ausgegeben" value=<Money value={totalSpent} /> />
-          <PrimaryButton onClick={addDay} className="mt-3">
-            <Plus className="size-4" /> Neuer Tag
-          </PrimaryButton>
+          {/* Die Summe ist aufklappbar, nicht der Startknopf fuer einen neuen
+              Tag. Wer das Tagebuch oeffnet, will zuerst wissen was die Reise
+              bisher gekostet hat und wer wie viel ausgelegt hat — einen Tag
+              anlegt man weiter unten, dort wo das naechste Blatt hingehoert. */}
+          <button
+            type="button"
+            onClick={() => setKostenOffen((v) => !v)}
+            aria-expanded={kostenOffen}
+            className="flex w-full items-start justify-between gap-3 text-left"
+            disabled={ausgaben.posten === 0}
+          >
+            <Stat label="Bisher ausgegeben" value=<Money value={totalSpent} /> />
+            {ausgaben.posten > 0 && (
+              <ChevronDown
+                className={`mt-1 size-4 shrink-0 text-muted-foreground transition ${
+                  kostenOffen ? "rotate-180" : ""
+                }`}
+              />
+            )}
+          </button>
+
+          {kostenOffen && ausgaben.posten > 0 && (
+            <div className="mt-4 border-t border-border pt-3">
+              <p className="kicker mb-2">Wer hat ausgelegt</p>
+              <dl className="space-y-1.5">
+                {ausgaben.proPerson.map(({ name, amount }) => (
+                  <div key={name} className="flex items-baseline justify-between gap-3">
+                    <dt className="min-w-0 truncate text-sm">{name}</dt>
+                    <dd className="amount shrink-0 text-[1.02rem]">
+                      <Money value={amount} />
+                    </dd>
+                  </div>
+                ))}
+                {/* Nicht zugeordnete Posten zu verschweigen waere schlimmer als
+                    sie zu zeigen: die Einzelbetraege ergaeben sonst nicht die
+                    Summe darueber, und man sucht den Fehler bei sich. */}
+                {ausgaben.ohne > 0 && (
+                  <div className="flex items-baseline justify-between gap-3 text-muted-foreground">
+                    <dt className="min-w-0 truncate text-sm">Ohne Zuordnung</dt>
+                    <dd className="amount shrink-0 text-[1.02rem]">
+                      <Money value={ausgaben.ohne} />
+                    </dd>
+                  </div>
+                )}
+              </dl>
+              <p className="mt-3 text-xs text-muted-foreground">
+                {ausgaben.posten} {ausgaben.posten === 1 ? "Posten" : "Posten"} an {ausgaben.tage}{" "}
+                {ausgaben.tage === 1 ? "Tag" : "Tagen"}. Wer wofuer bezahlt hat, traegst du im
+                jeweiligen Tag ein.
+              </p>
+            </div>
+          )}
 
           {/* Steht der Zeitraum fest, kennt die Reise ihre Tage — niemand soll
               elf Tage von Hand anlegen. Bestehende Eintraege bleiben unberuehrt. */}
@@ -348,65 +432,6 @@ function DiaryTab() {
         )}
 
         <div className="space-y-4">
-          {/* Der Tagesumschalter: Wochentag, Datum in der Serif, darunter das
-              Stichwort des Tages. Er beantwortet "wo im Buch bin ich?" mit
-              einem Blick und traegt einen aufs Datum, ohne durch den ganzen
-              Stapel zu rollen. */}
-          {orderedDiary.length > 1 && (
-            <div className="-mx-4 mb-4 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <div className="flex gap-2 pb-1">
-                {orderedDiary.map((e) => {
-                  const d = parseLocalDate(e.date);
-                  const aktiv = openDay === e.id;
-                  return (
-                    <button
-                      key={e.id}
-                      type="button"
-                      onClick={() => {
-                        setOpenDay(e.id);
-                        document.getElementById(`tag-${e.id}`)?.scrollIntoView({
-                          behavior: "smooth",
-                          block: "center",
-                        });
-                      }}
-                      className={`min-w-[92px] shrink-0 rounded-[14px] border px-3.5 py-2 text-left transition ${
-                        aktiv
-                          ? "border-primary bg-primary shadow-[var(--sh-2)]"
-                          : "border-border bg-card"
-                      }`}
-                    >
-                      <span
-                        className={`block text-[10px] font-semibold uppercase tracking-[0.14em] ${
-                          aktiv ? "text-primary-foreground/70" : "text-muted-foreground"
-                        }`}
-                      >
-                        {d
-                          ? d.toLocaleDateString("de-DE", { weekday: "short" }).replace(".", "")
-                          : `Tag ${e.day}`}
-                      </span>
-                      <span
-                        className={`display block text-[1.15rem] leading-tight ${
-                          aktiv ? "text-primary-foreground" : ""
-                        }`}
-                      >
-                        {d
-                          ? `${d.getDate()}. ${d.toLocaleDateString("de-DE", { month: "short" })}`
-                          : e.day}
-                      </span>
-                      <span
-                        className={`block max-w-[9rem] truncate text-[11px] ${
-                          aktiv ? "text-primary-foreground/70" : "text-muted-foreground"
-                        }`}
-                      >
-                        {e.highlight || daySummary(e) || "\u00a0"}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
           {/* Ein Stapel Blaetter statt einer Liste Karten: die Tage liegen
               dicht uebereinander, das aufgeschlagene loest sich heraus. */}
           <div className="sheet-stack">
@@ -617,6 +642,18 @@ function DiaryTab() {
                 )}
               </Card>
             ))}
+
+            {/* Ein neues Blatt gehoert ans Ende des Stapels, nicht an den
+                Anfang der Seite. Als ruhige Zeile, nicht als Handlungsknopf:
+                waehrend der Reise legt man einen Tag an, danach nie wieder. */}
+            <button
+              type="button"
+              onClick={addDay}
+              className="mt-3 w-full rounded-[var(--radius)] border border-dashed border-border py-3 text-sm font-medium text-muted-foreground transition hover:border-[var(--input)] hover:text-foreground"
+            >
+              <Plus className="mr-1 inline size-4 align-[-3px]" />
+              Weiteren Tag anlegen
+            </button>
           </div>
         </div>
 

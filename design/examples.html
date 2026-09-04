@@ -1,370 +1,174 @@
 <!doctype html>
-<html lang="de">
-<head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>kialia Design System · Beispiele</title>
-<link rel="stylesheet" href="./css/kialia.css">
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/tokens.css">
 <style>
-  .sg-section { padding: 34px 0; border-top: 1px solid var(--line); }
-  .sg-section:first-of-type { border-top: none; }
-  .sg-label { font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--ink-soft); }
-  .sg-swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 10px; }
-  .sg-swatch { border: 1px solid var(--line); border-radius: var(--r-md); overflow: hidden; background: var(--paper); }
-  .sg-swatch .fill { height: 54px; }
-  .sg-swatch .meta { padding: 8px 10px; }
-  .sg-swatch .meta b { display: block; font-size: 12px; font-weight: 600; }
-  .sg-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
-  .sg-static-sheet { position: static; max-height: none; box-shadow: var(--sh-2); border-radius: var(--r-xl); }
-  .sg-static-toast { position: static; transform: none; animation: none; display: inline-flex; }
-  .page { padding-bottom: 60px; }
+* { box-sizing: border-box; }
+body { margin:0; padding:38px 20px 80px; background:var(--ivory); color:var(--ink);
+       font-family:var(--sans); font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased; }
+body::before { content:''; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.32;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E"); }
+main { position:relative; z-index:1; max-width:680px; margin:0 auto; }
+.kicker { font-size:10.5px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-soft); }
+.kicker.brass { color:var(--brass); }
+.display { font-family:var(--serif); font-weight:500; line-height:1.06; letter-spacing:-.012em; color:var(--ink-display); }
+.d1 { font-size:clamp(34px,8vw,50px); } .d3 { font-size:21px; }
+.amount { font-family:var(--serif); font-weight:500; font-variant-numeric:tabular-nums; }
+.muted { color:var(--ink-soft); } .small { font-size:13px; }
+section { margin-top:44px; }
+.card { background:var(--paper); border:1px solid var(--line); border-radius:var(--r-lg);
+        box-shadow:var(--sh-1); padding:18px; }
+.sw-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:10px; margin-top:14px; }
+.sw { display:flex; gap:10px; align-items:center; }
+.sw .fill { width:42px; height:42px; border-radius:11px; border:1px solid var(--line); flex:none; }
+.sw b { display:block; font-size:13px; font-weight:600; }
+.sw span { display:block; font-size:11px; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+.btn { display:inline-flex; align-items:center; justify-content:center; height:46px; padding:0 22px;
+       border-radius:999px; border:1px solid transparent; font-size:14px; font-weight:550; cursor:pointer; }
+.btn-primary { background:var(--primary); color:var(--paper); box-shadow:var(--sh-1); }
+.btn-clay { background:var(--clay); color:#FBF3EC; box-shadow:var(--sh-1); }
+.btn-ghost { border-color:var(--line-strong); background:transparent; color:var(--ink); }
+.field { display:block; width:100%; border:1px solid var(--line); background:var(--paper-2);
+         border-radius:var(--r-md); padding:11px 14px; font:inherit; color:var(--ink); }
+.hero { border-radius:var(--r-lg); overflow:hidden; }
+.hero .sky { height:170px; background:var(--gradient-sky); }
+/* Blätterstapel und Buchseite */
+.stack > * + * { margin-top:-.85rem; }
+.leaf { position:relative; background:var(--paper); border:1px solid var(--line);
+        border-radius:var(--r-lg); padding:16px 18px;
+        box-shadow:0 -1px 0 rgb(58 52 44/.05), 0 -7px 16px -12px rgb(58 52 44/.42); }
+.stack > .leaf + .leaf::before { content:''; position:absolute; inset:0 16px auto 16px; height:1px;
+        background:var(--line); }
+.leaf.open { z-index:2; margin-top:.9rem !important; margin-bottom:1.1rem;
+        box-shadow: inset 26px 0 26px -26px rgb(58 52 44/.16), var(--sh-3); }
+.leaf.open::before { display:none; }
+.leaf.open::after { content:''; position:absolute; z-index:-1; inset:6px -4px -6px 10px;
+        background:#F2EAD9; border:1px solid var(--line); border-radius:var(--r-lg);
+        box-shadow:3px 4px 0 -1px #EDE3CF, 3px 4px 0 0 var(--line); }
+/* Zeitachse */
+.tl { display:flex; gap:12px; }
+.tl + .tl { margin-top:14px; }
+.tl .day { width:52px; flex:none; }
+.tl .dot { position:relative; width:6px; height:6px; border-radius:999px; background:var(--sage);
+        margin-top:7px; flex:none; }
+.tl:not(:last-child) .dot::before { content:''; position:absolute; left:50%; top:12px;
+        height:calc(100% + 26px); width:1px; transform:translateX(-50%); background:var(--line); }
+/* Flaggen */
+.fl { display:flex; align-items:center; gap:9px; font-size:13.5px; }
+.flag { display:inline-block; width:22px; height:15px; border-radius:3px; flex:none;
+        box-shadow:inset 0 0 0 1px rgba(58,52,44,.18); }
+.f-GR { background:repeating-linear-gradient(180deg,#7C89C4 0 3px,#F7F1E5 3px 6px); }
+.f-IT { background:linear-gradient(90deg,#5F8268 33%,#F7F1E5 33% 66%,#B96A55 66%); }
+.f-JP { background:#F7F1E5; position:relative; }
+.f-JP::after { content:''; position:absolute; inset:0; margin:auto; width:7px; height:7px;
+        border-radius:999px; background:#B96A55; }
+.f-SE { background:#7C89C4; position:relative; }
+.f-SE::after { content:''; position:absolute; inset:0;
+        background:linear-gradient(90deg,transparent 6px,#DFC17E 6px 9px,transparent 9px),
+                   linear-gradient(180deg,transparent 6px,#DFC17E 6px 9px,transparent 9px); }
+.f-CH { background:#B96A55; position:relative; }
+.f-CH::after { content:''; position:absolute; inset:0;
+        background:linear-gradient(90deg,transparent 9px,#F7F1E5 9px 13px,transparent 13px),
+                   linear-gradient(180deg,transparent 5px,#F7F1E5 5px 10px,transparent 10px); }
+.f-TR { background:#B96A55; position:relative; }
+.f-TR::after { content:''; position:absolute; left:5px; top:3px; width:9px; height:9px;
+        border-radius:999px; background:#F7F1E5;
+        box-shadow:3px 0 0 0 #B96A55; }
 </style>
-</head>
-<body>
-<div class="app">
+<main>
+  <p class="kicker brass">kialia Design System</p>
+  <h1 class="display d1" style="margin:.2em 0 .1em">Ruhiges Papier, ein warmer Akzent</h1>
+  <p class="muted">Erzeugt aus <code>src/styles.css</code> — was hier steht, rendert die App.</p>
 
-  <div class="topbar">
-    <div class="brand">
-      <span class="wordmark">KIALIA<span class="dot">.</span></span>
-      <span class="tagline" style="font-size:13px">Design System</span>
-    </div>
-    <div class="spacer"></div>
-    <div class="topnav"><button class="active">Beispiele</button><button>Tokens</button></div>
-    <span class="badge clay" style="margin-left:8px">v1</span>
-  </div>
-
-  <div class="page wide">
-
-    <div class="sg-section">
-      <div class="kicker brass">kialia Design System</div>
-      <h1 class="display d1" style="margin:8px 0">See more, <span class="serif-it">travel further</span></h1>
-      <p class="muted" style="max-width:62ch">
-        Mazunes Struktur, kialias Farben. Warmes Elfenbein statt Weiß, tiefes Violett als
-        Primärfarbe, Kupfer für Handlungen, Lagune für alles, was Geld kostet. Serif für
-        Titel, Uhrzeiten und Beträge — Grotesk für alles Funktionale.
-      </p>
-      <p class="small muted" style="margin-top:10px">
-        Alle Kontraste sind nachgerechnet. Wo die Marke zu hell war, steht der abgedunkelte
-        Ton — die Begründung dazu in <span class="mono">DESIGN-KIT.md</span>, Abschnitt 2.
-      </p>
-    </div>
-
-    <div class="sg-section">
-      <div class="section-head"><h2 class="display d2">Farben</h2><span class="sg-label">css/tokens.css</span></div>
-      <div class="sg-swatches" style="margin-top:14px"><div class="sg-swatch"><div class="fill" style="background:#FAF6F0"></div><div class="meta"><b>Elfenbein · Seite</b><span class="sg-label">--ivory #FAF6F0</span></div></div>
-<div class="sg-swatch"><div class="fill" style="background:#FFFCF9"></div><div class="meta"><b>Papier · Karten</b><span class="sg-label">--paper #FFFCF9</span></div></div>
-<div class="sg-swatch"><div class="fill" style="background:#FAF1E8"></div><div class="meta"><b>Creme · eingebettet</b><span class="sg-label">--paper-2 #FAF1E8</span></div></div>
-<div class="sg-swatch"><div class="fill" style="background:#2F2A3E"></div><div class="meta"><b>Tinte</b><span class="sg-label">--ink #2F2A3E</span></div></div>
-<div class="sg-swatch"><div class="fill" style="background:#6C6480"></div><div class="meta"><b>Tinte weich</b><span class="sg-label">--ink-soft #6C6480</span></div></div>
-<div class="sg-swatch"><div class="fill" style="background:#584876"></div><div class="meta"><b>Primär · gefüllt</b><span class="sg-label">--primary #584876</span></div></div>
-<div class="sg-swatch"><div class="fill" style="background:#8F9BE0"></div><div class="meta"><b>Perlblau · Marke</b><span class="sg-label">--primary-tone #8F9BE0</span></div></div>
-<div class="sg-swatch"><div class="fill" style="background:#B85D38"></div><div class="meta"><b>Terrakotta · Handlung</b><span class="sg-label">--clay #B85D38</span></div></div>
-<div class="sg-swatch"><div class="fill" style="background:#CE7F5F"></div><div class="meta"><b>Terrakotta hell</b><span class="sg-label">--clay-tone #CE7F5F</span></div></div>
-<div class="sg-swatch"><div class="fill" style="background:#F7D67F"></div><div class="meta"><b>Sonne · nur Fläche</b><span class="sg-label">--sun #F7D67F</span></div></div>
-<div class="sg-swatch"><div class="fill" style="background:#966A7F"></div><div class="meta"><b>Mauve · Preise</b><span class="sg-label">--brass #966A7F</span></div></div>
-<div class="sg-swatch"><div class="fill" style="background:#EFE8EE"></div><div class="meta"><b>Flieder · Avatare</b><span class="sg-label">--blush #EFE8EE</span></div></div>
-<div class="sg-swatch"><div class="fill" style="background:#4E7A63"></div><div class="meta"><b>Bezahlt</b><span class="sg-label">--ok #4E7A63</span></div></div>
-<div class="sg-swatch"><div class="fill" style="background:#8A6A2E"></div><div class="meta"><b>Offen</b><span class="sg-label">--warn #8A6A2E</span></div></div>
-<div class="sg-swatch"><div class="fill" style="background:#9A4F53"></div><div class="meta"><b>Abgesagt</b><span class="sg-label">--no #9A4F53</span></div></div></div>
-      <p class="small muted" style="margin-top:14px">
-      </p>
-      <div class="card" style="margin-top:16px; padding:0; overflow:hidden">
-        <div style="height:120px; background:var(--gradient-sky)"></div>
-        <div style="padding:14px 18px"><div class="kicker brass">--gradient-sky</div>
-        <p class="small muted" style="margin-top:4px">Der Verlauf ist das Wiedererkennbarste an kialia — dieselben vier Farbkreise wie in der App. Er gehört ins System, nicht in eine einzelne Komponente.</p></div>
+  <section>
+    <p class="kicker">Der Verlauf</p>
+    <div class="hero card" style="padding:0; margin-top:10px">
+      <div class="sky"></div>
+      <div style="padding:16px 18px">
+        <p class="kicker">Übersicht</p>
+        <p class="display d3">Kreta, elf Tage</p>
+        <p class="small muted" style="margin:.3em 0 0">Dieselben Farbkreise wie im Zeichen,
+          dieselbe Dämpfung. Weich über breitere Flanken, nicht über Aufhellen.</p>
       </div>
-      <p class="small muted" style="margin-top:14px">
-        Farbe bedeutet immer etwas: Grün = bezahlt · Blau = gebucht, noch offen ·
-        Lagune = kostet Geld · Kupfer = Handlung · Rot ausschließlich für Abgesagtes.
+    </div>
+  </section>
+
+  <section>
+    <p class="kicker">Farben</p>
+    <div class="sw-grid"><div class="sw"><div class="fill" style="background:#EFE7D9"></div><div><b>Seite</b><span>--ivory · #EFE7D9</span></div></div>
+<div class="sw"><div class="fill" style="background:#F7F1E5"></div><div><b>Blätter</b><span>--paper · #F7F1E5</span></div></div>
+<div class="sw"><div class="fill" style="background:#EAE0CE"></div><div><b>eingesenkt</b><span>--paper-2 · #EAE0CE</span></div></div>
+<div class="sw"><div class="fill" style="background:#3A342C"></div><div><b>Fließtext</b><span>--ink · #3A342C</span></div></div>
+<div class="sw"><div class="fill" style="background:#574B3E"></div><div><b>Serif-Titel</b><span>--ink-display · #574B3E</span></div></div>
+<div class="sw"><div class="fill" style="background:#6B6154"></div><div><b>Beiwerk</b><span>--ink-soft · #6B6154</span></div></div>
+<div class="sw"><div class="fill" style="background:#35553F"></div><div><b>gefüllte Fläche</b><span>--primary · #35553F</span></div></div>
+<div class="sw"><div class="fill" style="background:#AD5533"></div><div><b>warmer Akzent</b><span>--clay · #AD5533</span></div></div>
+<div class="sw"><div class="fill" style="background:#836858"></div><div><b>Preise, Kicker</b><span>--brass · #836858</span></div></div>
+<div class="sw"><div class="fill" style="background:#8F9BE0"></div><div><b>Marke · Verlauf</b><span>--periwinkle · #8F9BE0</span></div></div>
+<div class="sw"><div class="fill" style="background:#7E9A88"></div><div><b>Marke · Fortschritt</b><span>--sage · #7E9A88</span></div></div>
+<div class="sw"><div class="fill" style="background:#F7D67F"></div><div><b>Marke · Fläche</b><span>--sun · #F7D67F</span></div></div>
+<div class="sw"><div class="fill" style="background:#CE7F5F"></div><div><b>Marke · Fläche</b><span>--terracotta · #CE7F5F</span></div></div>
+<div class="sw"><div class="fill" style="background:#35553F"></div><div><b>erledigt</b><span>--ok · #35553F</span></div></div>
+<div class="sw"><div class="fill" style="background:#7F612A"></div><div><b>offen</b><span>--warn · #7F612A</span></div></div>
+<div class="sw"><div class="fill" style="background:#9A4F53"></div><div><b>Fehler</b><span>--no · #9A4F53</span></div></div></div>
+  </section>
+
+  <section>
+    <p class="kicker">Handlungen</p>
+    <div class="card" style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; align-items:center">
+      <button class="btn btn-primary">Speichern</button>
+      <button class="btn btn-clay">Ausgabe eintragen</button>
+      <button class="btn btn-ghost">Später</button>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <p class="kicker" style="margin-bottom:8px">Feld</p>
+      <input class="field" placeholder="Was hast du bezahlt?">
+      <p style="display:flex; justify-content:space-between; margin:16px 0 0">
+        <span>Bisher ausgegeben</span><span class="amount" style="font-size:20px">1 248,50 CHF</span>
       </p>
     </div>
+  </section>
 
-    <div class="sg-section">
-      <div class="section-head"><h2 class="display d2">Typografie</h2><span class="sg-label">Newsreader + Manrope</span></div>
-      <div class="card" style="margin-top:14px">
-        <div class="kicker">Kicker · 11px / 600 / .18em</div>
-        <div class="display d1" style="margin-top:8px">Kreta</div>
-        <span class="sg-label">.display.d1 — clamp(38px, 10vw, 64px)</span>
-        <div class="display d2" style="margin-top:18px">27. August – 6. September</div>
-        <span class="sg-label">.display.d2</span>
-        <div class="display d3" style="margin-top:18px">Samaria-Schlucht wandern</div>
-        <span class="sg-label">.display.d3</span>
-        <p style="margin-top:18px">Fließtext in Manrope, 15 px, Zeilenhöhe 1.55. Die Serif bleibt Titeln, Uhrzeiten und Beträgen vorbehalten — das ist der ganze Trick.</p>
-        <p class="small muted" style="margin-top:8px">.small · 13 px — Beschreibungen unter Titeln.</p>
-        <p class="tiny muted">.tiny · 12 px — Metadaten, Zähler, Hinweise.</p>
-        <p class="serif-it" style="margin-top:12px; font-size:19px">„Abends am Hafen, die Aussicht war der Wahnsinn." — Serif kursiv für Zitate aus dem Tagebuch.</p>
-        <div class="rule-ornament" style="margin:18px 0 6px"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" ><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 1 1 13 0c0 5.4-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.4"/></svg></div>
-        <span class="sg-label">.rule-ornament</span>
+  <section>
+    <p class="kicker">Blätterstapel — eine Seite aufgeschlagen</p>
+    <div class="stack" style="margin-top:12px">
+      <div class="leaf"><p class="kicker">1. Reisetag</p><p class="display d3">5. September</p></div>
+      <div class="leaf open">
+        <p class="kicker">2. Reisetag</p><p class="display d3">6. September</p>
+        <p class="small muted" style="margin:.5em 0 0">Sechzehn Kilometer bergab, und am Ende das Meer.
+          Der Falz links, der Seitenstapel rechts unten, und beim Öffnen dreht die Seite herein.</p>
       </div>
+      <div class="leaf"><p class="kicker">3. Reisetag</p><p class="display d3">7. September</p></div>
+      <div class="leaf"><p class="kicker">4. Reisetag</p><p class="display d3">8. September</p></div>
     </div>
+  </section>
 
-    <div class="sg-section">
-      <h2 class="display d2">Buttons</h2>
-      <div class="row wrap" style="gap:10px; margin-top:14px">
-        <button class="btn btn-primary">Zum Plan</button>
-        <button class="btn btn-clay"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" ><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg>Tag einsprechen</button>
-        <button class="btn btn-ghost">Zurück</button>
-        <button class="btn btn-quiet">Alle ansehen</button>
-        <button class="btn btn-primary sm">Klein</button>
-        <button class="btn btn-primary" disabled>Deaktiviert</button>
-      </div>
-      <p class="small muted" style="margin-top:12px">Höhe 46 px (sm: 36), Radius 999, beim Drücken <span class="mono">scale(.985)</span>.</p>
+  <section>
+    <p class="kicker">Zeitachse</p>
+    <div class="card" style="margin-top:10px">
+      <div class="tl"><span class="day"><span class="kicker">Tag</span>
+        <span class="display" style="font-size:22px; display:block; line-height:1">1</span></span>
+        <span class="dot"></span><div><p class="display d3">Zürich – Chania</p>
+        <p class="small muted">5. September · Flug</p></div></div>
+      <div class="tl"><span class="day"><span class="kicker">Tag</span>
+        <span class="display" style="font-size:22px; display:block; line-height:1">6</span></span>
+        <span class="dot"></span><div><p class="display d3">Plakias, kleine Pension</p>
+        <p class="small muted">10. September · 5 Nächte</p></div></div>
     </div>
+  </section>
 
-    <div class="sg-section">
-      <h2 class="display d2">Badges &amp; Chips</h2>
-      <div class="row wrap" style="gap:8px; margin-top:14px">
-        <span class="badge">Aktivität</span>
-        <span class="badge clay">Essen &amp; Trinken</span>
-        <span class="badge paid">Bezahlt</span>
-        <span class="badge booked">Gebucht</span>
-        <span class="badge brass">45 € p. P.</span>
-        <span class="badge warn">Noch offen</span>
-        <span class="badge no">Abgesagt</span>
-        <span class="badge solid">Heute</span>
-      </div>
-      <div class="row wrap" style="gap:8px; margin-top:18px">
-        <button class="chip on"><span class="tick"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" ><path d="M4.5 12.5 9 17 19.5 6.5"/></svg></span>Steffen</button>
-        <button class="chip off"><span class="tick"></span>Annalina</button>
-        <button class="chip"><span class="tick"></span>Gemeinsam</button>
-      </div>
-      <p class="small muted" style="margin-top:12px">Chips sind die schnellste Interaktion: wer packt was, wer war dabei, wer hat bezahlt.</p>
+  <section>
+    <p class="kicker">Flaggen — selbst gezeichnet</p>
+    <div class="card" style="margin-top:10px; display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px">
+      <div class="fl"><span class="flag f-GR"></span>Griechenland</div>
+<div class="fl"><span class="flag f-IT"></span>Italien</div>
+<div class="fl"><span class="flag f-JP"></span>Japan</div>
+<div class="fl"><span class="flag f-SE"></span>Schweden</div>
+<div class="fl"><span class="flag f-CH"></span>Schweiz</div>
+<div class="fl"><span class="flag f-TR"></span>Türkei</div>
     </div>
-
-    <div class="sg-section">
-      <h2 class="display d2">Beträge</h2>
-      <div class="card" style="margin-top:14px">
-        <div class="kicker brass">Zwei Währungen, klare Rangfolge</div>
-        <div class="row wrap" style="gap:26px; margin-top:12px">
-          <span class="amount lg"><span class="val">1.340</span><span class="cur">EUR</span><span class="conv">≈ 1.268 CHF</span></span>
-          <span class="amount"><span class="val">45</span><span class="cur">EUR</span><span class="conv">≈ 43 CHF</span></span>
-        </div>
-        <p class="small muted" style="margin-top:12px">Gezahlt wird groß, umgerechnet klein daneben. Ein Betrag ohne Währung ist auf einer Reise wertlos.</p>
-      </div>
-    </div>
-
-    <div class="sg-section">
-      <h2 class="display d2">Auswahl &amp; Eingaben</h2>
-      <div class="sg-grid" style="margin-top:14px">
-        <div class="stack">
-          <div class="segmented"><button class="active">Alle</button><button>Gemeinsam</button><button>Meine</button></div>
-          <button class="option on">
-            <span class="radio"></span>
-            <span style="flex:1">
-              <span class="row between" style="gap:8px"><b style="font-weight:550">Bootstour zur Balos-Lagune</b><span class="badge brass">40 €</span></span>
-              <span class="small muted">Vier Stunden, Abfahrt Kissamos</span>
-            </span>
-          </button>
-          <button class="option">
-            <span class="radio"></span>
-            <span style="flex:1"><b style="font-weight:550">Strand &amp; nichts tun</b>
-            <span class="small muted" style="display:block">Die ehrlichste Option</span></span>
-          </button>
-        </div>
-        <div class="stack">
-          <div class="field"><label class="label">Reiseziel</label><input class="input" value="Kreta, Griechenland"></div>
-          <div class="field"><label class="label">Hauptwährung</label><select class="select"><option>EUR — Euro</option><option>CHF — Schweizer Franken</option></select></div>
-          <div class="field"><label class="label">Was habt ihr erlebt?</label><textarea class="textarea" placeholder="Sprich es ein oder schreib es auf …"></textarea></div>
-          <div class="field"><label class="label">Einladungscode</label><input class="input code" value="R5G5YTDV"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="sg-section">
-      <h2 class="display d2">Karten</h2>
-      <div class="sg-grid" style="margin-top:14px">
-        <div class="card"><div class="kicker brass">Standard</div><h3 class="display d3">.card</h3><p class="small muted">Papier, Hairline, Radius 20, weicher warmer Schatten.</p></div>
-        <div class="card tint"><div class="kicker brass">Getönt</div><h3 class="display d3">.card.tint</h3><p class="small muted">Verlauf ins Creme — für Hinweise und die Teilen-Karte.</p></div>
-        <div class="card dark"><div class="kicker" style="color:rgba(251,247,242,.6)">Dunkel</div><h3 class="display d3">.card.dark</h3><p class="small muted">Violettverlauf — Countdown, Einladung, Höhepunkte.</p></div>
-        <div class="card flat" style="background:transparent; border-style:dashed"><div class="kicker">Gestrichelt</div><h3 class="display d3">Leerzustand</h3><p class="small muted">Erklärt, was passieren wird — nicht, dass etwas fehlt.</p></div>
-      </div>
-      <div class="grid-stats" style="margin-top:16px">
-        <div class="card stat"><div class="n">11</div><div class="l">Reisetage</div></div>
-        <div class="card stat"><div class="n">2</div><div class="l">planen mit</div></div>
-        <div class="card stat"><div class="n">1.605</div><div class="l">Euro geplant</div></div>
-      </div>
-    </div>
-
-    <div class="sg-section">
-      <h2 class="display d2">Blätterstapel</h2>
-      <p class="small muted" style="margin-top:6px">
-        Für Tagebuch, Plan und Packliste: die Tage liegen wie aufgefächertes Papier
-        übereinander, das aufgeschlagene löst sich heraus. Klick ein Blatt an.
-      </p>
-      <div class="leafstack" style="margin-top:16px">
-        <div class="leaf">
-          <button class="leaf-head">
-            <span style="flex:1; min-width:0">
-              <span class="kicker">1. Reisetag</span>
-              <span class="leaf-title" style="display:block">27. August 2026</span>
-              <span class="leaf-peek">Ankunft in Chania, abends am Hafen</span>
-            </span>
-            <span class="chev"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" ><path d="M6 9.5 12 15.5 18 9.5"/></svg></span>
-          </button>
-        </div>
-        <div class="leaf open">
-          <button class="leaf-head">
-            <span style="flex:1; min-width:0">
-              <span class="row" style="gap:8px"><span class="kicker">2. Reisetag</span><span class="badge solid">heute</span></span>
-              <span class="leaf-title" style="display:block">28. August 2026</span>
-              <span class="leaf-peek">Samaria-Schlucht, 16 km</span>
-            </span>
-            <span class="chev"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" ><path d="M6 9.5 12 15.5 18 9.5"/></svg></span>
-          </button>
-          <div class="leaf-body">
-            <div class="row wrap" style="gap:6px; margin-bottom:10px">
-              <span class="badge paid">Bezahlt</span><span class="badge brass">28 €</span>
-            </div>
-            <p class="small">Früh los, die Aussicht war der Wahnsinn. Abends Souvlaki am Hafen.</p>
-            <div class="hint" style="margin-top:12px"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v9M9.8 9.8h3.6a1.7 1.7 0 0 1 0 3.4h-2.8a1.7 1.7 0 0 0 0 3.4h3.6"/></svg><span><b>Ausgelegt</b> · <span class="muted">Steffen 28 € · Annalina 12 €</span></span></div>
-          </div>
-        </div>
-        <div class="leaf">
-          <button class="leaf-head">
-            <span style="flex:1; min-width:0">
-              <span class="kicker">3. Reisetag</span>
-              <span class="leaf-title" style="display:block">29. August 2026</span>
-              <span class="leaf-peek">noch leer</span>
-            </span>
-            <span class="chev"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" ><path d="M6 9.5 12 15.5 18 9.5"/></svg></span>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div class="sg-section">
-      <h2 class="display d2">Reisetage &amp; Verlauf</h2>
-      <div class="dayscroll" style="position:static; margin:14px 0 18px">
-        <div class="inner">
-          <button class="daypill"><div class="dp-day">DO</div><div class="dp-date">27. Aug</div><div class="dp-label">Anreise</div></button>
-          <button class="daypill active"><div class="dp-day">FR</div><div class="dp-date">28. Aug</div><div class="dp-label">Schlucht</div></button>
-          <button class="daypill"><div class="dp-day">SA</div><div class="dp-date">29. Aug</div><div class="dp-label">Strand</div></button>
-          <button class="daypill"><div class="dp-day">SO</div><div class="dp-date">30. Aug</div><div class="dp-label">Rethymno</div></button>
-        </div>
-      </div>
-      <div class="timeline">
-        <div class="tl-item is-highlight">
-          <div class="tl-time"><div class="t">06:20</div><div class="t2">bis 09:55</div></div>
-          <div class="tl-dot"></div>
-          <div class="tl-body"><div class="card tl-card">
-            <div class="row wrap" style="gap:6px; margin-bottom:8px"><span class="badge booked">Gebucht</span><span class="badge brass">218 CHF</span></div>
-            <h3 class="tl-title">Zürich → Chania</h3>
-            <p class="small muted" style="margin-top:6px">Direktflug, Gepäck inklusive. Bestätigung liegt im Plan.</p>
-          </div></div>
-        </div>
-        <div class="tl-item">
-          <div class="tl-time"><div class="t">13:00</div></div>
-          <div class="tl-dot"></div>
-          <div class="tl-body"><div class="card tl-card">
-            <div class="row wrap" style="gap:6px; margin-bottom:8px"><span class="badge clay">Essen &amp; Trinken</span><span class="badge paid">Bezahlt</span></div>
-            <h3 class="tl-title">Taverne Tamam</h3>
-            <p class="small muted" style="margin-top:6px">Meze in der Altstadt. Danach am Hafen sitzen.</p>
-            <div style="margin-top:14px">
-              <div class="tiny muted" style="margin-bottom:7px">Wer war dabei?</div>
-              <div class="row wrap" style="gap:7px">
-                <button class="chip on"><span class="tick"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" ><path d="M4.5 12.5 9 17 19.5 6.5"/></svg></span>Steffen</button>
-                <button class="chip on"><span class="tick"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" ><path d="M4.5 12.5 9 17 19.5 6.5"/></svg></span>Annalina</button>
-              </div>
-            </div>
-          </div></div>
-        </div>
-        <div class="tl-item is-out">
-          <div class="tl-time"><div class="t">—</div></div>
-          <div class="tl-dot"></div>
-          <div class="tl-body"><div class="card tl-card">
-            <div class="row wrap" style="gap:6px; margin-bottom:8px"><span class="badge">Idee</span></div>
-            <h3 class="tl-title">Elafonissi, rosa Sand</h3>
-            <p class="small muted" style="margin-top:6px">Noch kein Termin — die Karte tritt zurück (<span class="mono">.is-out</span>), verschwindet aber nie.</p>
-          </div></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="sg-section">
-      <h2 class="display d2">Sheet, Toast, Avatare</h2>
-      <div class="sg-grid" style="margin-top:14px; align-items:start">
-        <div class="sheet sg-static-sheet">
-          <div class="grab"></div>
-          <div class="row between" style="margin-bottom:16px">
-            <div><h3 class="display d3">Reise teilen</h3><div class="small muted">Wer den Code eingibt, plant mit</div></div>
-            <button class="btn btn-quiet"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" ><path d="M6.5 6.5 17.5 17.5M17.5 6.5 6.5 17.5"/></svg></button>
-          </div>
-          <div class="field"><label class="label">Einladungscode</label><input class="input code" value="R5G5YTDV"></div>
-          <button class="btn btn-clay block" style="margin-top:14px">Einladung senden</button>
-          <div class="card flat" style="background:var(--paper-2); margin-top:14px">
-            <div class="kicker" style="margin-bottom:8px">Dabei</div>
-            <div class="list-row"><span class="avatar sm brandfill">S</span><div style="flex:1"><b class="small" style="font-weight:600">Steffen</b><div class="tiny muted">Angelegt</div></div></div>
-            <div class="list-row"><span class="avatar sm">A</span><div style="flex:1"><b class="small" style="font-weight:600">Annalina</b><div class="tiny muted">Beigetreten</div></div></div>
-          </div>
-        </div>
-        <div class="stack">
-          <div class="toast sg-static-toast"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" ><path d="M4.5 12.5 9 17 19.5 6.5"/></svg>Reise übernommen</div>
-          <div class="card">
-            <div class="kicker" style="margin-bottom:10px">Avatare</div>
-            <div class="row" style="gap:10px">
-              <span class="avatar brandfill">SL</span><span class="avatar">AL</span>
-              <div class="avatar-stack"><span class="avatar sm brandfill">S</span><span class="avatar sm">A</span></div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="kicker" style="margin-bottom:6px">Packliste</div>
-            <div class="row between small"><span>Eingepackt</span><b>24 / 35</b></div>
-            <div class="bar" style="margin-top:6px"><span style="width:68%"></span></div>
-            <div class="row between small" style="margin-top:12px"><span>Budget verbraucht</span><b>41%</b></div>
-            <div class="bar clay" style="margin-top:6px"><span style="width:41%"></span></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="sg-section">
-      <h2 class="display d2">Navigation &amp; Symbole</h2>
-      <p class="small muted" style="margin-top:6px">Unter 861 px Tab-Bar unten, darüber dieselben Ziele als Pillen oben. Symbole als Inline-SVG, Strichstärke 1.5–1.9, runde Enden.</p>
-      <div class="card pad-sm" style="margin-top:14px; max-width:460px">
-        <nav class="tabbar" style="position:static; height:64px; background:transparent; border:none; backdrop-filter:none">
-          <button class="active"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.8V20h13V9.8"/></svg><span>Home</span><span class="tabdot"></span></button>
-          <button><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" ><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 1 3.6 10.8c-.6.5-.9 1.1-.9 1.8v.4h-5.4v-.4c0-.7-.3-1.3-.9-1.8A6 6 0 0 1 12 3Z"/></svg><span>Ideen</span><span class="tabdot"></span></button>
-          <button><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" ><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 11h18M16 3v4"/></svg><span>Plan</span><span class="tabdot"></span></button>
-          <button><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" ><path d="M6 8h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2Z"/><path d="M9 8V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V8"/></svg><span>Packen</span><span class="tabdot"></span></button>
-          <button><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" ><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H12v17H6.5A2.5 2.5 0 0 0 4 22.5Z"/><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H12v17h5.5A2.5 2.5 0 0 1 20 22.5Z"/></svg><span>Tagebuch</span><span class="tabdot"></span></button>
-        </nav>
-      </div>
-    </div>
-
-    <div class="sg-section center">
-      <div class="wordmark" style="font-size:12px; color:var(--ink-soft)">KIALIA</div>
-      <div class="tagline small">See more, travel further</div>
-      <p class="tiny muted" style="margin-top:10px">
-        Vollständige Beschreibung in <span class="mono">DESIGN-KIT.md</span> ·
-        Auftrag für eine neue Session in <span class="mono">PROMPT.md</span>
-      </p>
-    </div>
-
-  </div>
-</div>
-
-<script>
-  document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
-    c.classList.toggle('on'); c.classList.toggle('off');
-    const t = c.querySelector('.tick');
-    t.innerHTML = c.classList.contains('on')
-      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M4.5 12.5 9 17 19.5 6.5"/></svg>' : '';
-  }));
-  document.querySelectorAll('.option').forEach(o => o.addEventListener('click', () => {
-    o.parentElement.querySelectorAll('.option').forEach(x => x.classList.remove('on'));
-    o.classList.add('on');
-  }));
-  document.querySelectorAll('.segmented').forEach(s => s.querySelectorAll('button').forEach(b =>
-    b.addEventListener('click', () => { s.querySelectorAll('button').forEach(x => x.classList.remove('active')); b.classList.add('active') })));
-  document.querySelectorAll('.dayscroll .daypill').forEach(p => p.addEventListener('click', () => {
-    document.querySelectorAll('.dayscroll .daypill').forEach(x => x.classList.remove('active')); p.classList.add('active');
-  }));
-  // Blaetterstapel: immer genau eins offen — wie ein aufgeschlagenes Buch.
-  document.querySelectorAll('.leaf .leaf-head').forEach(h => h.addEventListener('click', () => {
-    const leaf = h.closest('.leaf'), war = leaf.classList.contains('open');
-    leaf.closest('.leafstack').querySelectorAll('.leaf').forEach(l => l.classList.remove('open'));
-    if (!war) leaf.classList.add('open');
-  }));
-</script>
-</body>
-</html>
+    <p class="small muted" style="margin-top:10px">Vereinfachte Geometrie in Palettenfarben.
+      Griechenland trägt das Kreuz im Feld — sonst läse sich das Blau-Weiß als Kuba.</p>
+  </section>
+</main>
