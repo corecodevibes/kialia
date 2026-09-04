@@ -16,6 +16,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import logo from "@/assets/kialia-logo.png";
 import { useProfile, useSession, useMyName } from "@/lib/auth";
 import { onboardingGate, readOnboardedCache } from "@/lib/onboarding-gate";
+import { requestPersistence } from "@/lib/attachments";
 import { FlagMark } from "@/components/app/bits";
 
 const tabs = [
@@ -39,7 +40,8 @@ export function AppShell({
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { session, ready } = useSession();
   const { profile, failed, ready: profileReady } = useProfile(session?.user.id);
-  const { trip } = useTrip();
+  const { trip, persistFailed } = useTrip();
+  const speicherFehler = persistFailed;
 
   // Abgleich läuft für alle Bildschirme an einer Stelle: einmal holen, danach
   // bei eigenen Änderungen hochladen und auf fremde horchen.
@@ -65,6 +67,18 @@ export function AppShell({
       }
     })();
   }, [session]);
+
+  // Dauerhaften Speicher gleich beim Start erbitten.
+  //
+  // Bisher passierte das nur beim Anhaengen eines Fotos. Wer nie eines
+  // anhaengt, bekam ihn nie — und iOS raeumt den Speicher einer
+  // Homescreen-App nach etwa sieben Tagen ohne Nutzung ab. Genau das ist das
+  // Muster einer Reise-App: einmal planen, zwei Wochen nichts, dann
+  // unterwegs taeglich. Die Bitte ist kostenlos und wird vom System still
+  // beantwortet.
+  useEffect(() => {
+    void requestPersistence();
+  }, []);
 
   useEffect(() => {
     if (!session) return;
@@ -237,6 +251,22 @@ export function AppShell({
             </p>
           </div>
         )}
+        {/* Das Wichtigste zuerst: wenn das Geraet nicht speichern kann, ist
+            alles andere zweitrangig. Der Hinweis nennt den einzigen Ausweg,
+            der jetzt noch hilft — die Reise als Datei sichern. */}
+        {speicherFehler && (
+          <div
+            role="alert"
+            className="mx-auto mb-3 max-w-md rounded-[var(--radius)] border border-destructive/30 bg-[var(--no-soft)] px-4 py-3 text-xs text-destructive"
+          >
+            <p className="font-semibold">Änderungen werden nicht gespeichert</p>
+            <p className="mt-1">
+              {speicherFehler} Was du jetzt einträgst, ist beim nächsten Öffnen weg. Sichere die
+              Reise über die Einstellungen als Datei, bevor du weitermachst.
+            </p>
+          </div>
+        )}
+
         {syncError && (
           <div
             role="status"

@@ -176,6 +176,24 @@ function RootComponent() {
   // wird und dabei auf eine geloeschte Datei stoesst.
   useEffect(() => watchForStaleBuild(), []);
 
+  // Service Worker anmelden, damit die App auch ohne Netz startet.
+  //
+  // Hier in der Wurzel und nicht in der App-Huelle: die rendert auf /auth,
+  // /impressum und /datenschutz gar nicht, und dort war die Anmeldung deshalb
+  // wirkungslos. Nachgesehen im Browser, nicht angenommen.
+  //
+  // Erst nach `load`, damit sie nicht mit dem ersten Rendern um Bandbreite
+  // ringt. Schlaegt sie fehl, passiert nichts weiter — die App laeuft dann wie
+  // bisher, nur eben nicht offline.
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;
+    const anmelden = () => {
+      void navigator.serviceWorker.register("/sw.js").catch(() => undefined);
+    };
+    if (document.readyState === "complete") anmelden();
+    else window.addEventListener("load", anmelden, { once: true });
+  }, []);
+
   useEffect(() => {
     const code = codeFromUrl(window.location.search);
     if (!code) return;

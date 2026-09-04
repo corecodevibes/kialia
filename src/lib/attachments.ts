@@ -157,3 +157,82 @@ export async function requestPersistence(): Promise<boolean> {
     return false;
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * Sicherung
+ *
+ * Die Belege lagen bisher ausschliesslich in der IndexedDB dieses einen
+ * Geraets: nicht auf dem Server, nicht in der Sicherungsdatei. Ein verlorenes
+ * Telefon und sie sind weg — bei Fotos, die fuer den Versicherungsfall
+ * aufgenommen wurden, ist das genau der Fall, fuer den sie da waren.
+ *
+ * Fuer die Datei werden die Blobs nach base64 uebersetzt. Das blaeht sie um
+ * ein Drittel auf, und genau deshalb liegen sie im Betrieb NICHT so vor. In
+ * einer Sicherung ist das der richtige Kompromiss: sie muss vollstaendig und
+ * ohne Zusatzdatei lesbar sein.
+ * ------------------------------------------------------------------------ */
+
+export type AttachmentFile = Omit<Attachment, "blob"> & { data: string };
+
+function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result));
+    r.onerror = () => reject(r.error ?? new Error("Datei nicht lesbar"));
+    r.readAsDataURL(blob);
+  });
+}
+
+function dataUrlToBlob(url: string, type: string): Blob {
+  const komma = url.indexOf(",");
+  const roh = atob(komma >= 0 ? url.slice(komma + 1) : url);
+  const bytes = new Uint8Array(roh.length);
+  for (let i = 0; i < roh.length; i++) bytes[i] = roh.charCodeAt(i);
+  return new Blob([bytes], { type: type || "application/octet-stream" });
+}
+
+/** Alle Belege zu diesen Posten, in Dateiform. */
+export async function exportAttachments(ownerIds: string[]): Promise<AttachmentFile[]> {
+  const alle = await loadForOwners(ownerIds);
+  const out: AttachmentFile[] = [];
+  for (const a of alle) {
+    // Ein einzelner unlesbarer Beleg darf nicht die ganze Sicherung verhindern.
+    try {
+      const { blob, ...rest } = a;
+      out.push({ ...rest, data: await blobToDataUrl(blob) });
+    } catch {
+      /* uebersprungen */
+    }
+  }
+  return out;
+}
+
+/**
+ * Belege aus einer Sicherung zurueckschreiben.
+ *
+ * Vorhandene mit derselben id werden ueberschrieben statt verdoppelt: eine
+ * Sicherung zweimal einzulesen ist ein normaler Bedienfehler und darf den
+ * Speicher nicht fuellen.
+ */
+export async function importAttachments(files: AttachmentFile[]): Promise<number> {
+  if (!files.length) return 0;
+  const db = await open();
+  let n = 0;
+  await new Promise<void>((resolve, reject) => {
+    const tx = db.transaction(STORE, "readwrite");
+    const store = tx.objectStore(STORE);
+    for (const f of files) {
+      try {
+        const { data, ...rest } = f;
+        store.put({ ...rest, blob: dataUrlToBlob(data, f.type) } satisfies Attachment);
+        n += 1;
+      } catch {
+        /* einzelnen Beleg ueberspringen */
+      }
+    }
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+  db.close();
+  return n;
+}

@@ -169,15 +169,21 @@ function HomeTab() {
   const days = tripDays(trip);
   const totals = tripTotals(trip);
 
-  function handleExportTrip() {
-    downloadTrip(trip);
-    setIoMsg(`„${trip.destination || "Reise"}“ als Datei gespeichert.`);
+  // Die Belegzahl steht bewusst in der Meldung: eine Sicherung, von der man
+  // nicht weiss, ob die Fotos drin sind, beruhigt niemanden.
+  function belege(n: number) {
+    return n === 0 ? "" : ` samt ${n} ${n === 1 ? "Beleg" : "Belegen"}`;
   }
 
-  function handleBackup() {
-    downloadAllTrips(trips);
+  async function handleExportTrip() {
+    const n = await downloadTrip(trip);
+    setIoMsg(`„${trip.destination || "Reise"}“ als Datei gespeichert${belege(n)}.`);
+  }
+
+  async function handleBackup() {
+    const n = await downloadAllTrips(trips);
     setIoMsg(
-      `Sicherung mit ${trips.length} ${trips.length === 1 ? "Reise" : "Reisen"} gespeichert.`,
+      `Sicherung mit ${trips.length} ${trips.length === 1 ? "Reise" : "Reisen"}${belege(n)} gespeichert.`,
     );
   }
 
@@ -837,7 +843,7 @@ function HomeTab() {
             </span>
           </p>
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
-            <PrimaryButton onClick={handleExportTrip}>
+            <PrimaryButton onClick={() => void handleExportTrip()}>
               <Download className="size-4" /> Diese Reise exportieren
             </PrimaryButton>
             <PrimaryButton onClick={() => fileInput.current?.click()}>
@@ -846,7 +852,7 @@ function HomeTab() {
           </div>
           <button
             type="button"
-            onClick={handleBackup}
+            onClick={() => void handleBackup()}
             className="mt-2 w-full rounded-xl px-3 py-2 text-xs font-semibold text-muted-foreground underline-offset-2 transition hover:underline"
           >
             {trips.length === 1 ? "Auch als Datei sichern" : `Alle ${trips.length} Reisen sichern`}

@@ -245,11 +245,11 @@ function SettingsPage() {
             <CardTitle>Deine Daten</CardTitle>
             <p className="mt-1 text-xs text-muted-foreground">
               {trips.length === 1 ? "Eine Reise" : `${trips.length} Reisen`} auf diesem Gerät.
-              Angehängte Belege liegen nur hier und wandern nicht mit.
+              Angehängte Belege wandern mit — sie stecken als Bilddaten in der Datei.
             </p>
             <button
               type="button"
-              onClick={() => downloadAllTrips(trips)}
+              onClick={() => void downloadAllTrips(trips)}
               disabled={!trips.length}
               className="mt-3 w-full rounded-2xl bg-secondary px-4 py-3 text-sm font-semibold transition hover:bg-secondary/70 disabled:opacity-50"
             >

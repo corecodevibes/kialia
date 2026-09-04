@@ -6,6 +6,7 @@ export type PayStatus = "offen" | "reserviert" | "bezahlt";
 export type LinkItem = { id: string; label: string; url: string };
 
 import type { IdeaKind } from "./idea-kind";
+import { exportAttachments, importAttachments, type AttachmentFile } from "@/lib/attachments";
 
 export type Idea = {
   id: string;
@@ -403,11 +404,42 @@ export function loadStore(): Store {
   return { trips: [], activeId: "" };
 }
 
+/**
+ * Ob der letzte Schreibversuch fehlgeschlagen ist.
+ *
+ * Vorher wurde der Fehler hier stillschweigend geschluckt. Das ist der
+ * gefaehrlichste Zustand, den diese App haben kann: der Eintrag steht auf dem
+ * Bildschirm, weil der Speicher im Arbeitsspeicher schon aktualisiert ist —
+ * beim naechsten Laden ist er weg. Niemand merkt es, bis es zu spaet ist.
+ *
+ * Passiert real bei vollem Geraetespeicher und in Safaris privatem Modus, wo
+ * localStorage vorhanden ist, aber jeden Schreibversuch ablehnt.
+ */
+let persistFehler: string | null = null;
+
+export function persistError(): string | null {
+  return persistFehler;
+}
+
 export function saveStore(store: Store) {
   try {
     window.localStorage.setItem(KEY, JSON.stringify(store));
-  } catch {
-    /* Speicher voll oder blockiert */
+    if (persistFehler !== null) {
+      persistFehler = null;
+      for (const l of listeners) l();
+    }
+  } catch (e) {
+    const name = e instanceof Error ? e.name : "";
+    const voll = name === "QuotaExceededError" || name === "NS_ERROR_DOM_QUOTA_REACHED";
+    const neu = voll
+      ? "Der Speicher des Geräts ist voll."
+      : "Dieses Gerät lässt kein Speichern zu (privater Modus?).";
+    if (persistFehler !== neu) {
+      persistFehler = neu;
+      // Ohne diese Benachrichtigung wuerde die Warnung erst beim naechsten
+      // Rendern aus anderem Anlass erscheinen — also womoeglich nie.
+      for (const l of listeners) l();
+    }
   }
 }
 
@@ -465,6 +497,13 @@ export function useTrip() {
     () => fallback,
   );
   const ready = loaded;
+  // Mitgeliefert statt separat abgefragt: der Fehler aendert sich nur beim
+  // Speichern, und genau dann benachrichtigt saveStore dieselben Listener.
+  const persistFailed = useSyncExternalStore(
+    subscribe,
+    () => persistFehler,
+    () => null,
+  );
 
   const mutate = useCallback((fn: (s: Store) => Store) => {
     current = fn(current);
@@ -540,6 +579,7 @@ export function useTrip() {
 
   return {
     trip,
+    persistFailed,
     hasTrip,
     trips: store.trips,
     activeId: store.activeId,
@@ -707,9 +747,33 @@ export function tripToFile(trip: Trip): TripFile {
   };
 }
 
-/** Loest den Download einer einzelnen Reise als .json aus. */
-export function downloadTrip(trip: Trip) {
-  const blob = new Blob([JSON.stringify(tripToFile(trip), null, 2)], {
+/**
+ * Alle Posten einer Reise, an denen ein Beleg haengen kann.
+ *
+ * Muss mit den Stellen uebereinstimmen, die im UI eine Beleg-Leiste zeigen —
+ * heute Fortbewegung, Unterkunft, Programm und Packliste. Wird dort etwas
+ * ergaenzt, gehoert es auch hierher, sonst faellt es lautlos aus jeder
+ * Sicherung.
+ */
+export function attachmentOwnerIds(trip: Trip): string[] {
+  return [
+    ...trip.transports.map((t) => t.id),
+    ...trip.stays.map((s) => s.id),
+    ...trip.activities.map((a) => a.id),
+    ...trip.packing.flatMap((k) => k.items.map((i) => i.id)),
+  ];
+}
+
+/**
+ * Loest den Download einer einzelnen Reise als .json aus — samt Belegen.
+ *
+ * Die Fotos lagen bisher nur in der IndexedDB dieses Geraets und fehlten in
+ * jeder Sicherung. Wer sie fuer den Versicherungsfall aufgenommen hat, haette
+ * beim Verlust des Telefons genau das verloren, wogegen sie versichern.
+ */
+export async function downloadTrip(trip: Trip): Promise<number> {
+  const files = await exportAttachments(attachmentOwnerIds(trip));
+  const blob = new Blob([JSON.stringify({ ...tripToFile(trip), files }, null, 2)], {
     type: "application/json",
   });
   const url = URL.createObjectURL(blob);
@@ -721,15 +785,18 @@ export function downloadTrip(trip: Trip) {
   a.remove();
   // Erst nach dem Klick freigeben, sonst bricht der Download in Safari ab.
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+  return files.length;
 }
 
 /** Sicherung aller Reisen — fuer den Fall, dass der Browser-Speicher wegfaellt. */
-export function downloadAllTrips(trips: Trip[]) {
+export async function downloadAllTrips(trips: Trip[]): Promise<number> {
+  const files = await exportAttachments(trips.flatMap(attachmentOwnerIds));
   const payload = {
     kind: "kialia.backup" as const,
     version: TRIP_FILE_VERSION,
     exportedAt: new Date().toISOString(),
     trips,
+    files,
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -741,6 +808,7 @@ export function downloadAllTrips(trips: Trip[]) {
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+  return files.length;
 }
 
 /**
@@ -754,7 +822,21 @@ export async function readTripFile(file: File): Promise<Partial<Trip>[]> {
   } catch {
     throw new Error("Das ist keine gueltige kialia-Datei.");
   }
-  const obj = parsed as { kind?: string; trip?: Partial<Trip>; trips?: Partial<Trip>[] };
+  const obj = parsed as {
+    kind?: string;
+    trip?: Partial<Trip>;
+    trips?: Partial<Trip>[];
+    files?: AttachmentFile[];
+  };
+  // Belege zuerst zurueckschreiben. Schlaegt das fehl, sollen die Reisedaten
+  // trotzdem ankommen — eine halbe Wiederherstellung ist besser als keine.
+  if (Array.isArray(obj.files) && obj.files.length > 0) {
+    try {
+      await importAttachments(obj.files);
+    } catch {
+      /* Reisedaten haben Vorrang */
+    }
+  }
   if (obj?.kind === "kialia.trip" && obj.trip) return [obj.trip];
   if (obj?.kind === "kialia.backup" && Array.isArray(obj.trips)) return obj.trips;
   throw new Error("Die Datei stammt nicht aus kialia.");

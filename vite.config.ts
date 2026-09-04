@@ -72,6 +72,11 @@ export default defineConfig(({ mode, command }) => {
           "/passwort-neu": { headers: { "cache-control": "no-cache" } },
           "/datenschutz": { headers: { "cache-control": "no-cache" } },
           "/impressum": { headers: { "cache-control": "no-cache" } },
+          // Der Service Worker darf NIE aus dem Cache kommen. Steckt eine alte
+          // Fassung im Browser-Cache, bleibt sie es auch nach einem Deploy —
+          // und ein Service Worker, den man nicht mehr austauschen kann, ist
+          // die schlechteste Sorte Fehler.
+          "/sw.js": { headers: { "cache-control": "no-cache, no-store, must-revalidate" } },
           // Hash im Namen: eine neue Fassung heisst ohnehin anders.
           "/assets/**": {
             headers: { "cache-control": "public, max-age=31536000, immutable" },
