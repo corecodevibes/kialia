@@ -107,15 +107,17 @@ function SettingsPage() {
           und sonst UEBER dem Inhalt malt — nicht-positionierter Inhalt liegt in
           der Malreihenfolge unter jedem positionierten Element. */}
       <div className="relative z-10 mx-auto max-w-lg">
-        <button
-          type="button"
-          onClick={() => navigate({ to: "/" })}
-          className="mb-4 flex items-center gap-1 text-sm font-medium text-foreground/70"
-        >
-          <ChevronLeft className="size-4" /> Zurück
-        </button>
+        <div className="stage-dark">
+          <button
+            type="button"
+            onClick={() => navigate({ to: "/" })}
+            className="mb-4 flex items-center gap-1 text-sm font-medium text-foreground/70"
+          >
+            <ChevronLeft className="size-4" /> Zurück
+          </button>
 
-        <h1 className="display text-[1.6rem]">Einstellungen</h1>
+          <h1 className="display text-[1.6rem]">Einstellungen</h1>
+        </div>
 
         <div className="mt-5 space-y-4">
           <Card>

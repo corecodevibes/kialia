@@ -50,7 +50,7 @@ export function ExpenseField({
         }}
         rows={2}
         placeholder="Taverne 45, Taxi 8, Souvenirs 15"
-        className={`mt-1 block w-full min-w-0 resize-y rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground transition focus:border-primary`}
+        className={`mt-1 block w-full min-w-0 resize-y rounded-xl border-[0.5px] border-border bg-background px-3 py-2.5 text-sm text-foreground transition focus:border-primary`}
       />
 
       {items.length > 0 && (
@@ -100,7 +100,7 @@ export function ExpenseField({
               das ist eine Uebersicht, keine Abrechnung — ihr seht die Zahlen
               und regelt es unter euch. */}
           {ausgelegt.length > 0 && (
-            <div className="mt-1 space-y-0.5 border-t border-border px-2.5 pt-1.5">
+            <div className="mt-1 space-y-0.5 border-t-[0.5px] border-border px-2.5 pt-1.5">
               {ausgelegt.map((p) => (
                 <div key={p.name} className="flex items-center justify-between text-xs">
                   <span className="text-muted-foreground">{p.name} hat ausgelegt</span>

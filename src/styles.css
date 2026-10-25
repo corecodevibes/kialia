@@ -332,30 +332,30 @@
   --radius: 1.25rem;              /* 20px, Kartenradius des Kits */
 
   /* ---- Flaechen: drei Beige-Stufen, mehr braucht es nicht ---------------- */
-  --background: #EFE7D9;          /* die Seite */
+  --background: #EFE7D9;          /* die Seite: Papier */
   --card: #F7F1E5;                /* die Blaetter darauf */
   --secondary: #EAE0CE;           /* eingesenkt: Felder, Segmented Control */
   --muted: #E8DECB;
   --popover: #F7F1E5;
 
   /* ---- Schrift ----------------------------------------------------------- */
-  --foreground: #3A342C;          /* Fliesstext, 10,9:1 */
+  --foreground: #111522;          /* Tiefstes der Palette, 16:1 auf Beige */
   --card-foreground: #3A342C;
   --popover-foreground: #3A342C;
-  --display-ink: #574B3E;         /* grosse Serif-Titel, 7,5:1 — ruhig statt hart */
-  --secondary-foreground: #4E4639;
-  --muted-foreground: #6B6154;    /* 5,4:1 */
+  --display-ink: #303D59;         /* Schiefer der Palette, 9,6:1 — Titel */
+  --secondary-foreground: #303D59;
+  --muted-foreground: #4B5D7D;    /* Stahl, auf Creme 5,1:1 */
 
   /* ---- Handlung ---------------------------------------------------------- */
-  --primary: #35553F;             /* Gruen aus dem Zeichen     (8,14:1) */
-  --primary-2: #2B4633;           /* gedrueckt                (10,14:1) */
-  --primary-foreground: #F7F1E5;
+  --primary: #303D59;             /* Schiefer der Palette      (8,4:1 mit Eis) */
+  --primary-2: #1E263B;           /* Nacht: gedrueckt */
+  --primary-foreground: #DCE3EF;
   /* 4,64:1 gegen die cremefarbene Schrift, die auf dieser Flaeche steht.
      Vorher #B25936 — gegen reines Weiss gerechnet ergab das 4,70, gegen die
      tatsaechliche Schriftfarbe #FBF3EC aber nur 4,37. Die falsche
      Bezugsfarbe hat den Fehler zwei Durchgaenge lang verdeckt. */
-  --clay: #AD5533;                /* der eine warme Akzent     (4,64:1) */
-  --clay-soft: #F2E1D2;
+  --clay: #303D59;                /* Handlung: Schiefer — eine Familie, kein warmer Akzent mehr */
+  --clay-soft: #E4E9F0;
   --destructive: #9A4F53;
   --destructive-foreground: #F7F1E5;
 
@@ -365,11 +365,11 @@
   --accent-foreground: #3A342C;
   --border: rgba(58, 52, 44, 0.12);
   --input: rgba(58, 52, 44, 0.20);
-  --ring: #7E9A88;                /* Fokus im Salbei der Marke */
+  --ring: #536684;                /* Stahl: Fokus */
 
   /* ---- Marken-Toene: Verlauf, Punkte, Raender — nie Flaeche unter Text ---- */
-  --periwinkle: #8F9BE0;
-  --sage: #7E9A88;                /* helles Gruen: Fortschritt, Ringe */
+  --periwinkle: #98A9C4;
+  --sage: #98A9C4;                /* Nebel der Palette: Fortschritt, Fokus, Zeitachse */
   /* Auf dem beigen Papier traegt #8A6F5E nur 4,13:1 — auf dem helleren
      Papier von vorher waren es 4,55. Beim Wechsel auf Beige ist das
      mitgerutscht und erst beim Ableiten des Design-Kits aufgefallen, weil
@@ -382,7 +382,7 @@
   --brass: #836858;
 
   /* ---- Status ------------------------------------------------------------ */
-  --ok: #35553F;   --ok-soft: #E3EAE2;
+  --ok: #536684;   --ok-soft: #E4E9F0;
   --warn: #7F612A; --warn-soft: #F3E7CE;   /* Text auf Papier: 5,04:1 */
   --no: #9A4F53;   --no-soft: #F2DFDB;
 
@@ -392,6 +392,12 @@
      aufgehellt) — App und Zeichen zeigen damit denselben Himmel. Die vollen
      Toene waren gegen das beige Papier zu hart: der Kopf sah nach Bildschirm
      aus, der Rest nach Papier. */
+  /* Die dunkle Buehne — nur der Kopf. Der Verlauf steht nicht mehr fuer Farbe,
+     sondern fuer Tiefe: von Nacht nach Schiefer, mit einem Glanz aus Stahl. */
+  --gradient-stage:
+    radial-gradient(70% 90% at 12% 0%, #536684 0%, transparent 60%),
+    radial-gradient(60% 80% at 92% 10%, #303D59 0%, transparent 65%),
+    linear-gradient(180deg, #1E263B 0%, #303D59 100%);
   --gradient-sky:
     radial-gradient(75% 120% at 6% 4%, #9EA7D8 0%, transparent 58%),
     radial-gradient(65% 110% at 96% 0%, #E9D294 0%, transparent 62%),
@@ -519,7 +525,7 @@
     position: absolute;
     inset: 0 0 auto 0;
     height: 420px;
-    background: var(--gradient-sky);
+    background: var(--gradient-stage);
     background-size: 150% 150%;
     background-position: 0% 40%;
     -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 30%, transparent 100%);
@@ -548,7 +554,7 @@
    Jetzt eine gefuellte Flaeche in der Handlungsfarbe. */
 @utility btn-warm {
   background: var(--clay);
-  color: #FBF3EC;
+  color: #EEF2F8;
   box-shadow: var(--sh-1);
 
   &:hover:not(:disabled) {
@@ -1068,3 +1074,26 @@ body {
   }
 }
 
+
+
+/* Dunkle Buehne. Wer im Kopf steht, bekommt helle Schrift — ueber die
+   Variablen, damit alle Bausteine (Titel, Kicker, Untertitel) mitgehen,
+   ohne dass jeder einzeln umgefaerbt werden muss. */
+.stage-dark {
+  --foreground: #EEF2F8;
+  --display-ink: #EEF2F8;
+  --muted-foreground: #98A9C4;
+  color: var(--foreground);
+}
+.stage-dark .kicker {
+  color: #98A9C4;
+}
+
+/* In der App endet die dunkle Buehne am Kopf. Die volle Hoehe von 420 px
+   gilt fuer Anmeldung und Einstellungen; im Reiseteil wuerde ihr Auslauf
+   sonst ueber den ersten Abschnittstitel laufen und ihn grau uebermalen. */
+.stage-short::before {
+  height: 150px;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 52%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 52%, transparent 100%);
+}

@@ -90,7 +90,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       // Flaechenfarbe unter Text ausgeschieden ist; das gilt fuer Knoepfe, nicht
       // fuer die Systemleiste, auf der kein Text von uns steht. Dunkles Violett
       // ergaebe einen harten Balken ueber einem hellen Kopf.
-      { name: "theme-color", content: "#8F9BE0" },
+      { name: "theme-color", content: "#1E263B" },
       { name: "mobile-web-app-capable", content: "yes" },
       // Legacy-Pendant, das iOS bis heute auswertet.
       { name: "apple-mobile-web-app-capable", content: "yes" },

@@ -76,13 +76,13 @@ function NewPasswordPage() {
   return (
     <div className="acrylic-page flex min-h-screen items-center justify-center px-5 py-10">
       <div className="relative z-10 w-full max-w-sm">
-        <div className="mb-6 flex flex-col items-center text-center">
+        <div className="stage-dark mb-6 flex flex-col items-center text-center">
           <img
             src={logo}
             alt="kialia Logo"
             width={160}
             height={160}
-            className="size-24 rounded-3xl shadow-sm"
+            className="size-24 rounded-3xl shadow-sm ring-1 ring-white/15"
           />
           <h1 className="mt-4">
             <Wordmark />

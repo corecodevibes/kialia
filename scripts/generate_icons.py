@@ -39,7 +39,14 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw
 S=2048; K=S/1024.0
-BEIGE=(246,235,217); GREEN=(72,114,92)
+# Palette aus dem Referenzbild (Obsidian Plum), gemessen auf dem Zeichen.
+NACHT=(30,38,59)      # #1E263B  Grund
+SCHIEFER=(48,61,89)   # #303D59  Grund, unten
+STAHL=(83,102,132)    # #536684  Glanz oben links
+EIS=(220,227,239)     # #DCE3EF  Linien
+NEBEL=(152,169,196)   # #98A9C4  Berg und Palme
+BEIGE=EIS
+GREEN=NEBEL
 def p(v): return v*K
 def bez(a,b,c,n=72):
     return [((1-t)**2*a[0]+2*(1-t)*t*b[0]+t*t*c[0],(1-t)**2*a[1]+2*(1-t)*t*b[1]+t*t*c[1])
@@ -63,20 +70,23 @@ STOPS=[((143,155,224),0.06,0.04,0.75,1.20,0.58),
        ((160,121,140),0.22,1.04,0.70,1.20,0.62),
        ((240,160, 85),0.50,0.40,1.20,0.90,0.70)]
 def grund():
-    N=256; im=Image.new("RGB",(N,N)); px=im.load()
-    ca,sa = math.cos(math.radians(50)), math.sin(math.radians(50))
-    A, B = pastell((143,155,224)), pastell((240,160,85))
-    stops = [(pastell(c),cx,cy,rx*1.10,ry*1.10,end*1.16) for c,cx,cy,rx,ry,end in STOPS]
-    for j in range(N):
-        for i in range(N):
-            u,v=i/(N-1), j/(N-1)
-            t=max(0.0,min(1.0,(u*ca+v*sa)/(ca+sa)))
-            r,g,b=[A[k]+(B[k]-A[k])*t for k in range(3)]
-            for (cr,cg,cb),cx,cy,rx,ry,end in reversed(stops):
-                a=max(0.0,min(1.0,1-math.hypot((u-cx)/rx,(v-cy)/ry)/end))
-                r,g,b = r+(cr-r)*a, g+(cg-g)*a, b+(cb-b)*a
-            px[i,j]=(int(r),int(g),int(b))
-    return im.resize((S,S), Image.LANCZOS)
+    """Dunkler Grund aus der Palette, mit einem kaum sichtbaren Glanz oben links.
+
+    Vorher war der Grund pastellfarben und die Linien beige. Mit der dunklen
+    Palette traegt der Grund den Kontrast, die Linien sind Eis — hell genug,
+    um auch bei 28 px noch zu tragen, ohne dass der Grund verwaschen wirkt."""
+    N = 256
+    im = Image.new("RGB", (N, N))
+    px = im.load()
+    for jj in range(N):
+        for ii in range(N):
+            u, v = ii / (N - 1), jj / (N - 1)
+            t = max(0.0, min(1.0, (u + v) / 2))
+            base = [NACHT[k] + (SCHIEFER[k] - NACHT[k]) * t * 0.8 for k in range(3)]
+            a = max(0.0, min(1.0, 1 - math.hypot((u - 0.1) / 0.9, (v - 0.0) / 0.8)))
+            a = a * a * 0.42
+            px[ii, jj] = tuple(int(base[k] + (STAHL[k] - base[k]) * a) for k in range(3))
+    return im.resize((S, S), Image.LANCZOS)
 
 CX, CY, SEP = 513, 555, 181
 RO, RW = 182, 146
@@ -127,12 +137,12 @@ def zeichen():
     """
     lay = Image.new("RGBA", (S, S), (0, 0, 0, 0))
     d = ImageDraw.Draw(lay)
-    lw = int(p(16))
+    lw = int(p(9))   # feiner: Haarlinie statt Strich
 
     # Glaeser milchig hinterlegen, damit Berg und Palme ruhig stehen
     for s_ in (-1, 1):
         ox = CX + s_ * SEP
-        d.ellipse([p(ox - RW), p(CY - RW), p(ox + RW), p(CY + RW)], fill=(255, 252, 249, 132))
+        d.ellipse([p(ox - RW), p(CY - RW), p(ox + RW), p(CY + RW)], fill=(152, 169, 196, 46))
 
     # Aussenlinie der ganzen Form: eine Flaeche, also eine Linie
     a = Image.new("L", (S, S), 0)

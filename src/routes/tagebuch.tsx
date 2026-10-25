@@ -374,7 +374,7 @@ function DiaryTab() {
           </button>
 
           {kostenOffen && ausgaben.posten > 0 && (
-            <div className="mt-4 border-t border-border pt-3">
+            <div className="mt-4 border-t-[0.5px] border-border pt-3">
               <p className="kicker mb-2">Wer hat ausgelegt</p>
               <dl className="space-y-1.5">
                 {ausgaben.proPerson.map(({ name, amount }) => (
@@ -494,7 +494,7 @@ function DiaryTab() {
                       landen direkt am richtigen Ort. Ein zweiter Weg zum
                       selben Ziel ist keine Hilfe, sondern eine Entscheidung
                       mehr. */}
-                    <div className="mt-3 border-t border-border pt-3">
+                    <div className="mt-3 border-t-[0.5px] border-border pt-3">
                       <input
                         type="date"
                         value={e.date}

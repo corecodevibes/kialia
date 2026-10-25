@@ -58,7 +58,7 @@ export const Route = createFileRoute("/packliste")({
 });
 
 const rowInput =
-  "rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none transition focus:border-primary";
+  "rounded-xl border-[0.5px] border-border bg-background px-3 py-2 text-sm outline-none transition focus:border-primary";
 
 function PackingTab() {
   const { trip, update, ready, hasTrip } = useTrip();

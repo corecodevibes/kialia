@@ -169,7 +169,7 @@ export function AppShell({
   }
 
   return (
-    <div className="acrylic-page min-h-screen">
+    <div className="acrylic-page stage-short min-h-screen">
       {/* Der obere Sicherheitsabstand fehlte.
           `viewport-fit=cover` im Meta-Tag laesst den Inhalt bewusst unter die
           Statusleiste laufen — damit der Verlauf bis zum Rand geht. Dann muss
@@ -179,7 +179,7 @@ export function AppShell({
           dort die Adressleiste den Platz einnimmt — nur in der installierten
           App. */}
       <header
-        className="relative z-30 px-5 pb-6 pt-6 print:hidden"
+        className="stage-dark relative z-30 px-5 pb-6 pt-6 print:hidden"
         style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.5rem)" }}
       >
         <div className="mx-auto flex max-w-lg items-center gap-3">
@@ -197,7 +197,7 @@ export function AppShell({
               alt="kialia"
               width={64}
               height={64}
-              className="size-11 rounded-2xl shadow-sm"
+              className="size-11 rounded-2xl shadow-sm ring-1 ring-white/15"
             />
           </div>
           <div className="min-w-0 flex-1">
@@ -243,7 +243,7 @@ export function AppShell({
         {joined && (
           <div
             role="status"
-            className="mx-auto mb-3 max-w-md rounded-[var(--radius)] border border-border bg-secondary px-4 py-2.5 text-xs"
+            className="mx-auto mb-3 max-w-md rounded-[var(--radius)] border-[0.5px] border-border bg-secondary px-4 py-2.5 text-xs"
           >
             <p className="font-semibold">Reise übernommen</p>
             <p className="mt-0.5 text-muted-foreground">
@@ -282,7 +282,7 @@ export function AppShell({
         {children}
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card print:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-20 border-t-[0.5px] border-border bg-card print:hidden">
         <div className="mx-auto flex max-w-lg items-stretch justify-between px-1 pb-[env(safe-area-inset-bottom)]">
           {tabs.map(({ to, label, icon: Icon }) => (
             <Link
@@ -319,7 +319,7 @@ export function Card({
   return (
     <section
       id={id}
-      className={`rounded-[var(--radius)] border border-border bg-card p-4 shadow-[var(--sh-1)] ${className}`}
+      className={`rounded-[var(--radius)] border-[0.5px] border-border bg-card p-4 shadow-[var(--sh-1)] ${className}`}
     >
       {children}
     </section>
@@ -624,7 +624,7 @@ export function PersonColors({
    16 px erzwingt die Regel weiter unten fuer Touch-Geraete — darunter zoomt
    iOS beim Fokus hinein und bleibt so. */
 export const inputClass =
-  "block w-full min-w-0 max-w-full rounded-[14px] border border-border bg-secondary px-3.5 py-2.5 text-sm text-foreground transition placeholder:text-muted-foreground/70 focus:border-[var(--ring)] focus:bg-card focus:outline-none";
+  "block w-full min-w-0 max-w-full rounded-[14px] border-[0.5px] border-border bg-secondary px-3.5 py-2.5 text-sm text-foreground transition placeholder:text-muted-foreground/70 focus:border-[var(--ring)] focus:bg-card focus:outline-none";
 
 /** Datums-Felder: gleiches Aussehen, aber kompakter, damit nichts abgeschnitten wird. */
 export const dateInputClass = `${inputClass} box-border appearance-none px-2.5 text-[13px] [&::-webkit-date-and-time-value]:text-left [&::-webkit-calendar-picker-indicator]:ml-0`;

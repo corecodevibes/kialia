@@ -86,13 +86,13 @@ function OnboardingPage() {
   return (
     <div className="acrylic-page flex min-h-screen items-center justify-center px-5 py-10">
       <div className="relative z-10 w-full max-w-sm">
-        <div className="mb-5 flex flex-col items-center text-center">
+        <div className="stage-dark mb-5 flex flex-col items-center text-center">
           <img
             src={logo}
             alt="kialia Logo"
             width={96}
             height={96}
-            className="size-20 rounded-3xl shadow-sm"
+            className="size-20 rounded-3xl shadow-sm ring-1 ring-white/15"
           />
           <p className="mt-3">
             <Wordmark size="sm" />
@@ -104,7 +104,7 @@ function OnboardingPage() {
         </div>
 
         <div
-          className="rounded-3xl border border-border/60 bg-card p-5"
+          className="rounded-3xl border-[0.5px] border-border/60 bg-card p-5"
           style={{ boxShadow: "var(--shadow-soft)" }}
         >
           {step === 0 ? (
@@ -184,7 +184,7 @@ function OnboardingPage() {
                 <button
                   type="button"
                   onClick={() => setStep(0)}
-                  className="rounded-2xl border border-border px-4 py-3.5 text-sm font-medium"
+                  className="rounded-2xl border-[0.5px] border-border px-4 py-3.5 text-sm font-medium"
                 >
                   Zurück
                 </button>

@@ -10,7 +10,7 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
         // Papier auf Elfenbein: eine Haarlinie und ein kaum sichtbarer Absatz
         // reichen. Weiss auf Weiss braeuchte einen Schatten zum Abheben.
         cn(
-          "rounded-[var(--radius)] border border-border bg-card text-card-foreground shadow-[var(--sh-1)]",
+          "rounded-[var(--radius)] border-[0.5px] border-border bg-card text-card-foreground shadow-[var(--sh-1)]",
           className,
         )
       }

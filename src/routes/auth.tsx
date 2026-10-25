@@ -174,7 +174,7 @@ function AuthPage() {
     const isSignup = phase === "signup-sent";
     return (
       <AuthFrame>
-        <div className="rounded-[var(--radius)] border border-border bg-card p-5 shadow-[var(--sh-2)]">
+        <div className="rounded-[var(--radius)] border-[0.5px] border-border bg-card p-5 shadow-[var(--sh-2)]">
           <h2 className="display text-[1.15rem]">
             {isSignup ? "Fast geschafft" : "Link ist unterwegs"}
           </h2>
@@ -217,7 +217,7 @@ function AuthPage() {
     <AuthFrame>
       <form
         onSubmit={submit}
-        className="rounded-[var(--radius)] border border-border bg-card p-5 shadow-[var(--sh-2)]"
+        className="rounded-[var(--radius)] border-[0.5px] border-border bg-card p-5 shadow-[var(--sh-2)]"
       >
         <div className="mb-5 grid grid-cols-2 gap-1 rounded-full bg-secondary p-1 text-sm font-medium">
           {(["signup", "login"] as const).map((m) => (
@@ -304,13 +304,13 @@ function AuthFrame({ children }: { children: React.ReactNode }) {
   return (
     <div className="acrylic-page flex min-h-screen items-center justify-center px-5 py-10">
       <div className="relative z-10 w-full max-w-sm">
-        <div className="mb-6 flex flex-col items-center text-center">
+        <div className="stage-dark mb-6 flex flex-col items-center text-center">
           <img
             src={logo}
             alt="kialia Logo"
             width={160}
             height={160}
-            className="size-32 rounded-3xl shadow-sm"
+            className="size-32 rounded-3xl shadow-sm ring-1 ring-white/15"
           />
           <h1 className="mt-4">
             <Wordmark size="lg" />
@@ -323,7 +323,7 @@ function AuthFrame({ children }: { children: React.ReactNode }) {
             landet auf einer Anmeldemaske. Ohne diesen Satz wirkt der Link
             kaputt und der Abbruch ist wahrscheinlicher als die Anmeldung. */}
         {hasInvite && (
-          <div className="mb-4 rounded-[var(--radius)] border border-border bg-card/85 px-4 py-3 text-center text-sm">
+          <div className="mb-4 rounded-[var(--radius)] border-[0.5px] border-border bg-card/85 px-4 py-3 text-center text-sm">
             <p className="font-semibold">Du wurdest zu einer Reise eingeladen</p>
             <p className="mt-0.5 text-xs text-muted-foreground">
               Leg kurz ein Konto an — danach ist die Reise sofort da.
