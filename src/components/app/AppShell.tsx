@@ -631,8 +631,15 @@ export const dateInputClass = `${inputClass} box-border appearance-none px-2.5 t
 
 export const selectClass = `${inputClass} appearance-none bg-secondary pr-8`;
 
+/* Abschnittstitel. Die Haarlinie danach ist das Signatur-Motiv aus dem
+   Blueprint: eine Linie, die sich ausrollt, statt eines Rahmens. Sie traegt
+   die Ordnung, ohne laut zu werden. */
 export function SectionTitle({ children }: { children: ReactNode }) {
-  return <h2 className="kicker mb-2.5 mt-7 px-1">{children}</h2>;
+  return (
+    <h2 className="kicker sig-rule mb-2.5 mt-7 flex items-center gap-3 px-1">
+      <span>{children}</span>
+    </h2>
+  );
 }
 
 /** Einheitliche Überschrift innerhalb einer Karte – überall gleich.

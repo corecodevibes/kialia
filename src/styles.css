@@ -717,13 +717,86 @@
   box-shadow: var(--sh-1);
 }
 
+/* ---------------------------------------------------------------------------
+   Stil-Schicht nach dem Premium-Site-Blueprint.
+
+   Bewusst klein gehalten. Partikel, Wasser-Hero und Dauerbewegung sind fuer
+   eine Webseite gedacht, die man einmal besucht. In einer App, die man
+   taeglich oeffnet, wuerden sie nach dem dritten Mal nerven. Uebernommen wird,
+   was ruhig bleibt: eine Signatur-Linie, sauberer Umbruch und Einblendungen,
+   die nur beim Ankommen einmal laufen.
+   --------------------------------------------------------------------------- */
+
+/* Signatur: eine Haarlinie rollt sich vom Titel weg aus. Einmal, beim
+   Erscheinen des Abschnitts — nie in einer Schleife. */
+.sig-rule::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--input), transparent);
+  transform-origin: left center;
+  animation: sig-draw 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+}
+
+@keyframes sig-draw {
+  from {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+/* Umbruch: Ueberschriften nicht mit einem einzelnen Wort in der letzten Zeile
+   enden lassen, Fliesstext nicht mit einer Waise. Kostet nichts, wirkt sofort
+   gesetzt. */
+h1,
+h2,
+h3,
+.display {
+  text-wrap: balance;
+}
+p {
+  text-wrap: pretty;
+}
+
+/* Gestaffeltes Ankommen: die Karten eines Bildschirms gleiten nacheinander
+   ein, je 40 ms versetzt, nur beim Oeffnen eines Reiters. Die ersten acht
+   reichen; was weiter unten liegt, erscheint sofort. */
+main > * {
+  animation: arrive 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+main > *:nth-child(2) { animation-delay: 0.04s; }
+main > *:nth-child(3) { animation-delay: 0.08s; }
+main > *:nth-child(4) { animation-delay: 0.12s; }
+main > *:nth-child(5) { animation-delay: 0.16s; }
+main > *:nth-child(6) { animation-delay: 0.2s; }
+main > *:nth-child(7) { animation-delay: 0.24s; }
+main > *:nth-child(8) { animation-delay: 0.28s; }
+main > *:nth-child(n + 9) { animation: none; }
+
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .sheet-open,
   .sheet,
   .splash-mark,
   .splash-word,
   .acrylic,
-  .acrylic-page {
+  .acrylic-page,
+  .sig-rule::after,
+  main > * {
     animation: none;
   }
 
