@@ -209,8 +209,8 @@ function HomeTab() {
     return (
       <AppShell title="" subtitle="">
         <div className="pt-2">
-          <h2 className="display text-[1.85rem]">Let&rsquo;s start a new adventure</h2>
-          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+          <h2 className="display text-[34px]">Let&rsquo;s start a new adventure</h2>
+          <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">
             Sag uns, wohin es geht. Plan, Budget, Packliste und Tagebuch gehören danach zu genau
             dieser Reise.
           </p>
@@ -310,7 +310,7 @@ function HomeTab() {
               return (
                 <div
                   key={t.id}
-                  className={`flex items-center gap-2 rounded-[var(--radius)] border px-3.5 py-3 transition ${
+                  className={`flex items-center gap-2 rounded-[var(--radius)] border-[0.5px] px-3.5 py-3 transition ${
                     active
                       ? "border-[var(--sage)] bg-[var(--ok-soft)]"
                       : "border-border hover:border-[var(--input)]"
@@ -322,7 +322,7 @@ function HomeTab() {
                     className="flex flex-1 items-center gap-2.5 text-left"
                   >
                     {f ? (
-                      <span className="text-[1.05rem] leading-none" aria-hidden>
+                      <span className="text-[17px] leading-none" aria-hidden>
                         <FlagMark code={f} />
                       </span>
                     ) : (
@@ -331,7 +331,7 @@ function HomeTab() {
                       />
                     )}
                     <span className="min-w-0">
-                      <span className="display block truncate text-[1.05rem]">{t.destination}</span>
+                      <span className="display block truncate text-[17px]">{t.destination}</span>
                       <span className="block text-xs text-muted-foreground">
                         {t.startDate
                           ? `${formatDateLong(t.startDate)}${t.endDate ? ` – ${formatDateLong(t.endDate)}` : ""}`
@@ -346,7 +346,7 @@ function HomeTab() {
                              weg — und das sieht man vorher nirgends.
                           2. Wie viel steckt drin? Drei Reisen namens "Kreta"
                              sind sonst nicht auseinanderzuhalten. */}
-                      <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px]">
+                      <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">
                         <span
                           /* Rot war hier zu laut. "Nur auf diesem Geraet" ist
                              kein Fehler, sondern ein Zustand — es soll auffallen,
@@ -384,7 +384,7 @@ function HomeTab() {
           </div>
 
           <details className="mt-3">
-            <summary className="flex cursor-pointer list-none items-center justify-center gap-1.5 rounded-2xl border border-dashed border-foreground/25 bg-card/70 py-3 text-sm font-semibold text-foreground transition hover:bg-card">
+            <summary className="flex cursor-pointer list-none items-center justify-center gap-1.5 rounded-2xl border-[0.5px] border-dashed border-foreground/25 bg-card/70 py-3 text-[13px] font-semibold text-foreground transition hover:bg-card">
               <Plus className="size-4" /> Weitere Reise
             </summary>
             <form
@@ -442,7 +442,7 @@ function HomeTab() {
                   <button
                     type="submit"
                     disabled={joinCode.trim().length < 4}
-                    className="btn-warm shrink-0 rounded-xl px-4 py-2.5 text-sm font-semibold disabled:opacity-50"
+                    className="btn-warm shrink-0 rounded-xl px-4 py-2.5 text-[13px] font-semibold disabled:opacity-50"
                   >
                     Beitreten
                   </button>
@@ -576,7 +576,7 @@ function HomeTab() {
             onClick={() => setPendingDelete(null)}
           >
             <div
-              className="w-full max-w-md rounded-3xl bg-card p-5"
+              className="w-full max-w-md rounded-[var(--radius)] bg-card p-5"
               onClick={(ev) => ev.stopPropagation()}
             >
               {(() => {
@@ -587,10 +587,8 @@ function HomeTab() {
                 const passt = !schwer || typedName.trim().toLowerCase() === name.toLowerCase();
                 return (
                   <>
-                    <p className="display text-[1.2rem]">
-                      „{name || "Reise ohne Namen"}" entfernen?
-                    </p>
-                    <p className="mt-2 text-sm text-muted-foreground">
+                    <p className="display text-xl">„{name || "Reise ohne Namen"}" entfernen?</p>
+                    <p className="mt-2 text-[13px] text-muted-foreground">
                       Sie verschwindet von deinen Geräten.{" "}
                       {t.remoteId
                         ? "Wer sonst noch mitplant, behält sie unverändert — erst wenn niemand mehr dabei ist, wird sie endgültig gelöscht."
@@ -599,7 +597,7 @@ function HomeTab() {
 
                     {schwer && (
                       <div className="mt-4">
-                        <p className="text-sm">
+                        <p className="text-[13px]">
                           Hier steckt Arbeit drin. Tippe zur Bestätigung{" "}
                           <span className="font-semibold text-foreground">{name}</span>:
                         </p>
@@ -623,7 +621,7 @@ function HomeTab() {
                       <button
                         type="button"
                         onClick={() => setPendingDelete(null)}
-                        className="flex-1 rounded-2xl bg-secondary py-3 text-sm font-semibold"
+                        className="flex-1 rounded-2xl bg-secondary py-3 text-[13px] font-semibold"
                       >
                         Behalten
                       </button>
@@ -648,7 +646,7 @@ function HomeTab() {
                           removeTrip(t.id);
                           setPendingDelete(null);
                         }}
-                        className="flex-1 rounded-2xl bg-destructive py-3 text-sm font-semibold disabled:opacity-50"
+                        className="flex-1 rounded-2xl bg-destructive py-3 text-[13px] font-semibold disabled:opacity-50"
                       >
                         {deleting ? "Wird entfernt …" : "Entfernen"}
                       </button>
@@ -713,7 +711,7 @@ function HomeTab() {
                     setTimeout(() => setCopied(false), 2000);
                   }
                 }}
-                className="btn-warm mt-3 w-full rounded-2xl px-4 py-3 text-sm font-semibold"
+                className="btn-warm mt-3 w-full rounded-2xl px-4 py-3 text-[13px] font-semibold"
               >
                 Einladung senden
               </button>

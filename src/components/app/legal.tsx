@@ -19,10 +19,10 @@ export function LegalPage({ title, children }: { title: string; children: ReactN
       <div className="mx-auto w-full max-w-2xl">
         <Link to="/" className="inline-flex items-center gap-2">
           <img src={logo} alt="" className="size-8 rounded-xl" />
-          <span className="text-sm font-semibold tracking-tight">kialia</span>
+          <span className="text-[13px] font-semibold tracking-tight">kialia</span>
         </Link>
-        <h1 className="mt-6 text-2xl font-extrabold tracking-tight">{title}</h1>
-        <div className="legal mt-5 space-y-5 text-sm leading-relaxed text-muted-foreground">
+        <h1 className="mt-6 text-[26px] font-extrabold tracking-tight">{title}</h1>
+        <div className="legal mt-5 space-y-5 text-[13px] leading-relaxed text-muted-foreground">
           {children}
         </div>
         <div className="mt-10 flex gap-4 text-xs font-semibold">
@@ -42,7 +42,7 @@ export function LegalPage({ title, children }: { title: string; children: ReactN
 }
 
 export function H2({ children }: { children: ReactNode }) {
-  return <h2 className="pt-2 text-base font-bold text-foreground">{children}</h2>;
+  return <h2 className="pt-2 text-[15px] font-bold text-foreground">{children}</h2>;
 }
 
 /** Was noch fehlt, soll auffallen — nicht in einem grauen Absatz untergehen. */

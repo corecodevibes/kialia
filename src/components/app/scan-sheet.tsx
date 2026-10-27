@@ -57,7 +57,7 @@ export function ScanSheet({
   if (!rows.length) {
     return (
       <div className="mt-2 rounded-2xl bg-secondary/60 p-3">
-        <p className="text-sm font-medium">Nichts Verwertbares gefunden</p>
+        <p className="text-[13px] font-medium">Nichts Verwertbares gefunden</p>
         <p className="mt-1 text-xs text-muted-foreground">
           Der Beleg bleibt angehängt. Bei einem Foto hilft oft, den Text gerade und gut
           ausgeleuchtet aufzunehmen.
@@ -75,7 +75,7 @@ export function ScanSheet({
 
   return (
     <div className="mt-2 rounded-2xl bg-secondary/60 p-3">
-      <p className="text-sm font-semibold">Das steht auf dem Beleg</p>
+      <p className="text-[13px] font-semibold">Das steht auf dem Beleg</p>
       <p className="mt-0.5 text-xs text-muted-foreground">
         Prüf es kurz — übernommen wird nur, was angehakt ist.
       </p>
@@ -92,14 +92,14 @@ export function ScanSheet({
                 className="flex w-full items-center gap-2 rounded-xl bg-card px-2.5 py-2 text-left"
               >
                 <span
-                  className={`grid size-5 shrink-0 place-items-center rounded-md border ${
+                  className={`grid size-5 shrink-0 place-items-center rounded-md border-[0.5px] ${
                     on ? "border-primary bg-primary text-primary-foreground" : "border-border"
                   }`}
                 >
                   {on && <Check className="size-3" />}
                 </span>
                 <span className="w-24 shrink-0 text-xs text-muted-foreground">{r.label}</span>
-                <span className="min-w-0 flex-1 truncate text-sm font-medium">{r.shown}</span>
+                <span className="min-w-0 flex-1 truncate text-[13px] font-medium">{r.shown}</span>
               </button>
             </li>
           );
@@ -119,7 +119,7 @@ export function ScanSheet({
             if (!off.has("amount") && fields.currency) accepted.currency = fields.currency;
             onApply(accepted);
           }}
-          className="btn-warm flex-1 rounded-xl px-3 py-2.5 text-sm font-semibold"
+          className="btn-warm flex-1 rounded-xl px-3 py-2.5 text-[13px] font-semibold"
         >
           Übernehmen
         </button>

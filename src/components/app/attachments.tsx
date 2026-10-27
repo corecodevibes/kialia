@@ -199,7 +199,7 @@ export function Attachments({
               <button
                 type="button"
                 onClick={() => open(a)}
-                className="min-w-0 flex-1 truncate text-left text-sm font-medium underline-offset-2 hover:underline"
+                className="min-w-0 flex-1 truncate text-left text-[13px] font-medium underline-offset-2 hover:underline"
               >
                 {a.name}
               </button>
@@ -211,7 +211,7 @@ export function Attachments({
                   type="button"
                   onClick={() => scan(a)}
                   disabled={scanning === a.id}
-                  className="shrink-0 rounded-lg bg-card px-2 py-1 text-[10px] font-semibold disabled:opacity-60"
+                  className="shrink-0 rounded-lg bg-card px-2 py-1 text-xs font-semibold disabled:opacity-60"
                 >
                   {scanning === a.id ? "liest …" : "auslesen"}
                 </button>
@@ -233,7 +233,7 @@ export function Attachments({
         type="button"
         onClick={() => input.current?.click()}
         disabled={busy}
-        className="mt-1.5 flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-foreground/25 py-2.5 text-xs font-semibold transition hover:bg-secondary/60 disabled:opacity-60"
+        className="mt-1.5 flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl border-[0.5px] border-dashed border-foreground/25 py-2.5 text-xs font-semibold transition hover:bg-secondary/60 disabled:opacity-60"
       >
         <Paperclip className="size-3.5" />
         {busy ? "Wird gespeichert …" : items.length ? "Weiteren Beleg" : "Beleg anhängen"}

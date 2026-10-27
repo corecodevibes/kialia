@@ -281,7 +281,7 @@ function DiaryTab() {
         type="button"
         disabled={busyKey === key}
         onClick={() => toggleRecording(entry, field)}
-        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-semibold transition ${
+        className={`inline-flex items-center gap-1.5 min-h-11 inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold transition ${
           isRec ? "bg-destructive text-background" : "bg-secondary text-foreground"
         }`}
       >
@@ -379,8 +379,8 @@ function DiaryTab() {
               <dl className="space-y-1.5">
                 {ausgaben.proPerson.map(({ name, amount }) => (
                   <div key={name} className="flex items-baseline justify-between gap-3">
-                    <dt className="min-w-0 truncate text-sm">{name}</dt>
-                    <dd className="amount shrink-0 text-[1.02rem]">
+                    <dt className="min-w-0 truncate text-[13px]">{name}</dt>
+                    <dd className="amount shrink-0 text-[17px]">
                       <Money value={amount} />
                     </dd>
                   </div>
@@ -390,8 +390,8 @@ function DiaryTab() {
                     Summe darueber, und man sucht den Fehler bei sich. */}
                 {ausgaben.ohne > 0 && (
                   <div className="flex items-baseline justify-between gap-3 text-muted-foreground">
-                    <dt className="min-w-0 truncate text-sm">Ohne Zuordnung</dt>
-                    <dd className="amount shrink-0 text-[1.02rem]">
+                    <dt className="min-w-0 truncate text-[13px]">Ohne Zuordnung</dt>
+                    <dd className="amount shrink-0 text-[17px]">
                       <Money value={ausgaben.ohne} />
                     </dd>
                   </div>
@@ -411,7 +411,7 @@ function DiaryTab() {
             <button
               type="button"
               onClick={fillDays}
-              className="mt-2 w-full rounded-2xl bg-secondary px-4 py-3 text-sm font-semibold transition hover:bg-secondary/70"
+              className="mt-2 w-full rounded-2xl bg-secondary px-4 py-3 text-[13px] font-semibold transition hover:bg-secondary/70"
             >
               Alle {missing.length} Reisetage anlegen
             </button>
@@ -426,7 +426,7 @@ function DiaryTab() {
         )}
 
         {voice.error && (
-          <p className="rounded-2xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          <p className="rounded-2xl bg-destructive/10 px-4 py-3 text-[13px] text-destructive">
             {voice.error}
           </p>
         )}
@@ -464,16 +464,16 @@ function DiaryTab() {
                 >
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center gap-2">
-                      <span className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                      <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                         {e.day}. Reisetag
                       </span>
                       {e.date === today && (
-                        <span className="kicker rounded-full bg-[var(--ok-soft)] px-2 py-0.5 text-[9.5px] text-[var(--primary)]">
+                        <span className="kicker rounded-full bg-[var(--ok-soft)] px-2 py-0.5 text-xs text-[var(--primary)]">
                           heute
                         </span>
                       )}
                     </span>
-                    <span className="display mt-0.5 block truncate text-[1.1rem] leading-snug">
+                    <span className="display mt-0.5 block truncate text-[17px] leading-snug">
                       {formatDateLong(e.date) || "Ohne Datum"}
                     </span>
                     <span className="block truncate text-xs text-muted-foreground">
@@ -519,7 +519,7 @@ function DiaryTab() {
                   Alles Weitere ist erreichbar, draengt sich aber nicht auf. */}
                     <div className="mt-4">
                       <div className="mb-2 flex items-start justify-between gap-2">
-                        <p className="min-w-0 flex-1 text-[1.05rem] italic leading-snug text-primary">
+                        <p className="min-w-0 flex-1 text-[17px] italic leading-snug text-primary">
                           {questionFor(e.day)}
                         </p>
                         <MemoButton entry={e} field="text" />
@@ -547,7 +547,7 @@ function DiaryTab() {
                               type="button"
                               aria-pressed={active}
                               onClick={() => set(e.id, { mood: active ? "" : m })}
-                              className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+                              className={`min-h-11 inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium transition ${
                                 active
                                   ? "bg-primary text-primary-foreground"
                                   : "bg-secondary text-muted-foreground hover:bg-secondary/70"
@@ -592,7 +592,7 @@ function DiaryTab() {
                                     type="button"
                                     aria-pressed={active}
                                     onClick={() => set(e.id, { foodTag: active ? "" : tag })}
-                                    className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+                                    className={`min-h-11 inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium transition ${
                                       active
                                         ? "bg-primary text-primary-foreground"
                                         : "bg-secondary text-muted-foreground hover:bg-secondary/70"
@@ -649,7 +649,7 @@ function DiaryTab() {
             <button
               type="button"
               onClick={addDay}
-              className="mt-3 w-full rounded-[var(--radius)] border border-dashed border-border py-3 text-sm font-medium text-muted-foreground transition hover:border-[var(--input)] hover:text-foreground"
+              className="mt-3 w-full rounded-[var(--radius)] border-[0.5px] border-dashed border-border py-3 text-[13px] font-medium text-muted-foreground transition hover:border-[var(--input)] hover:text-foreground"
             >
               <Plus className="mr-1 inline size-4 align-[-3px]" />
               Weiteren Tag anlegen
@@ -658,7 +658,7 @@ function DiaryTab() {
         </div>
 
         {trip.diary.length === 0 && (
-          <p className="rounded-3xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+          <p className="rounded-[var(--radius)] border-[0.5px] border-dashed border-border p-8 text-center text-[13px] text-muted-foreground">
             Noch kein Eintrag – starte mit Tag 1.
           </p>
         )}
@@ -677,7 +677,7 @@ function DiaryTab() {
               {(Object.keys(layoutLabels) as Layout[]).map((l) => (
                 <label
                   key={l}
-                  className={`flex cursor-pointer items-center gap-2 rounded-2xl border px-3 py-2.5 text-sm ${
+                  className={`flex cursor-pointer items-center gap-2 rounded-2xl border-[0.5px] px-3 py-2.5 text-[13px] ${
                     layout === l ? "border-primary bg-primary/10" : "border-border"
                   }`}
                 >
@@ -693,7 +693,7 @@ function DiaryTab() {
               ))}
             </div>
 
-            <label className="mt-3 flex items-center gap-2 text-sm">
+            <label className="mt-3 flex items-center gap-2 text-[13px]">
               <input
                 type="checkbox"
                 checked={withBudget}

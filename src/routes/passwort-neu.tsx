@@ -82,42 +82,45 @@ function NewPasswordPage() {
             alt="kialia Logo"
             width={160}
             height={160}
-            className="size-24 rounded-3xl shadow-sm ring-1 ring-white/15"
+            className="size-24 rounded-[var(--radius)] shadow-sm ring-1 ring-white/15"
           />
           <h1 className="mt-4">
             <Wordmark />
           </h1>
         </div>
 
-        <div className="rounded-3xl bg-card p-5" style={{ boxShadow: "var(--shadow-soft)" }}>
+        <div
+          className="rounded-[var(--radius)] bg-card p-5"
+          style={{ boxShadow: "var(--shadow-soft)" }}
+        >
           {!ready ? (
-            <p className="text-sm text-muted-foreground">Einen Moment …</p>
+            <p className="text-[13px] text-muted-foreground">Einen Moment …</p>
           ) : done ? (
             <>
-              <h2 className="display text-[1.15rem]">Passwort geändert</h2>
-              <p className="mt-2 text-sm text-muted-foreground">
+              <h2 className="display text-xl">Passwort geändert</h2>
+              <p className="mt-2 text-[13px] text-muted-foreground">
                 Du bist angemeldet. Es geht gleich weiter.
               </p>
             </>
           ) : !hasSession ? (
             <>
-              <h2 className="display text-[1.15rem]">Dieser Link wirkt nicht mehr</h2>
-              <p className="mt-2 text-sm text-muted-foreground">
+              <h2 className="display text-xl">Dieser Link wirkt nicht mehr</h2>
+              <p className="mt-2 text-[13px] text-muted-foreground">
                 Rücksetz-Links gelten aus Sicherheitsgründen nur kurz und nur einmal. Fordere
                 einfach einen neuen an.
               </p>
               <button
                 type="button"
                 onClick={() => navigate({ to: "/auth" })}
-                className="btn-warm mt-4 w-full rounded-2xl px-4 py-3.5 text-sm font-semibold"
+                className="btn-warm mt-4 w-full rounded-2xl px-4 py-3.5 text-[13px] font-semibold"
               >
                 Zurück zur Anmeldung
               </button>
             </>
           ) : (
             <form onSubmit={submit}>
-              <h2 className="display text-[1.15rem]">Neues Passwort</h2>
-              <p className="mt-1 mb-3 text-sm text-muted-foreground">
+              <h2 className="display text-xl">Neues Passwort</h2>
+              <p className="mt-1 mb-3 text-[13px] text-muted-foreground">
                 Wähle ein neues Passwort für dein Konto.
               </p>
               <Field label="Neues Passwort">
@@ -134,7 +137,7 @@ function NewPasswordPage() {
               {msg && (
                 <div
                   role="status"
-                  className="mt-3 rounded-2xl bg-destructive/10 px-3 py-2 text-sm text-destructive"
+                  className="mt-3 rounded-2xl bg-destructive/10 px-3 py-2 text-[13px] text-destructive"
                 >
                   <p className="font-medium">{msg.text}</p>
                   {msg.action && <p className="mt-0.5 text-xs opacity-90">{msg.action}</p>}
@@ -144,7 +147,7 @@ function NewPasswordPage() {
               <button
                 type="submit"
                 disabled={busy}
-                className="btn-warm mt-4 w-full rounded-2xl px-4 py-3.5 text-sm font-semibold disabled:opacity-60"
+                className="btn-warm mt-4 w-full rounded-2xl px-4 py-3.5 text-[13px] font-semibold disabled:opacity-60"
               >
                 {busy ? "Einen Moment …" : "Passwort speichern"}
               </button>

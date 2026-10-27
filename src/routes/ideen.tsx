@@ -133,7 +133,7 @@ function IdeasTab() {
     <AppShell title="Ideen" subtitle="Alles, was ihr sehen, essen und erleben wollt.">
       <div className="space-y-4">
         {moved && (
-          <p role="status" className="rounded-2xl bg-secondary px-4 py-3 text-sm">
+          <p role="status" className="rounded-2xl bg-secondary px-4 py-3 text-[13px]">
             „{moved.text}“ steht jetzt unter{" "}
             <span className="font-semibold">Plan → {IDEA_KIND_LABELS[moved.kind]}</span>.
           </p>
@@ -178,7 +178,7 @@ function IdeasTab() {
               else setSugError(res.error);
             }}
             disabled={sugBusy || !trip.destination.trim()}
-            className="mt-3 w-full rounded-2xl bg-secondary px-4 py-3 text-sm font-semibold transition hover:bg-secondary/70 disabled:opacity-60"
+            className="mt-3 w-full rounded-2xl bg-secondary px-4 py-3 text-[13px] font-semibold transition hover:bg-secondary/70 disabled:opacity-60"
           >
             {sugBusy
               ? "Wird geholt …"
@@ -194,11 +194,11 @@ function IdeasTab() {
               {suggestions.map((sug, i) => (
                 <li key={`${sug.title}-${i}`} className="rounded-2xl bg-secondary/50 p-3">
                   <div className="flex items-start gap-2">
-                    <span className="mt-0.5 shrink-0 rounded-full bg-card px-2 py-0.5 text-[10px] font-semibold">
+                    <span className="mt-0.5 shrink-0 rounded-full bg-card px-2 py-0.5 text-xs font-semibold">
                       {IDEA_CATEGORY_LABELS[sug.category] ?? sug.category}
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold">{sug.title}</p>
+                      <p className="text-[13px] font-semibold">{sug.title}</p>
                       <p className="mt-0.5 text-xs text-muted-foreground">{sug.why}</p>
                     </div>
                   </div>
@@ -231,7 +231,7 @@ function IdeasTab() {
         {trip.ideas.map((idea) => (
           <Card key={idea.id}>
             <div className="flex items-start gap-2">
-              <p className="display min-w-0 flex-1 whitespace-pre-wrap break-words text-[1.04rem] leading-snug">
+              <p className="display min-w-0 flex-1 whitespace-pre-wrap break-words text-[17px] leading-snug">
                 {idea.text}
               </p>
               <DeleteButton
@@ -250,7 +250,7 @@ function IdeasTab() {
                     type="button"
                     aria-pressed={idea.kind === k}
                     onClick={() => setKind(idea.id, k)}
-                    className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${
+                    className={`min-h-11 inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold transition ${
                       idea.kind === k
                         ? "bg-primary text-primary-foreground"
                         : "bg-secondary text-muted-foreground"
@@ -269,7 +269,7 @@ function IdeasTab() {
                       key={k}
                       type="button"
                       onClick={() => setKind(idea.id, k)}
-                      className="rounded-full bg-card px-2.5 py-1 text-[11px] font-semibold shadow-sm"
+                      className="rounded-full bg-card px-2.5 py-1 text-xs font-semibold shadow-sm"
                     >
                       {IDEA_KIND_LABELS[k]}
                     </button>
@@ -284,7 +284,7 @@ function IdeasTab() {
               type="button"
               onClick={() => toPlan(idea)}
               disabled={!idea.text.trim()}
-              className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-secondary py-2.5 text-xs font-semibold transition hover:bg-secondary/70 disabled:opacity-50"
+              className="mt-3 flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-secondary py-2.5 text-xs font-semibold transition hover:bg-secondary/70 disabled:opacity-50"
             >
               <ArrowRight className="size-3.5" /> In den Plan übernehmen
             </button>
@@ -292,7 +292,7 @@ function IdeasTab() {
         ))}
 
         {trip.ideas.length === 0 && (
-          <p className="flex items-center gap-2 rounded-3xl border border-dashed border-border p-8 text-sm text-muted-foreground">
+          <p className="flex items-center gap-2 rounded-[var(--radius)] border-[0.5px] border-dashed border-border p-8 text-[13px] text-muted-foreground">
             <Lightbulb className="size-4" /> Noch keine Ideen – schreib einfach los.
           </p>
         )}

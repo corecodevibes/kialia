@@ -92,24 +92,24 @@ function OnboardingPage() {
             alt="kialia Logo"
             width={96}
             height={96}
-            className="size-20 rounded-3xl shadow-sm ring-1 ring-white/15"
+            className="size-20 rounded-[var(--radius)] shadow-sm ring-1 ring-white/15"
           />
           <p className="mt-3">
             <Wordmark size="sm" />
           </p>
           <p className="text-xs font-medium text-foreground/70">See more. travel further.</p>
-          <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-foreground/70">
+          <p className="mt-2 text-xs font-semibold uppercase tracking-[0.24em] text-foreground/70">
             Schritt {step + 1} von 2
           </p>
         </div>
 
         <div
-          className="rounded-3xl border-[0.5px] border-border/60 bg-card p-5"
+          className="rounded-[var(--radius)] border-[0.5px] border-border/60 bg-card p-5"
           style={{ boxShadow: "var(--shadow-soft)" }}
         >
           {step === 0 ? (
             <div className="space-y-4">
-              <h1 className="display text-[1.4rem]">Schön, dass du da bist</h1>
+              <h1 className="display text-[26px]">Schön, dass du da bist</h1>
               <Field label="Wie heißt du?">
                 <input
                   value={name}
@@ -147,18 +147,18 @@ function OnboardingPage() {
               <button
                 type="button"
                 onClick={() => setStep(1)}
-                className="btn-warm w-full rounded-2xl px-4 py-3.5 text-sm font-semibold"
+                className="btn-warm w-full rounded-2xl px-4 py-3.5 text-[13px] font-semibold"
               >
                 Weiter
               </button>
             </div>
           ) : (
             <div className="space-y-4">
-              <h1 className="display flex items-center gap-2 text-[1.4rem]">
+              <h1 className="display flex items-center gap-2 text-[26px]">
                 <Sparkles className="size-5 text-accent" />
                 Kurz zur App
               </h1>
-              <div className="space-y-3 text-sm leading-relaxed text-muted-foreground">
+              <div className="space-y-3 text-[13px] leading-relaxed text-muted-foreground">
                 <p>
                   Diese App begleitet dich{" "}
                   <strong className="text-foreground">vor, während und nach</strong> deiner Reise.
@@ -184,7 +184,7 @@ function OnboardingPage() {
                 <button
                   type="button"
                   onClick={() => setStep(0)}
-                  className="rounded-2xl border-[0.5px] border-border px-4 py-3.5 text-sm font-medium"
+                  className="rounded-2xl border-[0.5px] border-border px-4 py-3.5 text-[13px] font-medium"
                 >
                   Zurück
                 </button>
@@ -192,7 +192,7 @@ function OnboardingPage() {
                   type="button"
                   onClick={finish}
                   disabled={busy}
-                  className="btn-warm flex-1 rounded-2xl px-4 py-3.5 text-sm font-semibold disabled:opacity-60"
+                  className="btn-warm flex-1 rounded-2xl px-4 py-3.5 text-[13px] font-semibold disabled:opacity-60"
                 >
                   {busy ? "Einen Moment …" : "Los geht's"}
                 </button>
@@ -201,7 +201,7 @@ function OnboardingPage() {
               {saveError && (
                 <div
                   role="status"
-                  className={`mt-3 rounded-2xl px-3 py-2 text-sm ${
+                  className={`mt-3 rounded-2xl px-3 py-2 text-[13px] ${
                     saveError.offline
                       ? "bg-card text-foreground"
                       : "bg-destructive/10 text-destructive"
@@ -236,7 +236,7 @@ function ToggleRow({
     <button
       type="button"
       onClick={() => onChange(!value)}
-      className={`flex w-full items-center gap-2 rounded-2xl border px-3 py-2.5 text-left text-sm transition ${
+      className={`flex w-full items-center gap-2 rounded-2xl border-[0.5px] px-3 py-2.5 text-left text-[13px] transition ${
         value ? "border-primary bg-primary/10" : "border-border"
       }`}
     >

@@ -248,13 +248,16 @@
  */
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
+  /* Drei Radien und die Pille, sonst nichts. Vorher ergaben die Stufen 16, 18,
+     20 und 24 px — vier Kanten, die fast gleich aussehen und genau deshalb
+     unordentlich wirken. Klein: Symbolknoepfe. Mittel: Felder und Chips.
+     Gross: Karten und Blaetter. Alles Runde ist eine Pille. */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 14px;
+  --radius-2xl: 20px;
+  --radius-3xl: 20px;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -1041,7 +1044,7 @@ body {
 /* Kicker: die gesperrte Versalzeile ueber jeder Ueberschrift. Sie ordnet ein,
    bevor der Titel benannt wird, und ist das erkennbarste Merkmal des Kits. */
 @utility kicker {
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -1096,4 +1099,17 @@ body {
   height: 150px;
   -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 52%, transparent 100%);
   mask-image: linear-gradient(to bottom, #000 0%, #000 52%, transparent 100%);
+}
+
+/* Trefferflaeche fuer kleine Symbole. Das Symbol bleibt klein und leise; der
+   Knopf reagiert auf einen Bereich von rund 44 px. Der Bereich ist unsichtbar
+   und veraendert das Layout nicht — so bleibt die Ruhe der Oberflaeche erhalten,
+   ohne dass man beim Antippen danebenzielt. */
+.tap {
+  position: relative;
+}
+.tap::after {
+  content: "";
+  position: absolute;
+  inset: -12px;
 }

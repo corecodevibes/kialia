@@ -58,7 +58,7 @@ export const Route = createFileRoute("/packliste")({
 });
 
 const rowInput =
-  "rounded-xl border-[0.5px] border-border bg-background px-3 py-2 text-sm outline-none transition focus:border-primary";
+  "rounded-xl border-[0.5px] border-border bg-background px-3 py-2 text-[13px] outline-none transition focus:border-primary";
 
 function PackingTab() {
   const { trip, update, ready, hasTrip } = useTrip();
@@ -237,7 +237,7 @@ function PackingTab() {
               ]);
               setUndoCat(null);
             }}
-            className="flex w-full items-center justify-center gap-1.5 rounded-2xl bg-secondary px-4 py-3 text-sm font-semibold transition hover:bg-secondary/70"
+            className="flex w-full items-center justify-center gap-1.5 rounded-2xl bg-secondary px-4 py-3 text-[13px] font-semibold transition hover:bg-secondary/70"
           >
             <Undo2 className="size-4" />„{undoCat.cat.name}“ mit {undoCat.cat.items.length}{" "}
             Einträgen zurückholen
@@ -264,7 +264,7 @@ function PackingTab() {
                   type="button"
                   aria-pressed={aktiv}
                   onClick={() => setWessen(r.key)}
-                  className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                  className={`shrink-0 min-h-11 inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold transition ${
                     aktiv ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground"
                   }`}
                 >
@@ -276,7 +276,7 @@ function PackingTab() {
         )}
 
         {categories.length === 0 && wessen !== "alle" && (
-          <p className="px-1 text-sm text-muted-foreground">
+          <p className="px-1 text-[13px] text-muted-foreground">
             Hier liegt noch nichts. Ordne in „Alle" ein Teil jemandem zu — dann rutscht es hierher.
           </p>
         )}
@@ -290,14 +290,14 @@ function PackingTab() {
                 <button
                   type="button"
                   onClick={() => setOpen((o) => ({ ...o, [c.id]: !isOpen }))}
-                  className="flex flex-1 items-center gap-2 text-left"
+                  className="flex min-h-11 flex-1 items-center gap-2 text-left"
                 >
                   {isOpen ? (
                     <ChevronDown className="size-4" />
                   ) : (
                     <ChevronRight className="size-4" />
                   )}
-                  <span className="display text-[1.02rem] leading-snug">{c.name}</span>
+                  <span className="display text-[17px] leading-snug">{c.name}</span>
                   <span className="text-xs text-muted-foreground">
                     {catDone}/{c.items.length}
                   </span>
@@ -309,7 +309,7 @@ function PackingTab() {
                     setUndoCat({ cat: c, index: categories.findIndex((x) => x.id === c.id) });
                     setCats((cats) => cats.filter((x) => x.id !== c.id));
                   }}
-                  className="text-muted-foreground transition hover:text-destructive"
+                  className="tap text-muted-foreground transition hover:text-destructive"
                 >
                   <Trash2 className="size-4" />
                 </button>
@@ -345,7 +345,7 @@ function PackingTab() {
                                 ),
                               )
                             }
-                            className={`flex size-6 shrink-0 items-center justify-center rounded-lg border transition ${
+                            className={`tap flex size-6 shrink-0 items-center justify-center rounded-lg border-[0.5px] transition ${
                               item.done
                                 ? "border-primary bg-primary text-primary-foreground"
                                 : "border-border"
@@ -397,7 +397,7 @@ function PackingTab() {
                                 ),
                               )
                             }
-                            className={`${rowInput} w-[3.6rem] shrink-0 appearance-none px-1 text-center text-[11px] font-semibold text-foreground`}
+                            className={`${rowInput} w-[3.6rem] shrink-0 appearance-none px-1 text-center text-xs font-semibold text-foreground`}
                             style={
                               item.who ? { background: personColor(trip, item.who) } : undefined
                             }
@@ -421,13 +421,13 @@ function PackingTab() {
                             }
                             aria-expanded={openPhotos === item.id}
                             onClick={() => setOpenPhotos((v) => (v === item.id ? null : item.id))}
-                            className={`flex shrink-0 items-center gap-0.5 transition ${
+                            className={`tap flex shrink-0 items-center gap-0.5 transition ${
                               photoCounts[item.id] ? "text-primary" : "text-muted-foreground"
                             } hover:text-primary`}
                           >
                             <Camera className="size-4" />
                             {photoCounts[item.id] ? (
-                              <span className="text-[10px] font-bold tabular-nums">
+                              <span className="text-xs font-bold tabular-nums">
                                 {photoCounts[item.id]}
                               </span>
                             ) : null}
@@ -446,7 +446,7 @@ function PackingTab() {
                                 ),
                               );
                             }}
-                            className="text-muted-foreground transition hover:text-destructive"
+                            className="tap text-muted-foreground transition hover:text-destructive"
                           >
                             <X className="size-4" />
                           </button>
@@ -514,7 +514,7 @@ function PackingTab() {
                         ),
                       )
                     }
-                    className="flex items-center gap-1.5 rounded-xl px-2 py-1.5 text-xs font-medium text-primary"
+                    className="tap flex items-center gap-1.5 rounded-xl px-2 py-1.5 text-xs font-medium text-primary"
                   >
                     <Plus className="size-4" /> Eintrag hinzufügen
                   </button>
@@ -558,7 +558,7 @@ function PackingTab() {
             <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />
             <div className="min-w-0 flex-1">
               <CardTitle>Inventar sichern</CardTitle>
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="mt-1 text-[13px] text-muted-foreground">
                 Eine Datei mit allen Fotos und Bezeichnungen — lesbar ohne App und ohne Netz.
                 Speichere sie irgendwo, wo sie den Verlust des Handys übersteht.
               </p>

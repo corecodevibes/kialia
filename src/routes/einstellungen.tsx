@@ -111,12 +111,12 @@ function SettingsPage() {
           <button
             type="button"
             onClick={() => navigate({ to: "/" })}
-            className="mb-4 flex items-center gap-1 text-sm font-medium text-foreground/70"
+            className="mb-4 flex items-center gap-1 text-[13px] font-medium text-foreground/70"
           >
             <ChevronLeft className="size-4" /> Zurück
           </button>
 
-          <h1 className="display text-[1.6rem]">Einstellungen</h1>
+          <h1 className="display text-[26px]">Einstellungen</h1>
         </div>
 
         <div className="mt-5 space-y-4">
@@ -146,7 +146,7 @@ function SettingsPage() {
               Reise: sie aendert sich nicht, wenn du verreist. */}
           <Card>
             <CardTitle>Deine Rechenwährung</CardTitle>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="mt-1 text-[13px] text-muted-foreground">
               In dieser Währung willst du am Ende wissen, was die Reise gekostet hat. Was du
               unterwegs zahlst, trägst du weiterhin so ein, wie du es zahlst.
             </p>
@@ -174,7 +174,7 @@ function SettingsPage() {
 
           <Card>
             <CardTitle>Wie ihr reist</CardTitle>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="mt-1 text-[13px] text-muted-foreground">
               Einmal beantwortet — danach richten sich die Vorschläge bei jedem Ziel danach.
             </p>
             <div className="mt-3">
@@ -188,7 +188,7 @@ function SettingsPage() {
                 />
               </Field>
             </div>
-            <p className="mt-4 text-sm font-medium">Was hat euch dort am meisten gefallen?</p>
+            <p className="mt-4 text-[13px] font-medium">Was hat euch dort am meisten gefallen?</p>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {TASTE_OPTIONS.map((o) => {
                 const on = taste.likes.includes(o.key);
@@ -205,7 +205,7 @@ function SettingsPage() {
                           : [...taste.likes, o.key],
                       })
                     }
-                    className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                    className={`min-h-11 inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold transition ${
                       on ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground"
                     }`}
                   >
@@ -222,7 +222,7 @@ function SettingsPage() {
               Speichern
             </PrimaryButton>
             {tasteSaved && (
-              <p role="status" className="mt-2 text-sm text-muted-foreground">
+              <p role="status" className="mt-2 text-[13px] text-muted-foreground">
                 Gespeichert.
               </p>
             )}
@@ -230,14 +230,14 @@ function SettingsPage() {
 
           <Card>
             <CardTitle>Konto</CardTitle>
-            <p className="mt-1 text-sm text-muted-foreground">{session?.user.email}</p>
+            <p className="mt-1 text-[13px] text-muted-foreground">{session?.user.email}</p>
             <button
               type="button"
               onClick={async () => {
                 await signOut();
                 navigate({ to: "/auth", replace: true });
               }}
-              className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-secondary px-4 py-3 text-sm font-semibold transition hover:bg-secondary/70"
+              className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-secondary px-4 py-3 text-[13px] font-semibold transition hover:bg-secondary/70"
             >
               <LogOut className="size-4" /> Abmelden
             </button>
@@ -254,7 +254,7 @@ function SettingsPage() {
               type="button"
               onClick={() => void downloadAllTrips(trips)}
               disabled={!trips.length}
-              className="mt-3 w-full rounded-2xl bg-secondary px-4 py-3 text-sm font-semibold transition hover:bg-secondary/70 disabled:opacity-50"
+              className="mt-3 w-full rounded-2xl bg-secondary px-4 py-3 text-[13px] font-semibold transition hover:bg-secondary/70 disabled:opacity-50"
             >
               Alle Reisen sichern
             </button>
@@ -262,7 +262,7 @@ function SettingsPage() {
 
           <Card>
             <CardTitle>Konto löschen</CardTitle>
-            <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+            <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
               Das entfernt dein Konto, deine Reisen und alle Tagebucheinträge endgültig.{" "}
               <span className="font-medium text-foreground">
                 Reisen, die dir gehören, verschwinden auch für die anderen Mitreisenden.
@@ -287,7 +287,7 @@ function SettingsPage() {
               type="button"
               onClick={deleteAccount}
               disabled={confirmText !== "LÖSCHEN" || deleting}
-              className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-destructive px-4 py-3 text-sm font-semibold text-background transition disabled:opacity-40"
+              className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-destructive px-4 py-3 text-[13px] font-semibold text-background transition disabled:opacity-40"
             >
               <Trash2 className="size-4" />
               {deleting ? "Wird gelöscht …" : "Konto endgültig löschen"}
@@ -296,7 +296,7 @@ function SettingsPage() {
             {msg && (
               <div
                 role="status"
-                className="mt-3 rounded-2xl bg-destructive/10 px-3 py-2 text-sm text-destructive"
+                className="mt-3 rounded-2xl bg-destructive/10 px-3 py-2 text-[13px] text-destructive"
               >
                 <p className="font-medium">{msg.text}</p>
                 {msg.action && <p className="mt-0.5 text-xs opacity-90">{msg.action}</p>}

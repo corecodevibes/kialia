@@ -47,7 +47,10 @@ export function AiFeatures() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="rounded-3xl bg-card p-4" style={{ boxShadow: "var(--shadow-soft)" }}>
+    <div
+      className="rounded-[var(--radius)] bg-card p-4"
+      style={{ boxShadow: "var(--shadow-soft)" }}
+    >
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -55,7 +58,7 @@ export function AiFeatures() {
         className="flex w-full items-center gap-2 text-left"
       >
         <Sparkles className="size-4 shrink-0 text-primary" />
-        <span className="min-w-0 flex-1 text-[0.95rem] font-semibold leading-snug">
+        <span className="min-w-0 flex-1 text-[15px] font-semibold leading-snug">
           Was kialia für dich übernimmt
         </span>
         <ChevronDown
@@ -69,8 +72,8 @@ export function AiFeatures() {
             {FEATURES.map((f) => (
               <li key={f.title} className="rounded-2xl bg-secondary/40 p-3">
                 <div className="flex items-baseline justify-between gap-2">
-                  <span className="text-sm font-semibold">{f.title}</span>
-                  <span className="shrink-0 text-[10px] uppercase tracking-wider text-muted-foreground">
+                  <span className="text-[13px] font-semibold">{f.title}</span>
+                  <span className="shrink-0 text-xs uppercase tracking-wider text-muted-foreground">
                     {f.where}
                   </span>
                 </div>

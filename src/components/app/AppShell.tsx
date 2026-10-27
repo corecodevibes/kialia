@@ -146,16 +146,16 @@ export function AppShell({
   if (gate === "offline-unknown") {
     return (
       <div className="acrylic-page flex min-h-screen items-center justify-center px-6">
-        <div className="relative z-10 max-w-sm rounded-3xl bg-card p-5 text-center">
-          <h1 className="text-lg font-bold">Keine Verbindung</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
+        <div className="relative z-10 max-w-sm rounded-[var(--radius)] bg-card p-5 text-center">
+          <h1 className="text-[17px] font-bold">Keine Verbindung</h1>
+          <p className="mt-2 text-[13px] text-muted-foreground">
             Wir konnten dein Konto nicht laden. Sobald du wieder online bist, geht es weiter — deine
             Reisen auf diesem Gerät bleiben unberührt.
           </p>
           <button
             type="button"
             onClick={() => window.location.reload()}
-            className="btn-warm mt-4 w-full rounded-2xl px-4 py-3 text-sm font-semibold"
+            className="btn-warm mt-4 w-full rounded-2xl px-4 py-3 text-[13px] font-semibold"
           >
             Erneut versuchen
           </button>
@@ -212,11 +212,11 @@ export function AppShell({
                 Zielen der Name gekuerzt wird und nicht die Flagge wegfaellt. */}
             <div className="flex items-baseline gap-2">
               {flagCode && (
-                <span key={flagCode} aria-hidden className="hero-flag shrink-0 text-[1.15rem]">
+                <span key={flagCode} aria-hidden className="hero-flag shrink-0 text-xl">
                   <FlagMark code={flagCode} />
                 </span>
               )}
-              <h1 className="display min-w-0 truncate text-[1.55rem]">
+              <h1 className="display min-w-0 truncate text-[26px]">
                 {trip.destination || "kialia"}
               </h1>
             </div>
@@ -257,7 +257,7 @@ export function AppShell({
         {speicherFehler && (
           <div
             role="alert"
-            className="mx-auto mb-3 max-w-md rounded-[var(--radius)] border border-destructive/30 bg-[var(--no-soft)] px-4 py-3 text-xs text-destructive"
+            className="mx-auto mb-3 max-w-md rounded-[var(--radius)] border-[0.5px] border-destructive/30 bg-[var(--no-soft)] px-4 py-3 text-xs text-destructive"
           >
             <p className="font-semibold">Änderungen werden nicht gespeichert</p>
             <p className="mt-1">
@@ -270,7 +270,7 @@ export function AppShell({
         {syncError && (
           <div
             role="status"
-            className="mx-auto mb-3 max-w-md rounded-[var(--radius)] border border-destructive/25 bg-[var(--no-soft)] px-4 py-2.5 text-xs text-destructive"
+            className="mx-auto mb-3 max-w-md rounded-[var(--radius)] border-[0.5px] border-destructive/25 bg-[var(--no-soft)] px-4 py-2.5 text-xs text-destructive"
           >
             <p className="font-semibold">Abgleich fehlgeschlagen</p>
             <p className="mt-0.5">
@@ -291,7 +291,7 @@ export function AppShell({
               activeOptions={{ exact: to === "/" }}
               activeProps={{ className: "text-primary" }}
               inactiveProps={{ className: "text-muted-foreground" }}
-              className="group flex flex-1 flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition"
+              className="group flex flex-1 flex-col items-center gap-1 py-2.5 text-xs font-medium transition"
             >
               <Icon className="size-5" strokeWidth={1.6} />
               {label}
@@ -438,13 +438,13 @@ export function NoTripYet({ what }: { what: string }) {
     <AppShell title="Noch keine Reise" subtitle="">
       <div className="flex min-h-[50vh] flex-col justify-center">
         <h2 className="text-xl font-extrabold leading-tight tracking-tight">Zuerst die Reise</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="mt-2 text-[13px] text-muted-foreground">
           {what} gehört immer zu einer bestimmten Reise. Lege sie auf der Startseite an — danach ist
           dieser Bereich für sie da.
         </p>
         <Link
           to="/"
-          className="btn-warm mt-5 w-full rounded-2xl px-4 py-3.5 text-center text-sm font-semibold"
+          className="btn-warm mt-5 w-full rounded-2xl px-4 py-3.5 text-center text-[13px] font-semibold"
         >
           Reise anlegen
         </Link>
@@ -589,7 +589,7 @@ export function PersonColors({
             type="button"
             aria-expanded={editing === name}
             onClick={() => setEditing(editing === name ? null : name)}
-            className="rounded-full px-3 py-1.5 text-xs font-semibold text-foreground"
+            className="min-h-11 inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold text-foreground"
             style={{ background: personColor(trip, name) }}
           >
             {name}
@@ -624,7 +624,7 @@ export function PersonColors({
    16 px erzwingt die Regel weiter unten fuer Touch-Geraete — darunter zoomt
    iOS beim Fokus hinein und bleibt so. */
 export const inputClass =
-  "block w-full min-w-0 max-w-full rounded-[14px] border-[0.5px] border-border bg-secondary px-3.5 py-2.5 text-sm text-foreground transition placeholder:text-muted-foreground/70 focus:border-[var(--ring)] focus:bg-card focus:outline-none";
+  "block w-full min-w-0 max-w-full rounded-[14px] border-[0.5px] border-border bg-secondary px-3.5 py-2.5 text-[13px] text-foreground transition placeholder:text-muted-foreground/70 focus:border-[var(--ring)] focus:bg-card focus:outline-none";
 
 /** Datums-Felder: gleiches Aussehen, aber kompakter, damit nichts abgeschnitten wird. */
 export const dateInputClass = `${inputClass} box-border appearance-none px-2.5 text-[13px] [&::-webkit-date-and-time-value]:text-left [&::-webkit-calendar-picker-indicator]:ml-0`;
@@ -649,7 +649,7 @@ export function SectionTitle({ children }: { children: ReactNode }) {
  * Schrift, nur eine Stufe fetter. Die Serif macht daraus eine eigene Ebene,
  * ohne dass Größe oder Farbe lauter werden müssen. */
 export function CardTitle({ children }: { children: ReactNode }) {
-  return <h2 className="display text-[1.12rem]">{children}</h2>;
+  return <h2 className="display text-xl">{children}</h2>;
 }
 
 /** Einheitlicher Kennzahl-Block (z. B. Reisedauer, Gesamtkosten). */
@@ -665,8 +665,8 @@ export function Stat({
   return (
     <div className="text-center">
       <CardTitle>{label}</CardTitle>
-      <p className="mt-1 text-3xl font-extrabold tracking-tight">{value}</p>
-      {hint && <p className="mt-1 text-sm text-muted-foreground">{hint}</p>}
+      <p className="mt-1 text-[34px] font-extrabold tracking-tight">{value}</p>
+      {hint && <p className="mt-1 text-[13px] text-muted-foreground">{hint}</p>}
     </div>
   );
 }
@@ -692,7 +692,7 @@ export function PrimaryButton({
       onClick={onClick}
       disabled={disabled}
       aria-label={ariaLabel}
-      className={`btn-warm flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold transition active:scale-[0.99] disabled:opacity-60 ${className}`}
+      className={`btn-warm flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-[13px] font-semibold transition active:scale-[0.99] disabled:opacity-60 ${className}`}
     >
       {children}
     </button>
@@ -732,7 +732,7 @@ export function DeleteButton({
       type="button"
       aria-label={ariaLabel}
       onClick={onClick}
-      className="grid size-9 shrink-0 place-items-center rounded-xl text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"
+      className="grid size-11 shrink-0 place-items-center rounded-xl text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"
     >
       <span className="sr-only">{ariaLabel}</span>
       {/* Icon wird von der aufrufenden Seite gestellt */}
@@ -754,15 +754,15 @@ export function AddButton({ onClick, label }: { onClick: () => void; label: stri
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-foreground/25 bg-card/70 py-3 text-sm font-semibold text-foreground backdrop-blur-sm transition hover:bg-card"
+      className="flex w-full items-center justify-center gap-2 rounded-2xl border-[0.5px] border-dashed border-foreground/25 bg-card/70 py-3 text-[13px] font-semibold text-foreground backdrop-blur-sm transition hover:bg-card"
     >
-      <span className="text-base leading-none">+</span> {label}
+      <span className="text-[15px] leading-none">+</span> {label}
     </button>
   );
 }
 
 export function chipClass(active: boolean) {
-  return `inline-flex items-center justify-center gap-1.5 rounded-full border px-3 py-2 text-xs font-medium transition ${
+  return `inline-flex items-center justify-center min-h-11 gap-1.5 rounded-full border-[0.5px] px-3 py-2 text-xs font-medium transition ${
     active
       ? "border-primary bg-primary/10 text-primary"
       : "border-border bg-background text-muted-foreground"

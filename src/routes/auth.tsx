@@ -158,7 +158,7 @@ function AuthPage() {
     msg ? (
       <div
         role="status"
-        className={`mt-3 rounded-2xl px-3 py-2 text-sm ${
+        className={`mt-3 rounded-2xl px-3 py-2 text-[13px] ${
           msg.offline ? "bg-secondary text-foreground" : "bg-destructive/10 text-destructive"
         }`}
       >
@@ -175,10 +175,8 @@ function AuthPage() {
     return (
       <AuthFrame>
         <div className="rounded-[var(--radius)] border-[0.5px] border-border bg-card p-5 shadow-[var(--sh-2)]">
-          <h2 className="display text-[1.15rem]">
-            {isSignup ? "Fast geschafft" : "Link ist unterwegs"}
-          </h2>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <h2 className="display text-xl">{isSignup ? "Fast geschafft" : "Link ist unterwegs"}</h2>
+          <p className="mt-2 text-[13px] text-muted-foreground">
             Wir haben eine E-Mail an <span className="font-medium text-foreground">{email}</span>{" "}
             geschickt.{" "}
             {isSignup
@@ -196,7 +194,7 @@ function AuthPage() {
               type="button"
               onClick={resendConfirmation}
               disabled={busy || cooldown > 0}
-              className="mt-4 w-full rounded-full bg-secondary px-4 py-3 text-sm font-semibold transition active:scale-[0.985] disabled:opacity-40"
+              className="mt-4 w-full rounded-full bg-secondary px-4 py-3 text-[13px] font-semibold transition active:scale-[0.985] disabled:opacity-40"
             >
               {cooldown > 0 ? `Erneut senden in ${cooldown}\u00a0s` : "E-Mail erneut senden"}
             </button>
@@ -204,7 +202,7 @@ function AuthPage() {
           <button
             type="button"
             onClick={backToForm}
-            className="mt-2.5 w-full rounded-full px-4 py-3 text-sm font-medium text-muted-foreground transition hover:text-foreground"
+            className="mt-2.5 w-full rounded-full px-4 py-3 text-[13px] font-medium text-muted-foreground transition hover:text-foreground"
           >
             Andere Adresse verwenden
           </button>
@@ -219,7 +217,7 @@ function AuthPage() {
         onSubmit={submit}
         className="rounded-[var(--radius)] border-[0.5px] border-border bg-card p-5 shadow-[var(--sh-2)]"
       >
-        <div className="mb-5 grid grid-cols-2 gap-1 rounded-full bg-secondary p-1 text-sm font-medium">
+        <div className="mb-5 grid grid-cols-2 gap-1 rounded-full bg-secondary p-1 text-[13px] font-medium">
           {(["signup", "login"] as const).map((m) => (
             <button
               key={m}
@@ -267,7 +265,7 @@ function AuthPage() {
         <button
           type="submit"
           disabled={busy || cooldown > 0}
-          className="mt-5 w-full rounded-full bg-[var(--clay)] px-4 py-3.5 text-sm font-semibold text-[#FFF7F3] shadow-[var(--sh-1)] transition active:scale-[0.985] disabled:opacity-40"
+          className="mt-5 w-full rounded-full bg-[var(--clay)] px-4 py-3.5 text-[13px] font-semibold text-[#FFF7F3] shadow-[var(--sh-1)] transition active:scale-[0.985] disabled:opacity-40"
         >
           {busy
             ? "Einen Moment …"
@@ -283,7 +281,7 @@ function AuthPage() {
             type="button"
             onClick={requestReset}
             disabled={busy}
-            className="mt-2.5 w-full rounded-full px-4 py-2.5 text-sm font-medium text-muted-foreground transition hover:text-foreground disabled:opacity-40"
+            className="mt-2.5 w-full rounded-full px-4 py-2.5 text-[13px] font-medium text-muted-foreground transition hover:text-foreground disabled:opacity-40"
           >
             Passwort vergessen?
           </button>
@@ -310,7 +308,7 @@ function AuthFrame({ children }: { children: React.ReactNode }) {
             alt="kialia Logo"
             width={160}
             height={160}
-            className="size-32 rounded-3xl shadow-sm ring-1 ring-white/15"
+            className="size-32 rounded-[var(--radius)] shadow-sm ring-1 ring-white/15"
           />
           <h1 className="mt-4">
             <Wordmark size="lg" />
@@ -323,7 +321,7 @@ function AuthFrame({ children }: { children: React.ReactNode }) {
             landet auf einer Anmeldemaske. Ohne diesen Satz wirkt der Link
             kaputt und der Abbruch ist wahrscheinlicher als die Anmeldung. */}
         {hasInvite && (
-          <div className="mb-4 rounded-[var(--radius)] border-[0.5px] border-border bg-card/85 px-4 py-3 text-center text-sm">
+          <div className="mb-4 rounded-[var(--radius)] border-[0.5px] border-border bg-card/85 px-4 py-3 text-center text-[13px]">
             <p className="font-semibold">Du wurdest zu einer Reise eingeladen</p>
             <p className="mt-0.5 text-xs text-muted-foreground">
               Leg kurz ein Konto an — danach ist die Reise sofort da.

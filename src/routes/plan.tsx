@@ -114,7 +114,7 @@ function KindPicker({
           type="button"
           aria-pressed={value === g.kind}
           onClick={() => onChange(g.kind)}
-          className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+          className={`min-h-11 inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold transition ${
             value === g.kind ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
           }`}
         >
@@ -433,7 +433,7 @@ function PlanTab() {
               wird getrennt gespeichert: wer umschaltet, verliert seine
               Eingaben nicht und bekommt sie beim Zurueckschalten wieder. */}
           <div
-            className="mb-3 grid grid-cols-2 gap-1 rounded-2xl bg-secondary p-1 text-sm font-medium"
+            className="mb-3 grid grid-cols-2 gap-1 rounded-2xl bg-secondary p-1 text-[13px] font-medium"
             role="radiogroup"
             aria-label="Wie plant ihr das Essen?"
           >
@@ -449,7 +449,7 @@ function PlanTab() {
                 role="radio"
                 aria-checked={trip.meals.mode === key}
                 onClick={() => setMeals({ mode: key })}
-                className={`rounded-xl py-2 transition ${
+                className={`min-h-11 rounded-xl py-2 transition ${
                   trip.meals.mode === key
                     ? "bg-card text-foreground shadow-sm"
                     : "text-muted-foreground"
@@ -500,7 +500,7 @@ function PlanTab() {
                     </li>
                   ))}
                 </ul>
-                <p className="mt-2 text-[11px] leading-snug text-muted-foreground">
+                <p className="mt-2 text-xs leading-snug text-muted-foreground">
                   {costs.note} Das ist eine Schätzung, keine Auskunft — prüf sie, bevor du danach
                   planst.
                 </p>
@@ -582,7 +582,9 @@ function PlanTab() {
               />
             </Field>
           </div>
-          <p className={`mt-3 text-sm ${overMax ? "text-destructive" : "text-muted-foreground"}`}>
+          <p
+            className={`mt-3 text-[13px] ${overMax ? "text-destructive" : "text-muted-foreground"}`}
+          >
             Geplant: <Money value={perDay} /> pro Tag
             {overMax ? ` – ${eur(perDay - trip.meals.maxPerDay)} über deinem Limit.` : "."}
           </p>
@@ -621,7 +623,7 @@ function PlanTab() {
                     className="flex w-full items-start gap-2 text-left"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="display truncate text-[1.06rem] leading-snug">
+                      <p className="display truncate text-[17px] leading-snug">
                         {a.name || "Ohne Namen"}
                       </p>
                       <p className="mt-0.5 truncate text-xs text-muted-foreground">
@@ -631,7 +633,7 @@ function PlanTab() {
                       </p>
                     </div>
                     {a.cost > 0 && (
-                      <span className="amount shrink-0 pt-0.5 text-[0.95rem]">
+                      <span className="amount shrink-0 pt-0.5 text-[15px]">
                         {money(a.cost, a.currency || trip.currency || "EUR")}
                       </span>
                     )}
@@ -757,7 +759,7 @@ function PlanTab() {
                 </Card>
               ))}
               {items.length === 0 && (
-                <p className="px-1 text-sm text-muted-foreground">
+                <p className="px-1 text-[13px] text-muted-foreground">
                   {group.kind === "restaurant"
                     ? "Noch nichts fürs Essen notiert."
                     : "Noch keine Aktivität geplant."}
@@ -794,10 +796,10 @@ function PlanTab() {
         <SectionTitle>Gesamtkosten</SectionTitle>
         <Card>
           <CardTitle>Geplant</CardTitle>
-          <p className="amount mt-1 text-[2rem]">
+          <p className="amount mt-1 text-[34px]">
             <Money value={totals.total} />
           </p>
-          <div className="mt-3 space-y-1 text-sm text-muted-foreground">
+          <div className="mt-3 space-y-1 text-[13px] text-muted-foreground">
             <p>
               Fortbewegung: <Money value={totals.transport} />
             </p>
@@ -852,7 +854,7 @@ function PlanTab() {
             <div className="mt-4 rounded-2xl bg-secondary/40 p-3">
               <div className="flex items-baseline justify-between gap-3">
                 <CardTitle>Tatsächlich ausgegeben</CardTitle>
-                <span className="amount text-[1.2rem]">
+                <span className="amount text-xl">
                   <Money value={totals.actual} />
                 </span>
               </div>
@@ -874,7 +876,7 @@ function PlanTab() {
             </div>
           )}
 
-          <label className="mt-4 flex items-center gap-2 text-sm font-medium">
+          <label className="mt-4 flex items-center gap-2 text-[13px] font-medium">
             <input
               type="checkbox"
               checked={trip.savings.enabled}
@@ -917,7 +919,7 @@ function PlanTab() {
 
                 {plan.perMonth === null ? (
                   <>
-                    <p className="mt-1 text-lg font-semibold">Keine Monatsrate mehr</p>
+                    <p className="mt-1 text-[17px] font-semibold">Keine Monatsrate mehr</p>
                     <p className="mt-1 text-xs text-muted-foreground">
                       {plan.months !== null && plan.months < 0
                         ? "Das Reisedatum liegt in der Vergangenheit."
@@ -927,7 +929,7 @@ function PlanTab() {
                   </>
                 ) : plan.reason === "nothing-open" ? (
                   <>
-                    <p className="mt-1 text-lg font-semibold">Alles beisammen</p>
+                    <p className="mt-1 text-[17px] font-semibold">Alles beisammen</p>
                     <p className="mt-1 text-xs text-muted-foreground">
                       Gespartes und Kredit decken die geplanten <Money value={plan.total} /> bereits
                       ab.
@@ -935,7 +937,7 @@ function PlanTab() {
                   </>
                 ) : (
                   <>
-                    <p className="amount mt-1 text-[1.7rem]">
+                    <p className="amount mt-1 text-[26px]">
                       <Money value={plan.perMonth} /> / Monat
                     </p>
                     <p className="mt-1 text-xs text-muted-foreground">
@@ -989,7 +991,7 @@ function PlanTab() {
 
                 {/* Herkunft der Zahl — eine Zahl ohne erkennbare Herkunft
                     glaubt niemand zweimal. */}
-                <dl className="mt-3 space-y-1 border-t border-foreground/10 pt-2 text-xs">
+                <dl className="mt-3 space-y-1 border-t-[0.5px] border-foreground/10 pt-2 text-xs">
                   <div className="flex justify-between gap-3">
                     <dt className="text-muted-foreground">Geplante Kosten</dt>
                     <dd className="amount">
@@ -1034,7 +1036,7 @@ function Itinerary({ trip }: { trip: Trip }) {
   if (!stops.length && !undated.length) {
     return (
       <Card>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-[13px] text-muted-foreground">
           Sobald Unterkünfte oder Fahrten ein Datum haben, entsteht hier euer Verlauf — mit
           Reisetagen, Nächten und den Lücken, für die noch nichts gebucht ist.
         </p>
@@ -1056,7 +1058,7 @@ function Itinerary({ trip }: { trip: Trip }) {
                 <div className="relative flex items-baseline gap-3 pl-0">
                   <span className="w-12 shrink-0">
                     <span className="kicker block">Tag</span>
-                    <span className="display block text-[1.35rem] leading-none">
+                    <span className="display block text-[26px] leading-none">
                       {s.day || formatDateLong(s.date).split(" ")[0]}
                     </span>
                   </span>
@@ -1067,7 +1069,7 @@ function Itinerary({ trip }: { trip: Trip }) {
                     className="relative mt-1.5 size-1.5 shrink-0 rounded-full bg-[var(--sage)] before:absolute before:left-1/2 before:top-3 before:h-[calc(100%+1.4rem)] before:w-px before:-translate-x-1/2 before:bg-border group-last/stop:before:hidden"
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="display truncate text-[1.04rem] leading-snug">{s.title}</p>
+                    <p className="display truncate text-[17px] leading-snug">{s.title}</p>
                     <p className="text-xs text-muted-foreground">
                       {[
                         formatDateLong(s.date),
@@ -1097,13 +1099,13 @@ function Itinerary({ trip }: { trip: Trip }) {
       )}
 
       {undated.length > 0 && (
-        <div className={stops.length ? "mt-4 border-t border-foreground/10 pt-3" : ""}>
+        <div className={stops.length ? "mt-4 border-t-[0.5px] border-foreground/10 pt-3" : ""}>
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Noch ohne Datum
           </p>
           <ul className="mt-1.5 space-y-1">
             {undated.map((u) => (
-              <li key={`${u.kind}-${u.id}`} className="truncate text-sm text-muted-foreground">
+              <li key={`${u.kind}-${u.id}`} className="truncate text-[13px] text-muted-foreground">
                 {u.title}
               </li>
             ))}

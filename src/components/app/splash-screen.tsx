@@ -49,11 +49,11 @@ export function SplashScreen() {
         alt=""
         width={112}
         height={112}
-        className="splash-mark size-28 rounded-3xl shadow-sm"
+        className="splash-mark size-28 rounded-[var(--radius)] shadow-sm"
       />
       <div className="splash-word flex flex-col items-center gap-1.5">
         <Wordmark size="lg" />
-        <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-foreground/50">
+        <span className="text-xs font-semibold uppercase tracking-[0.28em] text-foreground/50">
           See more. travel further.
         </span>
       </div>

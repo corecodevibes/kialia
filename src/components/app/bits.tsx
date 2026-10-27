@@ -42,7 +42,7 @@ export function LinkList({
             href={safeHref(l.url)}
             target="_blank"
             rel="noreferrer noopener"
-            className="min-w-0 flex-1 truncate text-sm font-medium underline-offset-2 hover:underline"
+            className="min-w-0 flex-1 truncate text-[13px] font-medium underline-offset-2 hover:underline"
           >
             {l.label}
           </a>
@@ -110,7 +110,7 @@ export function StatusPicker({
           key={s}
           type="button"
           onClick={() => onChange(s)}
-          className={`min-w-0 truncate rounded-full border px-2 py-2 text-xs font-medium transition ${
+          className={`min-h-11 min-w-0 truncate rounded-full border-[0.5px] px-2 py-2 text-xs font-medium transition ${
             value === s
               ? "border-primary bg-primary/10 text-primary"
               : "border-border bg-background text-muted-foreground"
@@ -134,7 +134,7 @@ export function StatusPicker({
  * loest, ohne eine zweite Schrift zu brauchen.
  */
 export function Wordmark({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
-  const scale = { sm: "text-xl", md: "text-[1.7rem]", lg: "text-[2.1rem]" }[size];
+  const scale = { sm: "text-xl", md: "text-[26px]", lg: "text-[34px]" }[size];
   return (
     <span className={`display ${scale}`}>
       kialia <span className="text-[var(--clay)]">·</span> κιάλια
