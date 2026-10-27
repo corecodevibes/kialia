@@ -206,6 +206,11 @@ if __name__ == "__main__":
     voll.resize((1024, 1024), Image.LANCZOS).save(root / "src/assets/kialia-logo.png")
     voll.resize((512, 512), Image.LANCZOS).save(root / "public/icons/icon-512.png")
     voll.resize((192, 192), Image.LANCZOS).save(root / "public/icons/icon-192.png")
+    # iOS nimmt beim "Zum Home-Bildschirm" NICHT das Manifest, sondern dieses
+    # Bild (apple-touch-icon). Ohne diese Datei bleibt auf dem Homescreen das
+    # alte Icon stehen — genau der Fehler, der hier aufgefallen ist. Opak, ohne
+    # eigene Rundung: iOS legt seine Maske selbst darueber.
+    voll.resize((180, 180), Image.LANCZOS).save(root / "public/icons/icon-180.png")
     maske.resize((512, 512), Image.LANCZOS).save(root / "public/icons/icon-maskable-512.png")
     # Favicon traegt die Rundung selbst — es steht ohne Maske im Browser-Tab
     rounded(voll, 180).save(root / "public/favicon.png")
