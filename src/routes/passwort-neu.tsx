@@ -74,7 +74,7 @@ function NewPasswordPage() {
   }
 
   return (
-    <div className="acrylic-page flex min-h-screen items-center justify-center px-5 py-10">
+    <div className="acrylic-page stage-tall flex min-h-screen items-center justify-center px-5 py-10">
       <div className="relative z-10 w-full max-w-sm">
         <div className="stage-dark mb-6 flex flex-col items-center text-center">
           <img

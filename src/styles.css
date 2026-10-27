@@ -1113,3 +1113,12 @@ body {
   position: absolute;
   inset: -12px;
 }
+
+/* Anmeldung, Onboarding, Passwort: Logo, Wortmarke und Untertitel liegen im
+   oberen Drittel. Die Bühne bleibt dort durchgehend dunkel und blendet erst
+   danach aus — sonst liegt der Untertitel im grauen Auslauf und ist kaum
+   lesbar. */
+.stage-tall::before {
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 74%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 74%, transparent 100%);
+}
