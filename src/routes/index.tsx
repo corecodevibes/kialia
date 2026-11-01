@@ -28,6 +28,7 @@ import { FlagMark } from "@/components/app/bits";
 import {
   downloadAllTrips,
   downloadTrip,
+  type SicherungsWeg,
   readTripFile,
   tripDays,
   tripTotals,
@@ -170,20 +171,40 @@ function HomeTab() {
   const totals = tripTotals(trip);
 
   // Die Belegzahl steht bewusst in der Meldung: eine Sicherung, von der man
-  // nicht weiss, ob die Fotos drin sind, beruhigt niemanden.
+  // nicht weiss, ob die Fotos drin sind, beruhigt niemanden. Und die Meldung
+  // richtet sich nach dem tatsaechlichen Weg — "gespeichert" nur, wenn die
+  // Datei wirklich abgeholt wurde.
   function belege(n: number) {
     return n === 0 ? "" : ` samt ${n} ${n === 1 ? "Beleg" : "Belegen"}`;
   }
 
+  function sicherungsMeldung(weg: SicherungsWeg, was: string, n: number): string {
+    switch (weg) {
+      case "geladen":
+        return `${was} als Datei geladen${belege(n)}.`;
+      case "geteilt":
+        return `Teilen-Blatt geöffnet${belege(n)} — dort „In Dateien sichern“ wählen.`;
+      case "abgebrochen":
+        return `Nicht gesichert. Tippe erneut, wenn du die Sicherung willst.`;
+      case "nicht-geteilt":
+      default:
+        return `Das Teilen hat nicht geklappt. Bitte noch einmal tippen.`;
+    }
+  }
+
   async function handleExportTrip() {
-    const n = await downloadTrip(trip);
-    setIoMsg(`„${trip.destination || "Reise"}“ als Datei gespeichert${belege(n)}.`);
+    const { belege: n, weg } = await downloadTrip(trip);
+    setIoMsg(sicherungsMeldung(weg, `„${trip.destination || "Reise"}“`, n));
   }
 
   async function handleBackup() {
-    const n = await downloadAllTrips(trips);
+    const { belege: n, weg } = await downloadAllTrips(trips);
     setIoMsg(
-      `Sicherung mit ${trips.length} ${trips.length === 1 ? "Reise" : "Reisen"}${belege(n)} gespeichert.`,
+      sicherungsMeldung(
+        weg,
+        `Sicherung mit ${trips.length} ${trips.length === 1 ? "Reise" : "Reisen"}`,
+        n,
+      ),
     );
   }
 

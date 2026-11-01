@@ -226,7 +226,7 @@ function AuthPage() {
                 setMode(m);
                 setMsg(null);
               }}
-              className={`rounded-full py-2 transition ${
+              className={`min-h-11 rounded-full py-2 transition ${
                 mode === m
                   ? "bg-card text-foreground shadow-[var(--sh-1)]"
                   : "text-muted-foreground"

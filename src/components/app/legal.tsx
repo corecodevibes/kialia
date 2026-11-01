@@ -57,10 +57,18 @@ export function Todo({ children }: { children: ReactNode }) {
 export function LegalFooter() {
   return (
     <div className="mt-8 flex justify-center gap-4 text-xs text-muted-foreground">
-      <Link to="/datenschutz" className="underline underline-offset-2">
+      {/* Mit 44 px Trefferflaeche: Rechtstexte muessen auf dem Telefon sicher
+          erreichbar sein, auch fuer Leute mit ungenauen Fingern. */}
+      <Link
+        to="/datenschutz"
+        className="inline-flex min-h-11 items-center underline underline-offset-2"
+      >
         Datenschutz
       </Link>
-      <Link to="/impressum" className="underline underline-offset-2">
+      <Link
+        to="/impressum"
+        className="inline-flex min-h-11 items-center underline underline-offset-2"
+      >
         Impressum
       </Link>
     </div>

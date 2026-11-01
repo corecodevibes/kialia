@@ -201,7 +201,10 @@
   font-weight: 400 600;
   font-display: swap;
   src: url("/fonts/sourceserif-latin-ext-it.woff2") format("woff2");
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F,
+    U+A720-A7FF;
 }
 @font-face {
   font-family: "Source Serif 4";
@@ -209,7 +212,10 @@
   font-weight: 400 600;
   font-display: swap;
   src: url("/fonts/sourceserif-latin-ext.woff2") format("woff2");
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F,
+    U+A720-A7FF;
 }
 @font-face {
   font-family: "Source Serif 4";
@@ -217,7 +223,9 @@
   font-weight: 400 600;
   font-display: swap;
   src: url("/fonts/sourceserif-latin-it.woff2") format("woff2");
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 @font-face {
   font-family: "Source Serif 4";
@@ -225,7 +233,9 @@
   font-weight: 400 600;
   font-display: swap;
   src: url("/fonts/sourceserif-latin.woff2") format("woff2");
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @source "../src";
@@ -332,62 +342,65 @@
    Punkte und Raender. Keiner der drei traegt je Text.
    --------------------------------------------------------------------------- */
 :root {
-  --radius: 1.25rem;              /* 20px, Kartenradius des Kits */
+  --radius: 1.25rem; /* 20px, Kartenradius des Kits */
 
   /* ---- Flaechen: drei Beige-Stufen, mehr braucht es nicht ---------------- */
-  --background: #EFE7D9;          /* die Seite: Papier */
-  --card: #F7F1E5;                /* die Blaetter darauf */
-  --secondary: #EAE0CE;           /* eingesenkt: Felder, Segmented Control */
-  --muted: #E8DECB;
-  --popover: #F7F1E5;
+  --background: #efe7d9; /* die Seite: Papier */
+  --card: #f7f1e5; /* die Blaetter darauf */
+  --secondary: #eae0ce; /* eingesenkt: Felder, Segmented Control */
+  --muted: #e8decb;
+  --popover: #f7f1e5;
 
   /* ---- Schrift ----------------------------------------------------------- */
-  --foreground: #111522;          /* Tiefstes der Palette, 16:1 auf Beige */
-  --card-foreground: #3A342C;
-  --popover-foreground: #3A342C;
-  --display-ink: #303D59;         /* Schiefer der Palette, 9,6:1 — Titel */
-  --secondary-foreground: #303D59;
-  --muted-foreground: #4B5D7D;    /* Stahl, auf Creme 5,1:1 */
+  --foreground: #111522; /* Tiefstes der Palette, 16:1 auf Beige */
+  --card-foreground: #3a342c;
+  --popover-foreground: #3a342c;
+  --display-ink: #303d59; /* Schiefer der Palette, 9,6:1 — Titel */
+  --secondary-foreground: #303d59;
+  --muted-foreground: #4b5d7d; /* Stahl, auf Creme 5,1:1 */
 
   /* ---- Handlung ---------------------------------------------------------- */
-  --primary: #303D59;             /* Schiefer der Palette      (8,4:1 mit Eis) */
-  --primary-2: #1E263B;           /* Nacht: gedrueckt */
-  --primary-foreground: #DCE3EF;
+  --primary: #303d59; /* Schiefer der Palette      (8,4:1 mit Eis) */
+  --primary-2: #1e263b; /* Nacht: gedrueckt */
+  --primary-foreground: #dce3ef;
   /* 4,64:1 gegen die cremefarbene Schrift, die auf dieser Flaeche steht.
      Vorher #B25936 — gegen reines Weiss gerechnet ergab das 4,70, gegen die
      tatsaechliche Schriftfarbe #FBF3EC aber nur 4,37. Die falsche
      Bezugsfarbe hat den Fehler zwei Durchgaenge lang verdeckt. */
-  --clay: #303D59;                /* Handlung: Schiefer — eine Familie, kein warmer Akzent mehr */
-  --clay-soft: #E4E9F0;
-  --destructive: #9A4F53;
-  --destructive-foreground: #F7F1E5;
+  --clay: #303d59; /* Handlung: Schiefer — eine Familie, kein warmer Akzent mehr */
+  --clay-soft: #e4e9f0;
+  --destructive: #9a4f53;
+  --destructive-foreground: #f7f1e5;
 
   /* --accent ist in dieser Codebasis fast nur der Hover-Grund der Radix-
      Bausteine. Es meldet sich leise, sonst wird jeder Hover zum Signal. */
-  --accent: #EAE0CE;
-  --accent-foreground: #3A342C;
+  --accent: #eae0ce;
+  --accent-foreground: #3a342c;
   --border: rgba(58, 52, 44, 0.12);
-  --input: rgba(58, 52, 44, 0.20);
-  --ring: #536684;                /* Stahl: Fokus */
+  --input: rgba(58, 52, 44, 0.2);
+  --ring: #536684; /* Stahl: Fokus */
 
   /* ---- Marken-Toene: Verlauf, Punkte, Raender — nie Flaeche unter Text ---- */
-  --periwinkle: #98A9C4;
-  --sage: #98A9C4;                /* Nebel der Palette: Fortschritt, Fokus, Zeitachse */
+  --periwinkle: #98a9c4;
+  --sage: #98a9c4; /* Nebel der Palette: Fortschritt, Fokus, Zeitachse */
   /* Auf dem beigen Papier traegt #8A6F5E nur 4,13:1 — auf dem helleren
      Papier von vorher waren es 4,55. Beim Wechsel auf Beige ist das
      mitgerutscht und erst beim Ableiten des Design-Kits aufgefallen, weil
      dort gegen das Papier gerechnet wird und nicht gegen Weiss. */
-  --mauve: #836858;               /* warmer Stein fuer Kicker und Preise (4,57:1) */
-  --lilac: #E7DFE4;
-  --sun: #F7D67F;                 /* nur Flaeche, zu hell fuer Text */
-  --terracotta: #CE7F5F;          /* Flaeche ohne Text */
-  --sunset: #F0A055;              /* warme Seite des Verlaufs */
+  --mauve: #836858; /* warmer Stein fuer Kicker und Preise (4,57:1) */
+  --lilac: #e7dfe4;
+  --sun: #f7d67f; /* nur Flaeche, zu hell fuer Text */
+  --terracotta: #ce7f5f; /* Flaeche ohne Text */
+  --sunset: #f0a055; /* warme Seite des Verlaufs */
   --brass: #836858;
 
   /* ---- Status ------------------------------------------------------------ */
-  --ok: #536684;   --ok-soft: #E4E9F0;
-  --warn: #7F612A; --warn-soft: #F3E7CE;   /* Text auf Papier: 5,04:1 */
-  --no: #9A4F53;   --no-soft: #F2DFDB;
+  --ok: #536684;
+  --ok-soft: #e4e9f0;
+  --warn: #7f612a;
+  --warn-soft: #f3e7ce; /* Text auf Papier: 5,04:1 */
+  --no: #9a4f53;
+  --no-soft: #f2dfdb;
 
   /* Der Verlauf ist das Wiedererkennbarste an kialia und steht jetzt auch im
      Zeichen — dieselben Farbkreise, dort nur weicher. */
@@ -399,45 +412,45 @@
      sondern fuer Tiefe: von Nacht nach Schiefer, mit einem Glanz aus Stahl. */
   --gradient-stage:
     radial-gradient(70% 90% at 12% 0%, #536684 0%, transparent 60%),
-    radial-gradient(60% 80% at 92% 10%, #303D59 0%, transparent 65%),
-    linear-gradient(180deg, #1E263B 0%, #303D59 100%);
+    radial-gradient(60% 80% at 92% 10%, #303d59 0%, transparent 65%),
+    linear-gradient(180deg, #1e263b 0%, #303d59 100%);
   --gradient-sky:
-    radial-gradient(75% 120% at 6% 4%, #9EA7D8 0%, transparent 58%),
-    radial-gradient(65% 110% at 96% 0%, #E9D294 0%, transparent 62%),
-    radial-gradient(85% 130% at 78% 100%, #C48B75 0%, transparent 60%),
-    radial-gradient(70% 120% at 22% 104%, #A18593 0%, transparent 62%),
-    radial-gradient(120% 90% at 50% 40%, #DFA670 0%, transparent 70%),
-    linear-gradient(140deg, #9EA7D8, #DFA670);
+    radial-gradient(75% 120% at 6% 4%, #9ea7d8 0%, transparent 58%),
+    radial-gradient(65% 110% at 96% 0%, #e9d294 0%, transparent 62%),
+    radial-gradient(85% 130% at 78% 100%, #c48b75 0%, transparent 60%),
+    radial-gradient(70% 120% at 22% 104%, #a18593 0%, transparent 62%),
+    radial-gradient(120% 90% at 50% 40%, #dfa670 0%, transparent 70%),
+    linear-gradient(140deg, #9ea7d8, #dfa670);
   --gradient-warm:
-    radial-gradient(80% 140% at 0% 0%, #E9D294 0%, transparent 60%),
-    radial-gradient(90% 140% at 100% 100%, #A18593 0%, transparent 62%),
-    linear-gradient(120deg, #DFA670, #C48B75);
+    radial-gradient(80% 140% at 0% 0%, #e9d294 0%, transparent 60%),
+    radial-gradient(90% 140% at 100% 100%, #a18593 0%, transparent 62%),
+    linear-gradient(120deg, #dfa670, #c48b75);
   --gradient-soft:
-    radial-gradient(90% 140% at 0% 0%, #EAE0CE 0%, transparent 65%),
+    radial-gradient(90% 140% at 0% 0%, #eae0ce 0%, transparent 65%),
     radial-gradient(80% 130% at 100% 20%, rgba(247, 214, 127, 0.35) 0%, transparent 60%),
-    linear-gradient(160deg, #F7F1E5, #EFE7D9);
+    linear-gradient(160deg, #f7f1e5, #efe7d9);
 
   /* Warm getoent aus der Tinte, nie grau-blau. Auf Papier trifft ein grauer
      Schatten immer daneben. */
   --sh-1: 0 1px 2px rgba(58, 52, 44, 0.06);
   --sh-2: 0 2px 6px rgba(58, 52, 44, 0.05), 0 16px 36px -22px rgba(58, 52, 44, 0.32);
-  --sh-3: 0 4px 12px rgba(58, 52, 44, 0.07), 0 30px 60px -30px rgba(58, 52, 44, 0.40);
+  --sh-3: 0 4px 12px rgba(58, 52, 44, 0.07), 0 30px 60px -30px rgba(58, 52, 44, 0.4);
   --shadow-soft: var(--sh-2);
   --shadow-lift: var(--sh-3);
 
-  --chart-1: #35553F;
-  --chart-2: #8F9BE0;
-  --chart-3: #F7D67F;
-  --chart-4: #CE7F5F;
+  --chart-1: #35553f;
+  --chart-2: #8f9be0;
+  --chart-3: #f7d67f;
+  --chart-4: #ce7f5f;
   --chart-5: #836858;
-  --sidebar: #EAE0CE;
-  --sidebar-foreground: #3A342C;
-  --sidebar-primary: #35553F;
-  --sidebar-primary-foreground: #F7F1E5;
-  --sidebar-accent: #EFE7D9;
-  --sidebar-accent-foreground: #3A342C;
+  --sidebar: #eae0ce;
+  --sidebar-foreground: #3a342c;
+  --sidebar-primary: #35553f;
+  --sidebar-primary-foreground: #f7f1e5;
+  --sidebar-accent: #efe7d9;
+  --sidebar-accent-foreground: #3a342c;
   --sidebar-border: rgba(58, 52, 44, 0.12);
-  --sidebar-ring: #7E9A88;
+  --sidebar-ring: #7e9a88;
 }
 
 .dark {
@@ -557,14 +570,13 @@
    Jetzt eine gefuellte Flaeche in der Handlungsfarbe. */
 @utility btn-warm {
   background: var(--clay);
-  color: #EEF2F8;
+  color: #eef2f8;
   box-shadow: var(--sh-1);
 
   &:hover:not(:disabled) {
     background: #964828;
   }
 }
-
 
 @keyframes acrylic-drift {
   0% {
@@ -705,10 +717,12 @@
   position: absolute;
   z-index: -1;
   inset: 6px -4px -6px 10px;
-  background: #F2EAD9;
+  background: #f2ead9;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  box-shadow: 3px 4px 0 -1px #EDE3CF, 3px 4px 0 0 var(--border);
+  box-shadow:
+    3px 4px 0 -1px #ede3cf,
+    3px 4px 0 0 var(--border);
 }
 
 @keyframes page-open {
@@ -777,14 +791,30 @@ p {
 main > * {
   animation: arrive 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
-main > *:nth-child(2) { animation-delay: 0.04s; }
-main > *:nth-child(3) { animation-delay: 0.08s; }
-main > *:nth-child(4) { animation-delay: 0.12s; }
-main > *:nth-child(5) { animation-delay: 0.16s; }
-main > *:nth-child(6) { animation-delay: 0.2s; }
-main > *:nth-child(7) { animation-delay: 0.24s; }
-main > *:nth-child(8) { animation-delay: 0.28s; }
-main > *:nth-child(n + 9) { animation: none; }
+main > *:nth-child(2) {
+  animation-delay: 0.04s;
+}
+main > *:nth-child(3) {
+  animation-delay: 0.08s;
+}
+main > *:nth-child(4) {
+  animation-delay: 0.12s;
+}
+main > *:nth-child(5) {
+  animation-delay: 0.16s;
+}
+main > *:nth-child(6) {
+  animation-delay: 0.2s;
+}
+main > *:nth-child(7) {
+  animation-delay: 0.24s;
+}
+main > *:nth-child(8) {
+  animation-delay: 0.28s;
+}
+main > *:nth-child(n + 9) {
+  animation: none;
+}
 
 @keyframes arrive {
   from {
@@ -1019,7 +1049,6 @@ body {
   }
 }
 
-
 /* ===========================================================================
    Bauteile aus design/DESIGN-KIT.md
    Nur die Teile, die Tailwind nicht schon abdeckt. Alles andere bleibt
@@ -1077,19 +1106,17 @@ body {
   }
 }
 
-
-
 /* Dunkle Buehne. Wer im Kopf steht, bekommt helle Schrift — ueber die
    Variablen, damit alle Bausteine (Titel, Kicker, Untertitel) mitgehen,
    ohne dass jeder einzeln umgefaerbt werden muss. */
 .stage-dark {
-  --foreground: #EEF2F8;
-  --display-ink: #EEF2F8;
-  --muted-foreground: #98A9C4;
+  --foreground: #eef2f8;
+  --display-ink: #eef2f8;
+  --muted-foreground: #98a9c4;
   color: var(--foreground);
 }
 .stage-dark .kicker {
-  color: #98A9C4;
+  color: #98a9c4;
 }
 
 /* In der App endet die dunkle Buehne am Kopf. Die volle Hoehe von 420 px
@@ -1108,10 +1135,13 @@ body {
 .tap {
   position: relative;
 }
+/* Horizontal nur 4 px: Nebeneinander stehende Symbole haben gap-2 (8 px). Mit
+   12 px auf beiden Seiten lagen die Trefferflaechen uebereinander, und der
+   spaeter stehende Knopf bekam Tippfehler ab. Vertikal bleibt es bei 12 px. */
 .tap::after {
   content: "";
   position: absolute;
-  inset: -12px;
+  inset: -12px -4px;
 }
 
 /* Anmeldung, Onboarding, Passwort: Logo, Wortmarke und Untertitel liegen im

@@ -8,6 +8,7 @@ import {
   deleteAttachment,
   formatBytes,
   getAttachmentBlob,
+  sicherer,
   listAttachments,
   type AttachmentInfo,
 } from "@/lib/attachments";
@@ -126,7 +127,18 @@ export function Attachments({
     const blob = await getAttachmentBlob(a.id);
     if (!blob) return;
     const url = URL.createObjectURL(blob);
-    window.open(url, "_blank", "noopener");
+    if (sicherer(blob.type) === "application/octet-stream") {
+      // Nicht anzeigbar im App-Ursprung (z. B. SVG oder HTML): nur speichern.
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = a.name;
+      link.rel = "noopener";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } else {
+      window.open(url, "_blank", "noopener");
+    }
     setTimeout(() => URL.revokeObjectURL(url), 60_000);
   }
 

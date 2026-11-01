@@ -404,22 +404,8 @@ export function loadStore(): Store {
   return { trips: [], activeId: "" };
 }
 
-/**
- * Ob der letzte Schreibversuch fehlgeschlagen ist.
- *
- * Vorher wurde der Fehler hier stillschweigend geschluckt. Das ist der
- * gefaehrlichste Zustand, den diese App haben kann: der Eintrag steht auf dem
- * Bildschirm, weil der Speicher im Arbeitsspeicher schon aktualisiert ist —
- * beim naechsten Laden ist er weg. Niemand merkt es, bis es zu spaet ist.
- *
- * Passiert real bei vollem Geraetespeicher und in Safaris privatem Modus, wo
- * localStorage vorhanden ist, aber jeden Schreibversuch ablehnt.
- */
+/** Ob der letzte Schreibversuch fehlgeschlagen ist. Gelesen ueber useTrip(). */
 let persistFehler: string | null = null;
-
-export function persistError(): string | null {
-  return persistFehler;
-}
 
 export function saveStore(store: Store) {
   try {
@@ -786,18 +772,36 @@ export function attachmentOwnerIds(trip: Trip): string[] {
  * Der Rueckgabewert sagt, welcher Weg genommen wurde, damit die Oberflaeche
  * nicht "gespeichert" behauptet, wenn jemand das Teilen-Blatt weggewischt hat.
  */
-async function dateiAbliefern(blob: Blob, name: string): Promise<"geteilt" | "geladen"> {
+/** Was mit einer Sicherung passiert ist — die Meldung richtet sich danach. */
+export type SicherungsWeg = "geteilt" | "geladen" | "abgebrochen" | "nicht-geteilt";
+
+/**
+ * Eine Datei beim Menschen abliefern.
+ *
+ * Auf dem iPhone in der Homescreen-App wird `a.download` ignoriert. Deshalb
+ * zuerst das Teilen-Blatt, wenn es Dateien annimmt ("In Dateien sichern").
+ *
+ * Ehrlich zurueckgemeldet: Bricht der Nutzer das Blatt ab, passiert nichts
+ * weiter — kein Download hinterher, den niemand wollte. Schlaegt das Teilen aus
+ * anderem Grund fehl (etwa weil die Nutzergeste verbraucht ist), wird NICHT
+ * still heruntergeladen, denn in der Homescreen-App wuerde das ohnehin
+ * verpuffen. Die Oberflaeche sagt dann: bitte noch einmal tippen.
+ */
+async function dateiAbliefern(blob: Blob, name: string): Promise<SicherungsWeg> {
   const datei = new File([blob], name, { type: blob.type });
-  if (typeof navigator !== "undefined" && navigator.canShare?.({ files: [datei] })) {
-    try {
-      await navigator.share({ files: [datei], title: name });
-      return "geteilt";
-    } catch {
-      // Abgebrochen oder nicht erlaubt (Safari verlangt eine frische
-      // Nutzergeste; das Einsammeln der Belege davor kann sie verbrauchen).
-      // Dann eben herunterladen.
-    }
+  if (typeof navigator === "undefined" || !navigator.canShare?.({ files: [datei] })) {
+    downloadBlob(blob, name);
+    return "geladen";
   }
+  try {
+    await navigator.share({ files: [datei], title: name });
+    return "geteilt";
+  } catch (e) {
+    return e instanceof Error && e.name === "AbortError" ? "abgebrochen" : "nicht-geteilt";
+  }
+}
+
+function downloadBlob(blob: Blob, name: string) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -808,20 +812,21 @@ async function dateiAbliefern(blob: Blob, name: string): Promise<"geteilt" | "ge
   a.remove();
   // Erst nach dem Klick freigeben, sonst bricht der Download in Safari ab.
   setTimeout(() => URL.revokeObjectURL(url), 1000);
-  return "geladen";
 }
 
-export async function downloadTrip(trip: Trip): Promise<number> {
+export async function downloadTrip(trip: Trip): Promise<{ belege: number; weg: SicherungsWeg }> {
   const files = await exportAttachments(attachmentOwnerIds(trip));
   const blob = new Blob([JSON.stringify({ ...tripToFile(trip), files }, null, 2)], {
     type: "application/json",
   });
-  await dateiAbliefern(blob, `kialia-${safeFileName(trip.destination)}.json`);
-  return files.length;
+  const weg = await dateiAbliefern(blob, `kialia-${safeFileName(trip.destination)}.json`);
+  return { belege: files.length, weg };
 }
 
 /** Sicherung aller Reisen — fuer den Fall, dass der Browser-Speicher wegfaellt. */
-export async function downloadAllTrips(trips: Trip[]): Promise<number> {
+export async function downloadAllTrips(
+  trips: Trip[],
+): Promise<{ belege: number; weg: SicherungsWeg }> {
   const files = await exportAttachments(trips.flatMap(attachmentOwnerIds));
   const payload = {
     kind: "kialia.backup" as const,
@@ -832,8 +837,8 @@ export async function downloadAllTrips(trips: Trip[]): Promise<number> {
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
   const stamp = new Date().toISOString().slice(0, 10);
-  await dateiAbliefern(blob, `kialia-sicherung-${stamp}.json`);
-  return files.length;
+  const weg = await dateiAbliefern(blob, `kialia-sicherung-${stamp}.json`);
+  return { belege: files.length, weg };
 }
 
 /**
@@ -853,7 +858,13 @@ export async function readTripFile(file: File): Promise<Partial<Trip>[]> {
     trips?: Partial<Trip>[];
     files?: AttachmentFile[];
   };
-  // Belege zuerst zurueckschreiben. Schlaegt das fehl, sollen die Reisedaten
+  // Erst pruefen, was die Datei ist — erst dann Belege schreiben. Vorher wurden
+  // Belege aus einer falschen Datei geschrieben, bevor der Fehler kam.
+  let trips: Partial<Trip>[];
+  if (obj?.kind === "kialia.trip" && obj.trip) trips = [obj.trip];
+  else if (obj?.kind === "kialia.backup" && Array.isArray(obj.trips)) trips = obj.trips;
+  else throw new Error("Die Datei stammt nicht aus kialia.");
+  // Belege danach zurueckschreiben. Schlaegt das fehl, sollen die Reisedaten
   // trotzdem ankommen — eine halbe Wiederherstellung ist besser als keine.
   if (Array.isArray(obj.files) && obj.files.length > 0) {
     try {
@@ -862,9 +873,7 @@ export async function readTripFile(file: File): Promise<Partial<Trip>[]> {
       /* Reisedaten haben Vorrang */
     }
   }
-  if (obj?.kind === "kialia.trip" && obj.trip) return [obj.trip];
-  if (obj?.kind === "kialia.backup" && Array.isArray(obj.trips)) return obj.trips;
-  throw new Error("Die Datei stammt nicht aus kialia.");
+  return trips;
 }
 
 /* ---------------------------------------------------------------------------

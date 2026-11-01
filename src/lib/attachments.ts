@@ -183,6 +183,28 @@ function blobToDataUrl(blob: Blob): Promise<string> {
   });
 }
 
+/**
+ * Typen, die der Browser im App-Ursprung anzeigen darf. Alles andere wird als
+ * Datei geladen. Grund: eine Blob-URL des App-Ursprungs fuehrt Skript aus, wenn
+ * der Typ HTML oder SVG ist — und der Typ kam bei einem Import aus einer Datei
+ * von aussen. Ohne diese Liste laeuft ein praeparierter Beleg mit dem Zugriff
+ * der App auf localStorage (Sitzung, Reisedaten).
+ */
+const ANZEIGBAR = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "image/heic",
+  "application/pdf",
+]);
+
+/** Gibt den Typ zurueck, wenn er anzeigbar ist, sonst den neutralen Dateityp. */
+export function sicherer(typ: string): string {
+  const klein = (typ || "").toLowerCase();
+  return ANZEIGBAR.has(klein) ? klein : "application/octet-stream";
+}
+
 function dataUrlToBlob(url: string, type: string): Blob {
   const komma = url.indexOf(",");
   const roh = atob(komma >= 0 ? url.slice(komma + 1) : url);
@@ -224,7 +246,8 @@ export async function importAttachments(files: AttachmentFile[]): Promise<number
     for (const f of files) {
       try {
         const { data, ...rest } = f;
-        store.put({ ...rest, blob: dataUrlToBlob(data, f.type) } satisfies Attachment);
+        const typ = sicherer(f.type);
+        store.put({ ...rest, type: typ, blob: dataUrlToBlob(data, typ) } satisfies Attachment);
         n += 1;
       } catch {
         /* einzelnen Beleg ueberspringen */
