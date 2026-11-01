@@ -73,6 +73,27 @@ describe("attachmentOwnerIds", () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
+  test("Tagebuchtage sind Belegquellen — Fotos am Tag gehen sonst verloren", () => {
+    const t = newTrip("Kreta");
+    t.diary = [
+      {
+        id: "tag1",
+        day: 1,
+        date: "2026-09-05",
+        text: "",
+        highlight: "",
+        notes: "",
+        expenses: "",
+        spent: 0,
+        mood: "",
+        food: "",
+        assignedTo: "",
+        paidBy: {},
+      } as unknown as (typeof t.diary)[number],
+    ];
+    expect(attachmentOwnerIds(t)).toContain("tag1");
+  });
+
   test("uid liefert unterschiedliche Werte", () => {
     expect(uid()).not.toBe(uid());
   });

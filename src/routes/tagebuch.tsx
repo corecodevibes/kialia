@@ -2,7 +2,7 @@ import { useMyName } from "@/lib/auth";
 import { ExpenseField } from "@/components/app/expense-field";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ChevronDown, Loader2, Mic, Plus, Printer, Square } from "lucide-react";
+import { ChevronDown, Loader2, Mic, Plus, Printer, Search, Square } from "lucide-react";
 import {
   AppShell,
   Card,
@@ -30,6 +30,7 @@ import {
 } from "@/lib/trip-store";
 import { itemsWithPayers } from "@/lib/payers";
 import { useVoiceMemo } from "@/lib/use-voice-memo";
+import { Attachments } from "@/components/app/attachments";
 import { transcribe } from "@/lib/transcribe";
 
 export const Route = createFileRoute("/tagebuch")({
@@ -178,6 +179,18 @@ function DiaryTab() {
   const orderedDiary = [...trip.diary].sort((a, b) =>
     a.date < b.date ? -1 : a.date > b.date ? 1 : a.day - b.day,
   );
+
+  // Suche ueber alle Tage. Vorbild Day One: wer eine Stelle sucht, soll sie in
+  // zwei Sekunden finden, ohne durch den Stapel zu blaettern. Nur Felder, die
+  // der Mensch selbst geschrieben hat — Ausgaben und Zahlen bleiben draussen.
+  const [suche, setSuche] = useState("");
+  const gefiltert = useMemo(() => {
+    const q = suche.trim().toLowerCase();
+    if (!q) return orderedDiary;
+    return orderedDiary.filter((e) =>
+      [e.text, e.highlight, e.notes, e.mood].some((x) => (x || "").toLowerCase().includes(q)),
+    );
+  }, [orderedDiary, suche]);
 
   useEffect(() => {
     if (openDay) return;
@@ -434,8 +447,29 @@ function DiaryTab() {
         <div className="space-y-4">
           {/* Ein Stapel Blaetter statt einer Liste Karten: die Tage liegen
               dicht uebereinander, das aufgeschlagene loest sich heraus. */}
+          {orderedDiary.length > 2 && (
+            <div className="relative mb-3">
+              <input
+                type="search"
+                value={suche}
+                onChange={(ev) => setSuche(ev.target.value)}
+                placeholder="Im Tagebuch suchen"
+                aria-label="Im Tagebuch suchen"
+                className={`${inputClass} pl-9`}
+              />
+              <Search
+                aria-hidden
+                className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+              />
+            </div>
+          )}
+          {suche.trim() && gefiltert.length === 0 && (
+            <p className="mb-3 px-1 text-sm text-muted-foreground">
+              Nichts gefunden für „{suche.trim()}“.
+            </p>
+          )}
           <div className="sheet-stack">
-            {orderedDiary.map((e) => (
+            {gefiltert.map((e) => (
               <Card
                 key={e.id}
                 id={`tag-${e.id}`}
@@ -506,6 +540,17 @@ function DiaryTab() {
                       und abends steht ohnehin fest, wer erzählt. Eine Zuweisung,
                       die niemand durchsetzt, ist nur ein Feld mehr. In der
                       Packliste ergibt sie Sinn — dort bleibt sie. */}
+                    {/* Fotos gehoeren zu einem Tag: Reisetagebuecher sind ohne Bild
+                      blass. Dieselbe Anhang-Leiste wie bei Buchungen — gleiche
+                      Speicherung, gleiche Sicherung, keine zweite Fassung. */}
+                    <div className="mt-4">
+                      <Attachments
+                        ownerId={e.id}
+                        label="Fotos"
+                        variant="gallery"
+                        currency={trip.currency || "EUR"}
+                      />
+                    </div>
                     <div className="mt-2 flex justify-end">
                       <DeleteButton
                         ariaLabel={`Tag ${e.day} löschen`}

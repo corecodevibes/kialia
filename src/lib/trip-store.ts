@@ -747,6 +747,8 @@ export function attachmentOwnerIds(trip: Trip): string[] {
     ...trip.stays.map((s) => s.id),
     ...trip.activities.map((a) => a.id),
     ...trip.packing.flatMap((k) => k.items.map((i) => i.id)),
+    // Tagebuchtage nehmen Fotos auf — siehe Erfolgskriterien in docs/TAGEBUCH-KRITERIEN.md
+    ...trip.diary.map((d) => d.id),
   ];
 }
 
